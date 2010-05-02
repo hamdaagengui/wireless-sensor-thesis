@@ -8,5 +8,6 @@ This pages contains relevant links and references that is used to write this the
 
 = Links =
   * ANT+ http://www.thisisant.com/
+  * SIH projects at IHA ("[http://www.iha.dk/Sundhedsteknologier-i-Hjemmet-9259.aspx Sundhedsteknologi I Hjemmet]")
 
 = References =
