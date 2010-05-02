@@ -11,3 +11,7 @@ This pages contains relevant links and references that is used to write this the
   * SIH projects at IHA ("[http://www.iha.dk/Sundhedsteknologier-i-Hjemmet-9259.aspx Sundhedsteknologi I Hjemmet]")
 
 = References =
+  # Highly-resilient, energy-efficient multipath routing in wireless sensor networks 2001
+  # TEEN: A Routing Protocol for Enhanced Efficiency in Wireless Sensor Networks 2001
+  # Wireless sensor networks: a survey 2002
+  # Versatile Low Power Media Access for Wireless Sensor Networks 2004
