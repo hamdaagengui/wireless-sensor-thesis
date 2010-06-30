@@ -1,5 +1,5 @@
-#summary One-sentence summary of this page.
 #labels Featured
+This page contains relevant links and references that is used to write this thesis.
 
 = Introduction =
 
