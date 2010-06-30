@@ -1,11 +1,5 @@
 #summary This page contains relevant links and references that is used to write this thesis.
 #labels Featured
-
-= Introduction =
-
-This page contains relevant links and references that is used to write this thesis.
-
-
 = Links =
   * ANT+ http://www.thisisant.com/
   * SIH projects at IHA ("[http://www.iha.dk/Sundhedsteknologier-i-Hjemmet-9259.aspx Sundhedsteknologi I Hjemmet]")
