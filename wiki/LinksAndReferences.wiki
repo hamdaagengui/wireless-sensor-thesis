@@ -3,12 +3,13 @@
 
 = Introduction =
 
-This pages contains relevant links and references that is used to write this thesis.
+This page contains relevant links and references that is used to write this thesis.
 
 
 = Links =
   * ANT+ http://www.thisisant.com/
   * SIH projects at IHA ("[http://www.iha.dk/Sundhedsteknologier-i-Hjemmet-9259.aspx Sundhedsteknologi I Hjemmet]")
+  * Power debugging article by IAR - http://www.iar.com/website1/1.0.1.0/2563/1/
 
 = References =
   # Highly-resilient, energy-efficient multipath routing in wireless sensor networks 2001
