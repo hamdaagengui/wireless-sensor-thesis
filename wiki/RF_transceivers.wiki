@@ -1,0 +1,8 @@
+#summary This page lists the RF transceivers that have been considered for this project.
+
+= RF transceivers =
+
+The following table details the transceivers that have been in consideration for this project.
+
+|| *Chip* || *Integrated MCU* ||
+|| ATmega128RFA1 || Yes ||
