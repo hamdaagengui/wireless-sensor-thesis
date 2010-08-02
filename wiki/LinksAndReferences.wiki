@@ -14,7 +14,7 @@
   * LTC3588-1 - http://www.linear.com/pc/productDetail.jsp?navId=LTC3588-1
 
 === Components and stuff ===
-  * USB <> TTL converter cable with 3v3 @250 mA power supply - http://www.ftdichip.com/Products/EvaluationKits/TTL-232RG.htm
+  * USB <> TTL converter cable with 3v3 @250 mA power supply (TTL-232RG-VREG3V3-WE)- http://www.ftdichip.com/Products/EvaluationKits/TTL-232RG.htm
 
 == Development specific ==
   * Serial port on HTC - http://code.google.com/p/android-serialport-api/wiki/Htc
