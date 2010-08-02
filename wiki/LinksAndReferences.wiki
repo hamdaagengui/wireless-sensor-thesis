@@ -24,3 +24,6 @@
   # TEEN: A Routing Protocol for Enhanced Efficiency in Wireless Sensor Networks 2001
   # Wireless sensor networks: a survey 2002
   # Versatile Low Power Media Access for Wireless Sensor Networks 2004
+
+The following links look promising but have not yet been read through. Go ahead :)
+  ...
