@@ -2,14 +2,14 @@
 #labels Featured
 = Links =
 == General ==
-=== Wireless protocols =
+=== Wireless protocols ===
   * ANT+ http://www.thisisant.com/
   * SIH projects at IHA ("[http://www.iha.dk/Sundhedsteknologier-i-Hjemmet-9259.aspx Sundhedsteknologi I Hjemmet]")
 
-=== Low power embedded design =
+=== Low power embedded design ===
   * Power debugging article by IAR - http://www.iar.com/website1/1.0.1.0/2563/1/
 
-=== Power harvesting =
+=== Power harvesting ===
   * LTC3109 - http://www.linear.com/pc/productDetail.jsp?navId=H0,C1,C1003,C1799,P111807
   * LTC3588-1 - http://www.linear.com/pc/productDetail.jsp?navId=LTC3588-1
 
