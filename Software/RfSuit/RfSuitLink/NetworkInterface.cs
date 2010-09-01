@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO.Ports;
 
 namespace RfSuit
 {
 	class NetworkInterface
 	{
+		SerialPort prot;
+
 		public bool Open(string portName, int baudrate)
 		{
+
 			return false;
 		}
 
@@ -21,7 +25,7 @@ namespace RfSuit
 		{
 			int count = 0;
 
-			// Send tokens and wait for the ring to die
+			// Send Nothing token and wait for the ring to die
 
 			return count;
 		}

@@ -38,15 +38,16 @@ namespace RfSuit
 
 		IMessageHandler[] handlers = new IMessageHandler[256];
 	
-		public delegate bool MessagePredicateDelegate(Byte source);
+		public delegate bool MessagePredicateDelegate(Byte destination, Byte source);
 		public event MessagePredicateDelegate MessagePredicate;
 
 		public void HandleFrame(byte[] frame)
 		{
-			Byte source = frame[0];
-			Byte messageId = frame[1];
+			Byte destination = frame[0];
+			Byte source = frame[1];
+			Byte messageId = frame[2];
 
-			if (MessagePredicate == null || MessagePredicate(source))
+			if (MessagePredicate == null || MessagePredicate(destination, source))
 			{
 				var handler = handlers[messageId];
 				if (handler != null)
@@ -64,69 +65,159 @@ namespace RfSuit
 		}
 	}
 
-	class StartScanMessage
+	class NothingMessage
 	{
+		public Byte Destination;
 		public Byte Source;
 		static readonly Byte MessageId = 0;
-		public Byte Interval;
-		public Byte Channel;
-		public Byte TxPower;
 
-		public StartScanMessage()
+		public NothingMessage()
 		{ }
 
-		public StartScanMessage(Byte[] frame)
+		public NothingMessage(Byte[] frame)
 		{
-			Source = frame[0];
-			Interval = frame[2];
-			Channel = frame[3];
-			TxPower = frame[4];
+			Destination = frame[0];
+			Source = frame[1];
 		}
 
-		static public Byte[] Create(Byte source, Byte interval, Byte channel, Byte txPower)
+		static public Byte[] Create(Byte destination, Byte source)
 		{
-			Byte[] buffer = new Byte[5];
-			buffer[0] = source;
-			buffer[1] = MessageId;
-			buffer[2] = interval;
-			buffer[3] = channel;
-			buffer[4] = txPower;
+			Byte[] buffer = new Byte[3];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
 			return buffer;
 		}
 
 		public Byte[] Create()
 		{
-			return Create(Source, Interval, Channel, TxPower);
+			return Create(Destination, Source);
 		}
 	}
 
-	class ReportResultsMessage
+	class SetTxPowerMessage
 	{
+		public Byte Destination;
 		public Byte Source;
 		static readonly Byte MessageId = 1;
-		public Byte[] Rssis = new Byte[16];
+		public Byte TxPower;
 
-		public ReportResultsMessage()
+		public SetTxPowerMessage()
 		{ }
 
-		public ReportResultsMessage(Byte[] frame)
+		public SetTxPowerMessage(Byte[] frame)
 		{
-			Source = frame[0];
-			Array.Copy(frame, 2, Rssis, 0, 16);
+			Destination = frame[0];
+			Source = frame[1];
+			TxPower = frame[3];
 		}
 
-		static public Byte[] Create(Byte source, Byte[] rssis)
+		static public Byte[] Create(Byte destination, Byte source, Byte txPower)
 		{
-			Byte[] buffer = new Byte[18];
-			buffer[0] = source;
-			buffer[1] = MessageId;
-			Array.Copy(rssis, 0, buffer, 2, 16);
+			Byte[] buffer = new Byte[4];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			buffer[3] = txPower;
 			return buffer;
 		}
 
 		public Byte[] Create()
 		{
-			return Create(Source, Rssis);
+			return Create(Destination, Source, TxPower);
+		}
+	}
+
+	class EnableSweepingMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 2;
+
+		public EnableSweepingMessage()
+		{ }
+
+		public EnableSweepingMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+		}
+
+		static public Byte[] Create(Byte destination, Byte source)
+		{
+			Byte[] buffer = new Byte[3];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source);
+		}
+	}
+
+	class DisableSweepingMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 3;
+
+		public DisableSweepingMessage()
+		{ }
+
+		public DisableSweepingMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+		}
+
+		static public Byte[] Create(Byte destination, Byte source)
+		{
+			Byte[] buffer = new Byte[3];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source);
+		}
+	}
+
+	class ReportMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 4;
+		public Byte[] Rssis = new Byte[16];
+
+		public ReportMessage()
+		{ }
+
+		public ReportMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+			Array.Copy(frame, 3, Rssis, 0, 16);
+		}
+
+		static public Byte[] Create(Byte destination, Byte source, Byte[] rssis)
+		{
+			Byte[] buffer = new Byte[19];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			Array.Copy(rssis, 0, buffer, 3, 16);
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source, Rssis);
 		}
 	}
 
