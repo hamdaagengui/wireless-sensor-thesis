@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfSuitConnection", "RfSuitL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfSuitConnectionTester", "RfSuitConnectionTester\RfSuitConnectionTester.csproj", "{8E1B5E50-A252-4C4A-B16B-B2FF3CD88AE6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfSuitLogger", "RfSuitLogger\RfSuitLogger.csproj", "{7B0ADA50-FEB7-437D-81A5-9318881EECC6}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -39,6 +41,16 @@ Global
 		{8E1B5E50-A252-4C4A-B16B-B2FF3CD88AE6}.Release|Mixed Platforms.Build.0 = Release|x86
 		{8E1B5E50-A252-4C4A-B16B-B2FF3CD88AE6}.Release|x86.ActiveCfg = Release|x86
 		{8E1B5E50-A252-4C4A-B16B-B2FF3CD88AE6}.Release|x86.Build.0 = Release|x86
+		{7B0ADA50-FEB7-437D-81A5-9318881EECC6}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{7B0ADA50-FEB7-437D-81A5-9318881EECC6}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{7B0ADA50-FEB7-437D-81A5-9318881EECC6}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{7B0ADA50-FEB7-437D-81A5-9318881EECC6}.Debug|x86.ActiveCfg = Debug|x86
+		{7B0ADA50-FEB7-437D-81A5-9318881EECC6}.Debug|x86.Build.0 = Debug|x86
+		{7B0ADA50-FEB7-437D-81A5-9318881EECC6}.Release|Any CPU.ActiveCfg = Release|x86
+		{7B0ADA50-FEB7-437D-81A5-9318881EECC6}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{7B0ADA50-FEB7-437D-81A5-9318881EECC6}.Release|Mixed Platforms.Build.0 = Release|x86
+		{7B0ADA50-FEB7-437D-81A5-9318881EECC6}.Release|x86.ActiveCfg = Release|x86
+		{7B0ADA50-FEB7-437D-81A5-9318881EECC6}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
