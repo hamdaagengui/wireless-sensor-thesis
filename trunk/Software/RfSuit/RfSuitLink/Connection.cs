@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.IO.Ports;
+using Coma.Net.Embedded.PhysicalLayer;
+using Coma.Net.Embedded.DataLinkLayer;
 
 namespace RfSuit
 {
@@ -21,52 +23,39 @@ namespace RfSuit
 		public event SweepStartedDelegate SweepStarted;
 		public event SweepCompletedDelegate SweepCompleted;
 
-		Thread workerThread;
-		SerialPort port;
+		IDataLinkLayer dll;
+		MessageDispatcher md;
 
 		public bool Start(string portName)
 		{
 			try
 			{
-				port = new SerialPort(portName, 115200);
+				md = new MessageDispatcher();
+
+				var sp = new SerialPort(portName, 115200);
+				var pl = new SerialPortWrapper(sp);
+				dll = new FrameTransceiver(pl);
+				dll.FrameReceived += md.HandleFrame;
+				dll.Start();
 			}
 			catch
 			{
 				return false;
 			}
 
-			port.Open();
-			if (port.IsOpen == false)
-			{
-				return false;
-			}
-
-			workerThread = new Thread(new ThreadStart(WorkerMethod));
-			workerThread.IsBackground = true;
-			workerThread.Start();
-
 			return true;
 		}
 
-		void WorkerMethod()
+		public void Stop()
 		{
-			bool run = true;
-
-			while (run)
-			{
-				SweepResults[] sr = new SweepResults[16];
-				
-				ThreadPool.QueueUserWorkItem(new WaitCallback(ReportSweepCompleted), new SweepCompletedMessage{ channel = 1, results = sr });
-			}
-
-			port.Close();
+			dll.Stop();
 		}
-		
+
 		void ReportSweepStarted(object o)
 		{
 			if (SweepStarted != null)
 			{
-				var channel= (int)o;
+				var channel = (int)o;
 				SweepStarted(channel);
 			}
 		}
