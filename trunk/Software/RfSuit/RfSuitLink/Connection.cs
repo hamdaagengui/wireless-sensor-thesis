@@ -12,17 +12,23 @@ namespace RfSuit
 
 	public class Connection
 	{
+		class SweepCompletedMessage
+		{
+			public int channel;
+			public SweepResults[] results;
+		}
+
 		public event SweepStartedDelegate SweepStarted;
 		public event SweepCompletedDelegate SweepCompleted;
 
 		Thread workerThread;
 		SerialPort port;
 
-		public bool Start(string portname)
+		public bool Start(string portName)
 		{
 			try
 			{
-				port = new SerialPort(portname, 115200);
+				port = new SerialPort(portName, 115200);
 			}
 			catch
 			{
@@ -48,10 +54,30 @@ namespace RfSuit
 
 			while (run)
 			{
-
+				SweepResults[] sr = new SweepResults[16];
+				
+				ThreadPool.QueueUserWorkItem(new WaitCallback(ReportSweepCompleted), new SweepCompletedMessage{ channel = 1, results = sr });
 			}
 
 			port.Close();
+		}
+		
+		void ReportSweepStarted(object o)
+		{
+			if (SweepStarted != null)
+			{
+				var channel= (int)o;
+				SweepStarted(channel);
+			}
+		}
+
+		void ReportSweepCompleted(object o)
+		{
+			if (SweepCompleted != null)
+			{
+				var scm = (SweepCompletedMessage)o;
+				SweepCompleted(scm.channel, scm.results);
+			}
 		}
 	}
 }
