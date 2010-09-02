@@ -3,4 +3,9 @@ package dk.iha;
 message Entry {
 	required bytes picture = 1;
 	required int32 timestamp = 2;
+	repeated SweepResult results = 3;
+}
+
+message SweepResult {
+	repeated int32 rssis = 1;
 }
