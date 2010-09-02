@@ -5,7 +5,7 @@
  *      Author: coma
  */
 
-#include "Frametransceiver.h"
+#include "fra"
 #include <Config.h>
 #include <FIFO.h>
 #include <Kernel/Kernel.h>
