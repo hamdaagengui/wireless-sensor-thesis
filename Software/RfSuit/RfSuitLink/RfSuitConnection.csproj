@@ -31,9 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ComaLib">
-      <HintPath>..\..\..\..\My Dropbox\civil\Speciale\Subprojects\ComaLib.dll</HintPath>
-    </Reference>
+    <Reference Include="ComaLib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
