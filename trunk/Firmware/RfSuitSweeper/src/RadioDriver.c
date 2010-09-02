@@ -1,7 +1,6 @@
+#include "RadioDriver.h"
 #include <avr/interrupt.h>
 #include <avr/iom128rfa1.h>
-#include <Globals.h>
-#include "RadioDriver.h"
 #include <Config.h>
 
 // Transceiver state status
@@ -57,7 +56,7 @@ static frameHandlerCallback frameHandler = NULL;
 static volatile bool transmitting = false;
 static volatile uint8_t rssi = 0;
 
-void RadioDriver_Initialize(frameHandlerCallback fh)
+void RadioDriver_Initialize(BlockHandlerCallback fh)
 {
 	frameHandler = fh;
 

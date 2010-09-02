@@ -34,7 +34,7 @@ int main()
 	// Initialize kernel
 	Kernel_Initialize();
 
-	Rs485Driver_Initialize(BAUDRATE_500000, FrameHandler, TxOn, TxOff);
+	FrameTransceiver_Initialize(BAUDRATE_500000, FrameHandler);
 
 
 	// Start the system

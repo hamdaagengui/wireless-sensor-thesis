@@ -47,10 +47,7 @@
 #ifndef RADIODRIVER_H_
 #define RADIODRIVER_H_
 
-#include <stdint.h>
-#include
-
-typedef void (*frameHandlerCallback)(uint8_t* buffer, uint8_t length);
+#include "Globals.h"
 
 enum
 {
@@ -149,7 +146,7 @@ enum
 /*
  * Initialize the transceiver and sets the frame receive call back function.
  */
-extern void RadioDriver_Initialize(frameHandlerCallback fh);
+extern void RadioDriver_Initialize(BlockHandlerCallback fh);
 
 /*
  * Set transceiver bit rate.
