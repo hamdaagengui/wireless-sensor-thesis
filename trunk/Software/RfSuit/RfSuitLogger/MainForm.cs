@@ -107,9 +107,7 @@ namespace RfSuitLogger
 
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-      videoSource.NewFrame -= video_NewFrame;
-      videoSource.SignalToStop();
-      videoSource = null;
+      stopVideoSource();
     }
 
     private void captureDevicesComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -117,27 +115,40 @@ namespace RfSuitLogger
       var dfi = captureDevicesComboBox.SelectedItem as DisplayableFilterInfo;
       if (dfi == null)
         return;
-      if(videoSource != null) {
-        videoSource.SignalToStop();
-        videoSource.NewFrame -= video_NewFrame;
-        previewPictureBox.Visible = false;
-      }
+      stopVideoSource();
       videoSource = new VideoCaptureDevice(dfi.FilterInfo.MonikerString);
       videoCapabilitiesComboBox.Items.Clear();
       videoCapabilitiesComboBox.Items.AddRange(
         Array.ConvertAll(videoSource.VideoCapabilities, vc => new DisplayableVideoCapabilities { VideoCapabilities = vc }));
     }
 
-    private void videoCapabilitiesComboBox_SelectedIndexChanged(object sender, EventArgs e)
-    {
-      var vc = videoCapabilitiesComboBox.SelectedItem as DisplayableVideoCapabilities;
-      if (vc == null) return;
-      videoSource.DesiredFrameRate = vc.VideoCapabilities.MaxFrameRate;
-      videoSource.DesiredFrameSize = vc.VideoCapabilities.FrameSize;
+    private void stopVideoSource() {
+      if (videoSource == null) return;
+      previewPictureBox.Visible = false;
+      Application.DoEvents();
+      videoSource.Stop();
+      videoSource.NewFrame -= video_NewFrame;
+    }
+
+    private void startVideoSource(VideoCapabilities vc) {
+      videoSource.DesiredFrameRate = vc.MaxFrameRate;
+      videoSource.DesiredFrameSize = vc.FrameSize;
       videoSource.NewFrame += video_NewFrame;
       videoSource.Start();
-
       previewPictureBox.Visible = true;
+    }
+
+    private void videoCapabilitiesComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      var dvc = videoCapabilitiesComboBox.SelectedItem as DisplayableVideoCapabilities;
+      if (dvc == null) return;
+      stopVideoSource();
+      startVideoSource(dvc.VideoCapabilities);
+    }
+
+    private void propertiesButton_Click(object sender, EventArgs e)
+    {
+      videoSource.DisplayPropertyPage(Handle);
     }
   }
 
