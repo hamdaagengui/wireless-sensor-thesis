@@ -6,14 +6,10 @@ or FITNESS FOR A PARTICULAR PURPOSE.
 *****************************************************************************/
 
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Collections;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Diagnostics;
 
-using DirectShowLib;
 
 
 namespace WebCamService
