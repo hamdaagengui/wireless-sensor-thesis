@@ -29,6 +29,30 @@ namespace dk.iha
       get { return _timestamp; }
       set { _timestamp = value; }
     }
+    private readonly global::System.Collections.Generic.List<dk.iha.SweepResult> _results = new global::System.Collections.Generic.List<dk.iha.SweepResult>();
+    [global::ProtoBuf.ProtoMember(3, Name=@"results", DataFormat = global::ProtoBuf.DataFormat.Default)]
+    public global::System.Collections.Generic.List<dk.iha.SweepResult> results
+    {
+      get { return _results; }
+    }
+  
+    private global::ProtoBuf.IExtension extensionObject;
+    global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+      { return global::ProtoBuf.Extensible.GetExtensionObject(ref extensionObject, createIfMissing); }
+  }
+  
+  [global::System.Serializable, global::ProtoBuf.ProtoContract(Name=@"SweepResult")]
+  public partial class SweepResult : global::ProtoBuf.IExtensible
+  {
+    public SweepResult() {}
+    
+    private readonly global::System.Collections.Generic.List<int> _rssis = new global::System.Collections.Generic.List<int>();
+    [global::ProtoBuf.ProtoMember(1, Name=@"rssis", DataFormat = global::ProtoBuf.DataFormat.TwosComplement)]
+    public global::System.Collections.Generic.List<int> rssis
+    {
+      get { return _rssis; }
+    }
+  
     private global::ProtoBuf.IExtension extensionObject;
     global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
       { return global::ProtoBuf.Extensible.GetExtensionObject(ref extensionObject, createIfMissing); }
