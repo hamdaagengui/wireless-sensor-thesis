@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using AForge.Video;
 using AForge.Video.DirectShow;
 using System.IO;
 using System.Drawing.Imaging;
+using dk.iha;
+using ProtoBuf;
 
 namespace RfSuitLogger
 {
@@ -19,10 +22,9 @@ namespace RfSuitLogger
     }
 
     //    private Connection connection;
-    //private Capture capture;
-    private IntPtr bitmap;
     private FilterInfoCollection videoDevices;
     private VideoCaptureDevice videoSource;
+    private Stream logStream;
 
     private void startButton_Click(object sender, EventArgs e)
     {
@@ -38,23 +40,6 @@ namespace RfSuitLogger
       connection.SweepStarted += connection_SweepStarted;
       connection.SweepCompleted += connection_SweepCompleted;
       connection.Start("COM30"); */
-
-      // enumerate video devices
-
-      // create video source
-      if (captureDevicesComboBox.SelectedItem is DisplayableFilterInfo == false)
-      {
-        MessageBox.Show("Please select a webcam to start!");
-        return;
-      }
-      var fi = (DisplayableFilterInfo)captureDevicesComboBox.SelectedItem;
-      videoSource = new VideoCaptureDevice(fi.FilterInfo.MonikerString);
-      // set NewFrame event handler
-      videoSource.NewFrame += video_NewFrame;
-      videoSource.DesiredFrameRate = 15;
-      videoSource.DesiredFrameSize = previewPictureBox.Size;
-      // start the video source
-      videoSource.Start();
     }
 
     private void video_NewFrame(object sender,
@@ -63,19 +48,28 @@ namespace RfSuitLogger
       // get new frame
       var bitmap = (Bitmap)eventArgs.Frame.Clone();
       previewPictureBox.BeginInvokeIfRequired(p =>
-                                           {
-                                             try
-                                             {
-                                               if (p.Created) {
-                                                 bitmap.Save(Stream.Null, ImageFormat.Jpeg);
-                                                 p.Image = bitmap;
-                                               }
-                                             }
-                                             catch (Exception ex)
-                                             {
-                                               DisplayError(ex);
-                                             }
-                                           });
+      {
+        try
+        {
+          if (p.Created) {
+            if (logStream != null) {
+              var memoryStream = new MemoryStream(10*1024*1024);
+              bitmap.Save(memoryStream, ImageFormat.Jpeg);
+              
+              var entry = new Entry {
+                picture = memoryStream.ToArray(),
+                timestamp = (int) Utils.UnixTime(DateTime.Now)
+              };
+              Serializer.SerializeWithLengthPrefix(logStream, entry, PrefixStyle.Base128);
+            }
+            p.Image = bitmap;
+          }
+        }
+        catch (Exception ex)
+        {
+          DisplayError(ex);
+        }
+      });
     }
 
     private void refreshButton_Click(object sender, EventArgs e)
@@ -108,6 +102,10 @@ namespace RfSuitLogger
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
       stopVideoSource();
+      if(logStream != null) {
+        logStream.Close();
+        logStream = null;
+      }
     }
 
     private void captureDevicesComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -149,6 +147,20 @@ namespace RfSuitLogger
     private void propertiesButton_Click(object sender, EventArgs e)
     {
       videoSource.DisplayPropertyPage(Handle);
+    }
+
+    private void startLogButton_Click(object sender, EventArgs e)
+    {
+      if(logStream != null)
+        logStream.Close();
+      logStream = new FileStream(Directory.GetParent(Application.ExecutablePath) + @"\log" + (int)Utils.UnixTime(), FileMode.CreateNew);
+    }
+
+    private void stopLogButton_Click(object sender, EventArgs e)
+    {
+      if (logStream == null) return;
+      logStream.Close();
+      logStream = null;
     }
   }
 
