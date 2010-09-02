@@ -12,12 +12,14 @@ namespace RfSuitLogger
     {
       InitializeComponent();
 
+      refreshButton_Click(this, EventArgs.Empty);
       //Task.Factory.StartNew(() => { capture = new Capture(0, 30, 640, 480); });
     }
 
 //    private Connection connection;
     //private Capture capture;
     private IntPtr bitmap;
+    private FilterInfoCollection videoDevices;
 
     private void startButton_Click(object sender, EventArgs e)
     {
@@ -35,11 +37,19 @@ namespace RfSuitLogger
       connection.Start("COM30"); */
 
       // enumerate video devices
-      FilterInfoCollection videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+      
       // create video source
-      VideoCaptureDevice videoSource = new VideoCaptureDevice(videoDevices[0].MonikerString);
+      if(captureDevicesComboBox.SelectedItem is DisplayableFilterInfo == false)
+      {
+        MessageBox.Show("Please select a webcam to start!");
+        return;
+      }
+      DisplayableFilterInfo fi = (DisplayableFilterInfo) captureDevicesComboBox.SelectedItem;
+      VideoCaptureDevice videoSource = new VideoCaptureDevice(fi.FilterInfo.MonikerString);
       // set NewFrame event handler
       videoSource.NewFrame += video_NewFrame;
+      videoSource.DesiredFrameRate = 15;
+      videoSource.DesiredFrameSize = previewPictureBox.Size;
       // start the video source
       videoSource.Start();
     }
@@ -49,8 +59,22 @@ namespace RfSuitLogger
     {
       // get new frame
       Bitmap bitmap = eventArgs.Frame;
-      // process the frame
-      previewPictureBox.Image = bitmap;
+      previewPictureBox.InvokeIfRequired(p =>
+                                           {
+                                             p.Image = bitmap;
+                                           });
+    }
+
+    private void refreshButton_Click(object sender, EventArgs e)
+    {
+      videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+      captureDevicesComboBox.Items.Clear();
+      foreach (var videoDevice in videoDevices)
+      {
+        FilterInfo fi = videoDevice as FilterInfo;
+        if(fi != null)
+          captureDevicesComboBox.Items.Add(new DisplayableFilterInfo() { FilterInfo = fi });
+      }
     }
 
 /*
@@ -66,4 +90,14 @@ namespace RfSuitLogger
     }
 */
   }
+
+  class DisplayableFilterInfo
+  {
+    public FilterInfo FilterInfo { get; set; }
+    public override string ToString()
+    {
+      return (FilterInfo != null ? FilterInfo.Name : "NULL");
+    }
+  }
+
 }

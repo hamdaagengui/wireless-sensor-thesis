@@ -31,6 +31,8 @@
       this.startButton = new System.Windows.Forms.Button();
       this.previewPictureBox = new System.Windows.Forms.PictureBox();
       this.logTextBox = new System.Windows.Forms.TextBox();
+      this.captureDevicesComboBox = new System.Windows.Forms.ComboBox();
+      this.refreshButton = new System.Windows.Forms.Button();
       ((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).BeginInit();
       this.SuspendLayout();
       // 
@@ -38,9 +40,9 @@
       // 
       this.startButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                   | System.Windows.Forms.AnchorStyles.Right)));
-      this.startButton.Location = new System.Drawing.Point(12, 12);
+      this.startButton.Location = new System.Drawing.Point(12, 68);
       this.startButton.Name = "startButton";
-      this.startButton.Size = new System.Drawing.Size(222, 240);
+      this.startButton.Size = new System.Drawing.Size(222, 184);
       this.startButton.TabIndex = 0;
       this.startButton.Text = "Start";
       this.startButton.UseVisualStyleBackColor = true;
@@ -66,11 +68,36 @@
       this.logTextBox.Size = new System.Drawing.Size(548, 251);
       this.logTextBox.TabIndex = 2;
       // 
+      // captureDevicesComboBox
+      // 
+      this.captureDevicesComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                  | System.Windows.Forms.AnchorStyles.Right)));
+      this.captureDevicesComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.captureDevicesComboBox.FormattingEnabled = true;
+      this.captureDevicesComboBox.Location = new System.Drawing.Point(12, 12);
+      this.captureDevicesComboBox.Name = "captureDevicesComboBox";
+      this.captureDevicesComboBox.Size = new System.Drawing.Size(222, 21);
+      this.captureDevicesComboBox.TabIndex = 3;
+      // 
+      // refreshButton
+      // 
+      this.refreshButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                  | System.Windows.Forms.AnchorStyles.Right)));
+      this.refreshButton.Location = new System.Drawing.Point(12, 39);
+      this.refreshButton.Name = "refreshButton";
+      this.refreshButton.Size = new System.Drawing.Size(222, 23);
+      this.refreshButton.TabIndex = 4;
+      this.refreshButton.Text = "Refresh Capture Devices";
+      this.refreshButton.UseVisualStyleBackColor = true;
+      this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
+      // 
       // MainForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(572, 521);
+      this.Controls.Add(this.refreshButton);
+      this.Controls.Add(this.captureDevicesComboBox);
       this.Controls.Add(this.logTextBox);
       this.Controls.Add(this.previewPictureBox);
       this.Controls.Add(this.startButton);
@@ -87,6 +114,8 @@
     private System.Windows.Forms.Button startButton;
     private System.Windows.Forms.PictureBox previewPictureBox;
     private System.Windows.Forms.TextBox logTextBox;
+    private System.Windows.Forms.ComboBox captureDevicesComboBox;
+    private System.Windows.Forms.Button refreshButton;
   }
 }
 
