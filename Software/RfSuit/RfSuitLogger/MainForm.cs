@@ -3,6 +3,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using AForge.Video;
 using AForge.Video.DirectShow;
+using System.IO;
+using System.Drawing.Imaging;
 
 namespace RfSuitLogger
 {
@@ -16,10 +18,11 @@ namespace RfSuitLogger
       //Task.Factory.StartNew(() => { capture = new Capture(0, 30, 640, 480); });
     }
 
-//    private Connection connection;
+    //    private Connection connection;
     //private Capture capture;
     private IntPtr bitmap;
     private FilterInfoCollection videoDevices;
+    private VideoCaptureDevice videoSource;
 
     private void startButton_Click(object sender, EventArgs e)
     {
@@ -37,15 +40,15 @@ namespace RfSuitLogger
       connection.Start("COM30"); */
 
       // enumerate video devices
-      
+
       // create video source
-      if(captureDevicesComboBox.SelectedItem is DisplayableFilterInfo == false)
+      if (captureDevicesComboBox.SelectedItem is DisplayableFilterInfo == false)
       {
         MessageBox.Show("Please select a webcam to start!");
         return;
       }
-      DisplayableFilterInfo fi = (DisplayableFilterInfo) captureDevicesComboBox.SelectedItem;
-      VideoCaptureDevice videoSource = new VideoCaptureDevice(fi.FilterInfo.MonikerString);
+      var fi = (DisplayableFilterInfo)captureDevicesComboBox.SelectedItem;
+      videoSource = new VideoCaptureDevice(fi.FilterInfo.MonikerString);
       // set NewFrame event handler
       videoSource.NewFrame += video_NewFrame;
       videoSource.DesiredFrameRate = 15;
@@ -58,10 +61,20 @@ namespace RfSuitLogger
         NewFrameEventArgs eventArgs)
     {
       // get new frame
-      Bitmap bitmap = eventArgs.Frame;
-      previewPictureBox.InvokeIfRequired(p =>
+      var bitmap = (Bitmap)eventArgs.Frame.Clone();
+      previewPictureBox.BeginInvokeIfRequired(p =>
                                            {
-                                             p.Image = bitmap;
+                                             try
+                                             {
+                                               if (p.Created) {
+                                                 bitmap.Save(Stream.Null, ImageFormat.Jpeg);
+                                                 p.Image = bitmap;
+                                               }
+                                             }
+                                             catch (Exception ex)
+                                             {
+                                               DisplayError(ex);
+                                             }
                                            });
     }
 
@@ -71,24 +84,61 @@ namespace RfSuitLogger
       captureDevicesComboBox.Items.Clear();
       foreach (var videoDevice in videoDevices)
       {
-        FilterInfo fi = videoDevice as FilterInfo;
-        if(fi != null)
-          captureDevicesComboBox.Items.Add(new DisplayableFilterInfo() { FilterInfo = fi });
+        var fi = videoDevice as FilterInfo;
+        if (fi != null)
+          captureDevicesComboBox.Items.Add(new DisplayableFilterInfo { FilterInfo = fi });
       }
     }
 
-/*
-    void connection_SweepCompleted(int channel, SweepResults[] results)
+//        void connection_SweepCompleted(int channel, SweepResults[] results)
+//        {
+//          throw new NotImplementedException();
+//        }
+//
+//        void connection_SweepStarted(int channel)
+//        {
+          //capture.GetBitMap(); // TODO: Fetch bitmap, and convert it... in a seperate thread!
+//          throw new NotImplementedException();
+//        }
+    static void DisplayError(Exception ex, string msg = null)
     {
-      throw new NotImplementedException();
+      MessageBox.Show(msg ?? ex.Message, ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
 
-    void connection_SweepStarted(int channel)
+    private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-      //capture.GetBitMap(); // TODO: Fetch bitmap, and convert it... in a seperate thread!
-      throw new NotImplementedException();
+      videoSource.NewFrame -= video_NewFrame;
+      videoSource.SignalToStop();
+      videoSource = null;
     }
-*/
+
+    private void captureDevicesComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      var dfi = captureDevicesComboBox.SelectedItem as DisplayableFilterInfo;
+      if (dfi == null)
+        return;
+      if(videoSource != null) {
+        videoSource.SignalToStop();
+        videoSource.NewFrame -= video_NewFrame;
+        previewPictureBox.Visible = false;
+      }
+      videoSource = new VideoCaptureDevice(dfi.FilterInfo.MonikerString);
+      videoCapabilitiesComboBox.Items.Clear();
+      videoCapabilitiesComboBox.Items.AddRange(
+        Array.ConvertAll(videoSource.VideoCapabilities, vc => new DisplayableVideoCapabilities { VideoCapabilities = vc }));
+    }
+
+    private void videoCapabilitiesComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      var vc = videoCapabilitiesComboBox.SelectedItem as DisplayableVideoCapabilities;
+      if (vc == null) return;
+      videoSource.DesiredFrameRate = vc.VideoCapabilities.MaxFrameRate;
+      videoSource.DesiredFrameSize = vc.VideoCapabilities.FrameSize;
+      videoSource.NewFrame += video_NewFrame;
+      videoSource.Start();
+
+      previewPictureBox.Visible = true;
+    }
   }
 
   class DisplayableFilterInfo
@@ -97,6 +147,13 @@ namespace RfSuitLogger
     public override string ToString()
     {
       return (FilterInfo != null ? FilterInfo.Name : "NULL");
+    }
+  }
+  class DisplayableVideoCapabilities {
+    public VideoCapabilities VideoCapabilities { get; set; }
+    public override string ToString()
+    {
+      return String.Format("{0}x{1} @ {2}", VideoCapabilities.FrameSize.Width, VideoCapabilities.FrameSize.Height, VideoCapabilities.MaxFrameRate);
     }
   }
 
