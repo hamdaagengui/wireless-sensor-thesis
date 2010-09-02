@@ -8,7 +8,7 @@ namespace RfSuit
 {
 	class NetworkInterface
 	{
-		SerialPort prot;
+		SerialPort port;
 
 		public bool Open(string portName, int baudrate)
 		{
