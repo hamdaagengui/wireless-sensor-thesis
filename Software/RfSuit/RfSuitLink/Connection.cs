@@ -18,6 +18,8 @@ namespace RfSuit
 
 		const byte LOCAL_ADDRESS = 0;
 
+		static readonly byte[] nothingToken = NothingTokenMessage.Create(1, 0);
+		
 		IDataLinkLayer dll;
 		MessageDispatcher md;
 
@@ -38,7 +40,7 @@ namespace RfSuit
 			{
 				if (m.Destination == LOCAL_ADDRESS || m.Destination == tokenRingLength)
 				{
-					PassToken();
+					TokenReceived();
 				}
 			});
 			md.AddHandler<ReportTokenMessage>(m =>
@@ -50,7 +52,7 @@ namespace RfSuit
 
 				if (m.Destination == LOCAL_ADDRESS || m.Destination == tokenRingLength)
 				{
-					PassToken();
+					TokenReceived();
 				}
 			});
 
@@ -108,11 +110,13 @@ namespace RfSuit
 
 		public void Send(byte[] message)
 		{
+			
 			txQueue.Enqueue(message);
 		}
 
-		static readonly byte[] nothingToken = NothingTokenMessage.Create(1, 0);
-		void PassToken()
+
+
+		void TokenReceived()
 		{
 			byte[] msg;
 			if (txQueue.TryDequeue(out msg))
