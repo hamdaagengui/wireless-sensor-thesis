@@ -5,6 +5,10 @@
  *      Author: Coma
  */
 
+#define BAUDRATE_115200													16
+#define BAUDRATE_250000													7
+#define BAUDRATE_500000													3
+
 void FrameHandler(uint8_t* data, uint8_t length);
 
 int main()
@@ -30,7 +34,7 @@ int main()
 	// Initialize kernel
 	Kernel_Initialize();
 
-	Rs485Driver_Initialize(BAUDRATE_115200, FrameHandler, TxOn, TxOff);
+	Rs485Driver_Initialize(BAUDRATE_500000, FrameHandler, TxOn, TxOff);
 
 
 	// Start the system
