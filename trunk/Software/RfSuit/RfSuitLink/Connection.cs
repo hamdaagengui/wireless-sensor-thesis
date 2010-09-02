@@ -14,12 +14,6 @@ namespace RfSuit
 
 	public class Connection
 	{
-		class SweepCompletedMessage
-		{
-			public int channel;
-			public SweepResults[] results;
-		}
-
 		public event SweepCompletedDelegate SweepCompleted;
 
 		const byte LOCAL_ADDRESS = 0;
@@ -73,9 +67,11 @@ namespace RfSuit
 				return false;
 			}
 
-			DetectDevices();
+			DetectDevices(); // detect which devices are online and detect the length of the ring
 
-			dll.Send(nothingToken);
+
+
+			dll.Send(nothingToken); // start the token passing
 
 			return true;
 		}
