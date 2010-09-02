@@ -65,16 +65,16 @@ namespace RfSuit
 		}
 	}
 
-	class NothingMessage
+	class PingRequestMessage
 	{
 		public Byte Destination;
 		public Byte Source;
 		static readonly Byte MessageId = 0;
 
-		public NothingMessage()
+		public PingRequestMessage()
 		{ }
 
-		public NothingMessage(Byte[] frame)
+		public PingRequestMessage(Byte[] frame)
 		{
 			Destination = frame[0];
 			Source = frame[1];
@@ -95,17 +95,77 @@ namespace RfSuit
 		}
 	}
 
-	class SetTxPowerMessage
+	class PingReplyMessage
 	{
 		public Byte Destination;
 		public Byte Source;
 		static readonly Byte MessageId = 1;
-		public Byte TxPower;
 
-		public SetTxPowerMessage()
+		public PingReplyMessage()
 		{ }
 
-		public SetTxPowerMessage(Byte[] frame)
+		public PingReplyMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+		}
+
+		static public Byte[] Create(Byte destination, Byte source)
+		{
+			Byte[] buffer = new Byte[3];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source);
+		}
+	}
+
+	class NothingTokenMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 2;
+
+		public NothingTokenMessage()
+		{ }
+
+		public NothingTokenMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+		}
+
+		static public Byte[] Create(Byte destination, Byte source)
+		{
+			Byte[] buffer = new Byte[3];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source);
+		}
+	}
+
+	class SetTxPowerTokenMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 3;
+		public Byte TxPower;
+
+		public SetTxPowerTokenMessage()
+		{ }
+
+		public SetTxPowerTokenMessage(Byte[] frame)
 		{
 			Destination = frame[0];
 			Source = frame[1];
@@ -128,77 +188,77 @@ namespace RfSuit
 		}
 	}
 
-	class EnableSweepingMessage
-	{
-		public Byte Destination;
-		public Byte Source;
-		static readonly Byte MessageId = 2;
-
-		public EnableSweepingMessage()
-		{ }
-
-		public EnableSweepingMessage(Byte[] frame)
-		{
-			Destination = frame[0];
-			Source = frame[1];
-		}
-
-		static public Byte[] Create(Byte destination, Byte source)
-		{
-			Byte[] buffer = new Byte[3];
-			buffer[0] = destination;
-			buffer[1] = source;
-			buffer[2] = MessageId;
-			return buffer;
-		}
-
-		public Byte[] Create()
-		{
-			return Create(Destination, Source);
-		}
-	}
-
-	class DisableSweepingMessage
-	{
-		public Byte Destination;
-		public Byte Source;
-		static readonly Byte MessageId = 3;
-
-		public DisableSweepingMessage()
-		{ }
-
-		public DisableSweepingMessage(Byte[] frame)
-		{
-			Destination = frame[0];
-			Source = frame[1];
-		}
-
-		static public Byte[] Create(Byte destination, Byte source)
-		{
-			Byte[] buffer = new Byte[3];
-			buffer[0] = destination;
-			buffer[1] = source;
-			buffer[2] = MessageId;
-			return buffer;
-		}
-
-		public Byte[] Create()
-		{
-			return Create(Destination, Source);
-		}
-	}
-
-	class ReportMessage
+	class EnableSweepingTokenMessage
 	{
 		public Byte Destination;
 		public Byte Source;
 		static readonly Byte MessageId = 4;
-		public Byte[] Rssis = new Byte[16];
 
-		public ReportMessage()
+		public EnableSweepingTokenMessage()
 		{ }
 
-		public ReportMessage(Byte[] frame)
+		public EnableSweepingTokenMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+		}
+
+		static public Byte[] Create(Byte destination, Byte source)
+		{
+			Byte[] buffer = new Byte[3];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source);
+		}
+	}
+
+	class DisableSweepingTokenMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 5;
+
+		public DisableSweepingTokenMessage()
+		{ }
+
+		public DisableSweepingTokenMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+		}
+
+		static public Byte[] Create(Byte destination, Byte source)
+		{
+			Byte[] buffer = new Byte[3];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source);
+		}
+	}
+
+	class ReportTokenMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 6;
+		public Byte[] Rssis = new Byte[16];
+
+		public ReportTokenMessage()
+		{ }
+
+		public ReportTokenMessage(Byte[] frame)
 		{
 			Destination = frame[0];
 			Source = frame[1];
