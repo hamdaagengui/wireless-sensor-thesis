@@ -28,10 +28,24 @@ namespace RfSuit
 
 		public bool Start(string portName)
 		{
+			md = new MessageDispatcher();
+			md.AddHandler<NothingMessage>(m =>
+			{
+				if (m.Destination == 0)
+				{
+					PassToken();
+				}
+			});
+			md.AddHandler<ReportMessage>(m =>
+			{
+				if (m.Destination == 0)
+				{
+					PassToken();
+				}
+			});
+
 			try
 			{
-				md = new MessageDispatcher();
-
 				var sp = new SerialPort(portName, 115200);
 				var pl = new SerialPortWrapper(sp);
 				dll = new FrameTransceiver(pl);
@@ -49,6 +63,11 @@ namespace RfSuit
 		public void Stop()
 		{
 			dll.Stop();
+		}
+
+		void PassToken()
+		{
+
 		}
 
 		void ReportSweepStarted(object o)
