@@ -15,13 +15,13 @@ namespace dk.iha
   {
     public Entry() {}
     
-    private byte[] _picture;
-    [global::ProtoBuf.ProtoMember(1, IsRequired = true, Name=@"picture", DataFormat = global::ProtoBuf.DataFormat.Default)]
-    public byte[] picture
+    private readonly global::System.Collections.Generic.List<dk.iha.Picture> _pictures = new global::System.Collections.Generic.List<dk.iha.Picture>();
+    [global::ProtoBuf.ProtoMember(1, Name=@"pictures", DataFormat = global::ProtoBuf.DataFormat.Default)]
+    public global::System.Collections.Generic.List<dk.iha.Picture> pictures
     {
-      get { return _picture; }
-      set { _picture = value; }
+      get { return _pictures; }
     }
+  
     private int _timestamp;
     [global::ProtoBuf.ProtoMember(2, IsRequired = true, Name=@"timestamp", DataFormat = global::ProtoBuf.DataFormat.TwosComplement)]
     public int timestamp
@@ -53,6 +53,23 @@ namespace dk.iha
       get { return _rssis; }
     }
   
+    private global::ProtoBuf.IExtension extensionObject;
+    global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
+      { return global::ProtoBuf.Extensible.GetExtensionObject(ref extensionObject, createIfMissing); }
+  }
+  
+  [global::System.Serializable, global::ProtoBuf.ProtoContract(Name=@"Picture")]
+  public partial class Picture : global::ProtoBuf.IExtensible
+  {
+    public Picture() {}
+    
+    private byte[] _data;
+    [global::ProtoBuf.ProtoMember(1, IsRequired = true, Name=@"data", DataFormat = global::ProtoBuf.DataFormat.Default)]
+    public byte[] data
+    {
+      get { return _data; }
+      set { _data = value; }
+    }
     private global::ProtoBuf.IExtension extensionObject;
     global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
       { return global::ProtoBuf.Extensible.GetExtensionObject(ref extensionObject, createIfMissing); }
