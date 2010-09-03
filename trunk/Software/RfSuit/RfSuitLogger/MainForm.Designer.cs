@@ -38,9 +38,12 @@
       this.videoCapabilitiesComboBox = new System.Windows.Forms.ComboBox();
       this.refreshButton = new System.Windows.Forms.Button();
       this.captureDevicesComboBox = new System.Windows.Forms.ComboBox();
+      this.groupBox3 = new System.Windows.Forms.GroupBox();
+      this.serialPortsComboBox = new System.Windows.Forms.ComboBox();
       ((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).BeginInit();
       this.groupBox1.SuspendLayout();
       this.groupBox2.SuspendLayout();
+      this.groupBox3.SuspendLayout();
       this.SuspendLayout();
       // 
       // previewPictureBox
@@ -50,7 +53,7 @@
                   | System.Windows.Forms.AnchorStyles.Right)));
       this.previewPictureBox.Location = new System.Drawing.Point(172, 12);
       this.previewPictureBox.Name = "previewPictureBox";
-      this.previewPictureBox.Size = new System.Drawing.Size(382, 303);
+      this.previewPictureBox.Size = new System.Drawing.Size(606, 411);
       this.previewPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
       this.previewPictureBox.TabIndex = 1;
       this.previewPictureBox.TabStop = false;
@@ -59,10 +62,10 @@
       // 
       this.logTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
                   | System.Windows.Forms.AnchorStyles.Right)));
-      this.logTextBox.Location = new System.Drawing.Point(12, 239);
+      this.logTextBox.Location = new System.Drawing.Point(12, 347);
       this.logTextBox.Multiline = true;
       this.logTextBox.Name = "logTextBox";
-      this.logTextBox.Size = new System.Drawing.Size(476, 188);
+      this.logTextBox.Size = new System.Drawing.Size(700, 188);
       this.logTextBox.TabIndex = 2;
       // 
       // startLogButton
@@ -73,7 +76,7 @@
       this.startLogButton.TabIndex = 7;
       this.startLogButton.Text = "Start";
       this.startLogButton.UseVisualStyleBackColor = true;
-      this.startLogButton.Click += new System.EventHandler(this.startLogButton_Click);
+      this.startLogButton.Click += new System.EventHandler(this.StartLogButtonClick);
       // 
       // stopLogButton
       // 
@@ -83,7 +86,7 @@
       this.stopLogButton.TabIndex = 8;
       this.stopLogButton.Text = "Stop";
       this.stopLogButton.UseVisualStyleBackColor = true;
-      this.stopLogButton.Click += new System.EventHandler(this.stopLogButton_Click);
+      this.stopLogButton.Click += new System.EventHandler(this.StopLogButtonClick);
       // 
       // groupBox1
       // 
@@ -117,7 +120,7 @@
       this.propertiesButton.TabIndex = 10;
       this.propertiesButton.Text = "Properties";
       this.propertiesButton.UseVisualStyleBackColor = true;
-      this.propertiesButton.Click += new System.EventHandler(this.propertiesButton_Click);
+      this.propertiesButton.Click += new System.EventHandler(this.PropertiesButtonClick);
       // 
       // videoCapabilitiesComboBox
       // 
@@ -127,7 +130,7 @@
       this.videoCapabilitiesComboBox.Name = "videoCapabilitiesComboBox";
       this.videoCapabilitiesComboBox.Size = new System.Drawing.Size(141, 21);
       this.videoCapabilitiesComboBox.TabIndex = 9;
-      this.videoCapabilitiesComboBox.SelectedIndexChanged += new System.EventHandler(this.videoCapabilitiesComboBox_SelectedIndexChanged);
+      this.videoCapabilitiesComboBox.SelectedIndexChanged += new System.EventHandler(this.VideoCapabilitiesComboBoxSelectedIndexChanged);
       // 
       // refreshButton
       // 
@@ -137,7 +140,7 @@
       this.refreshButton.TabIndex = 8;
       this.refreshButton.Text = "Refresh";
       this.refreshButton.UseVisualStyleBackColor = true;
-      this.refreshButton.Click += new System.EventHandler(this.refreshButton_Click);
+      this.refreshButton.Click += new System.EventHandler(this.RefreshButtonClick);
       // 
       // captureDevicesComboBox
       // 
@@ -147,14 +150,35 @@
       this.captureDevicesComboBox.Name = "captureDevicesComboBox";
       this.captureDevicesComboBox.Size = new System.Drawing.Size(141, 21);
       this.captureDevicesComboBox.TabIndex = 7;
-      this.captureDevicesComboBox.SelectedIndexChanged += new System.EventHandler(this.captureDevicesComboBox_SelectedIndexChanged);
-      this.captureDevicesComboBox.Click += new System.EventHandler(this.captureDevicesComboBox_SelectedIndexChanged);
+      this.captureDevicesComboBox.SelectedIndexChanged += new System.EventHandler(this.CaptureDevicesComboBoxSelectedIndexChanged);
+      this.captureDevicesComboBox.Click += new System.EventHandler(this.CaptureDevicesComboBoxSelectedIndexChanged);
+      // 
+      // groupBox3
+      // 
+      this.groupBox3.Controls.Add(this.serialPortsComboBox);
+      this.groupBox3.Location = new System.Drawing.Point(12, 237);
+      this.groupBox3.Name = "groupBox3";
+      this.groupBox3.Size = new System.Drawing.Size(154, 90);
+      this.groupBox3.TabIndex = 11;
+      this.groupBox3.TabStop = false;
+      this.groupBox3.Text = "Connection";
+      // 
+      // serialPortsComboBox
+      // 
+      this.serialPortsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.serialPortsComboBox.FormattingEnabled = true;
+      this.serialPortsComboBox.Location = new System.Drawing.Point(6, 19);
+      this.serialPortsComboBox.Name = "serialPortsComboBox";
+      this.serialPortsComboBox.Size = new System.Drawing.Size(141, 21);
+      this.serialPortsComboBox.TabIndex = 0;
+      this.serialPortsComboBox.DropDown += new System.EventHandler(this.SerialPortsComboBoxDropDown);
       // 
       // MainForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(500, 439);
+      this.ClientSize = new System.Drawing.Size(724, 547);
+      this.Controls.Add(this.groupBox3);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox1);
       this.Controls.Add(this.logTextBox);
@@ -165,6 +189,7 @@
       ((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).EndInit();
       this.groupBox1.ResumeLayout(false);
       this.groupBox2.ResumeLayout(false);
+      this.groupBox3.ResumeLayout(false);
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -182,6 +207,8 @@
     private System.Windows.Forms.ComboBox videoCapabilitiesComboBox;
     private System.Windows.Forms.Button refreshButton;
     private System.Windows.Forms.ComboBox captureDevicesComboBox;
+    private System.Windows.Forms.GroupBox groupBox3;
+    private System.Windows.Forms.ComboBox serialPortsComboBox;
   }
 }
 

@@ -58,12 +58,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Arrays.cs" />
+    <Compile Include="List.cs" />
+    <Compile Include="VisualSource.cs" />
     <Compile Include="log.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>log.proto</DependentUpon>
     </Compile>
+    <Compile Include="Logger.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -103,6 +107,12 @@
     <Content Include="lib\AForge.Video.DirectShow.dll" />
     <Content Include="lib\AForge.Video.dll" />
     <Content Include="lib\protobuf-net.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RfSuitLink\RfSuitConnection.csproj">
+      <Project>{4F8244C7-6122-4C50-9F35-4264CAD48122}</Project>
+      <Name>RfSuitConnection</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
