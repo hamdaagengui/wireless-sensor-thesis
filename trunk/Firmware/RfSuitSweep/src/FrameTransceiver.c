@@ -8,7 +8,6 @@
 #include "FrameTransceiver.h"
 #include <Config.h>
 #include <Kernel/Kernel.h>
-#include "Checksum.h"
 
 #define SOF																			255
 #define EOF																			254
@@ -72,9 +71,14 @@ void Run()
 
 		uint8_t frame[FRAMETRANSCEIVER_MAXIMUM_FRAME_SIZE];
 
+		uint8_t checksum = 0;
 		for (uint16_t i = 0; i < length; i++)
 		{
-			frame[i] = receiverQueue[receiverQueueOut];
+			uint8_t value = receiverQueue[receiverQueueOut];
+
+			checksum += value;
+
+			frame[i] = value;
 			if (++receiverQueueOut >= FRAMETRANSCEIVER_RX_BUFFER_SIZE)
 			{
 				receiverQueueOut = 0;
@@ -83,7 +87,8 @@ void Run()
 
 		atomic(receiverQueueFrameCount--);
 
-		if (Checksum_AdditionChecksum(frame, length) == 0) // valid checksum?
+		if (checksum == 0) // valid checksum?
+
 		{
 			frameHandler(frame, length - 1); // call back with the frame (dumping checksum)
 		}
@@ -92,8 +97,10 @@ void Run()
 	Critical();
 
 	if (state == STATE_IDLE) // is the transmitter idle?
+
 	{
 		if (transmitterQueueFrameCount > 0) // any frames waiting to be sent?
+
 		{
 			state = STATE_SEND_SOF; // tell transmitter to start sending a frame
 
@@ -118,26 +125,28 @@ void FrameTransceiver_Send(void* data, uint8_t length)
 		return;
 	}
 
-	uint8_t checksum = Checksum_AdditionChecksum(data, length); // calculate the sum of all bytes
-	checksum = (~checksum) + 1; // convert to two's complement
-
-	transmitterQueue[transmitterQueueIn] = length + 1; // place the frame (including checksum) in the queue
+	transmitterQueue[transmitterQueueIn] = length + 1; // add length specifier to buffer (length of frame in buffer is length of data plus one for checksum)
 	if (++transmitterQueueIn >= FRAMETRANSCEIVER_TX_BUFFER_SIZE)
 	{
 		transmitterQueueIn = 0;
 	}
 
-	// send data (checksum is not part of the data => length - 1
+	uint8_t checksum = 0;
 	uint8_t* d = (uint8_t*) data;
 	for (uint8_t i = 0; i < length; i++)
 	{
-		transmitterQueue[transmitterQueueIn] = d[i];
+		uint8_t value = d[i];
+
+		checksum += value; // calculate checksum
+
+		transmitterQueue[transmitterQueueIn] = value; // add data
 		if (++transmitterQueueIn >= FRAMETRANSCEIVER_TX_BUFFER_SIZE)
 		{
 			transmitterQueueIn = 0;
 		}
 	}
 
+	checksum = (~checksum) + 1; // convert to two's complement
 	transmitterQueue[transmitterQueueIn] = checksum;
 	if (++transmitterQueueIn >= FRAMETRANSCEIVER_TX_BUFFER_SIZE)
 	{
