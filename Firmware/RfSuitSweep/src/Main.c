@@ -5,6 +5,11 @@
  *      Author: Coma
  */
 
+#include <Globals.h>
+#include <Kernel/Kernel.h>
+#include <FrameTransceiver.h>
+#include "messages.h"
+
 #define BAUDRATE_115200													16
 #define BAUDRATE_250000													7
 #define BAUDRATE_500000													3
@@ -45,20 +50,20 @@ int main()
 
 void FrameHandler(uint8_t* data, uint8_t length)
 {
-	adrcmdMessageBase* mb = (adrcmdMessageBase*) data;
-
-	if (mb->destination != id && mb->destination != BROADCAST_ID) // reject frame?
-	{
-		return;
-	}
-
-	bool doSignalActivity = true;
-
-	switch (mb->messageId)
-	{
-		case MESSAGEID_CONFIGUREACCESSPOINT:
-			{
-				configureAccessPointMessage* m = (configureAccessPointMessage*) data;
-			}
-	}
+	//	adrcmdMessageBase* mb = (adrcmdMessageBase*) data;
+	//
+	//	if (mb->destination != id && mb->destination != BROADCAST_ID) // reject frame?
+	//	{
+	//		return;
+	//	}
+	//
+	//	bool doSignalActivity = true;
+	//
+	//	switch (mb->messageId)
+	//	{
+	//		case MESSAGEID_CONFIGUREACCESSPOINT:
+	//			{
+	//				configureAccessPointMessage* m = (configureAccessPointMessage*) data;
+	//			}
+	//	}
 }

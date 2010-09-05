@@ -146,7 +146,7 @@ enum
 /*
  * Initialize the transceiver and sets the frame receive call back function.
  */
-extern void RadioDriver_Initialize(BlockHandlerCallback fh);
+extern void RadioDriver_Initialize(blockHandlerCallback fh);
 
 /*
  * Set transceiver bit rate.

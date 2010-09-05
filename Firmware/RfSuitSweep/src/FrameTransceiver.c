@@ -1,5 +1,5 @@
 /*
- * Rs485Driver.c
+ * FrameTransceiver.c
  *
  *  Created on: 10/05/2010
  *      Author: coma
@@ -14,11 +14,9 @@
 #define EOF																			254
 #define ESC																			253
 
-static BlockHandlerCallback frameHandler;
+static blockHandlerCallback frameHandler;
 
 static void Run();
-
-// Transceiver data
 
 enum
 {
@@ -39,17 +37,18 @@ static uint8_t state = STATE_IDLE;
 static uint8_t transmitterQueue[FRAMETRANSCEIVER_TX_BUFFER_SIZE];
 static uint16_t transmitterQueueIn = 0;
 static uint16_t transmitterQueueOut = 0;
-static uint16_t transmitterQueueUsed = 0;
-static volatile uint8_t transmitterQueueFrameCount = 0;
+static uint16_t transmitterQueueFree = FRAMETRANSCEIVER_TX_BUFFER_SIZE;
+static uint8_t transmitterQueueFrameCount = 0;
+
+static uint8_t frameLength; // length of frame currently in transmission (shared between the UDRE and TXC interrupts)
 
 // The queue holding received frames until the main task gets scheduled
 static uint8_t receiverQueue[FRAMETRANSCEIVER_RX_BUFFER_SIZE];
 static uint16_t receiverQueueIn = 0;
 static uint16_t receiverQueueOut = 0;
-static uint16_t receiverQueueUsed = 0;
-static volatile uint8_t receiverQueueFrameCount = 0;
+static uint8_t receiverQueueFrameCount = 0;
 
-void FrameTransceiver_Initialize(uint16_t ubrr, BlockHandlerCallback frameReceivedHandler)
+void FrameTransceiver_Initialize(uint16_t ubrr, blockHandlerCallback frameReceivedHandler)
 {
 	frameHandler = frameReceivedHandler;
 
@@ -82,51 +81,83 @@ void Run()
 			}
 		}
 
-		receiverQueueFrameCount--;
+		atomic(receiverQueueFrameCount--);
 
 		if (Checksum_AdditionChecksum(frame, length) == 0) // valid checksum?
 		{
-			frameHandler(frame, length - 1); // call back with the frame (not dumping checksum)
+			frameHandler(frame, length - 1); // call back with the frame (dumping checksum)
 		}
 	}
+
+	Critical();
 
 	if (state == STATE_IDLE) // is the transmitter idle?
 	{
-		if (transmitterQueueCount > 0) // any frames waiting to be sent?
+		if (transmitterQueueFrameCount > 0) // any frames waiting to be sent?
 		{
-			FIFO_Get(transmitterQueue, &transmitterBufferLength, 1); // load transmission buffer with the frame data
-			FIFO_Get(transmitterQueue, transmitterBuffer, transmitterBufferLength);
+			state = STATE_SEND_SOF; // tell transmitter to start sending a frame
 
-			transmitterBufferIndex = 0; // point to first byte to be send
-
-			state = STATE_SEND_SOF; // tell transmitter to send the SOF (automatically followed by the loaded frame)
-
-			SetBit(UCSR0B, UDRIE0); // enable transmission by enabling the interrupt sub system of the transmitter
+			SetBit(UCSR0B, UDRIE0); // enable transmission by enabling the transmitter interrupt
 		}
 	}
+
+	NonCritical();
 }
 
 void FrameTransceiver_Send(void* data, uint8_t length)
 {
-	if (FIFO_Free(transmitterQueue) >= (1 + length + 1)) // room enough for the frame plus length specifier and checksum?
+	if (length > (255 - 1)) // frames (including the checksum) in the buffer can not exceed what can be specified by an uint8_t
 	{
-		uint8_t checksum = Checksum_AdditionChecksum(data, length); // calculate the sum of all bytes
-		checksum = (~checksum) + 1; // convert to two's complement
-
-		Critical();
-
-		FIFO_PutByte(transmitterQueue, length + 1); // place the frame (including checksum) in the queue
-		FIFO_Put(transmitterQueue, data, length); // send data (checksum is not part of the data => length - 1
-		FIFO_PutByte(transmitterQueue, checksum);
-
-		NonCritical();
+		return;
 	}
+
+	uint8_t spaceRequired = 1 + length + 1; // total buffer requirements are: length specifier (1), data (<= 254) and checksum (1)?
+
+	if (spaceRequired > transmitterQueueFree)
+	{
+		return;
+	}
+
+	uint8_t checksum = Checksum_AdditionChecksum(data, length); // calculate the sum of all bytes
+	checksum = (~checksum) + 1; // convert to two's complement
+
+	transmitterQueue[transmitterQueueIn] = length + 1; // place the frame (including checksum) in the queue
+	if (++transmitterQueueIn >= FRAMETRANSCEIVER_TX_BUFFER_SIZE)
+	{
+		transmitterQueueIn = 0;
+	}
+
+	// send data (checksum is not part of the data => length - 1
+	uint8_t* d = (uint8_t*) data;
+	for (uint8_t i = 0; i < length; i++)
+	{
+		transmitterQueue[transmitterQueueIn] = d[i];
+		if (++transmitterQueueIn >= FRAMETRANSCEIVER_TX_BUFFER_SIZE)
+		{
+			transmitterQueueIn = 0;
+		}
+	}
+
+	transmitterQueue[transmitterQueueIn] = checksum;
+	if (++transmitterQueueIn >= FRAMETRANSCEIVER_TX_BUFFER_SIZE)
+	{
+		transmitterQueueIn = 0;
+	}
+
+	Critical();
+
+	transmitterQueueFree -= 1 + length + 1;
+
+	transmitterQueueFrameCount++;
+
+	NonCritical();
 }
 
 ISR(USART0_RX_vect)
 {
-	static uint8_t receiverBuffer[FRAMETRANSCEIVER_MAXIMUM_FRAME_SIZE];
-	static uint8_t receiverBufferIndex = 0;
+	static uint16_t receptionLengthPosition;
+	static uint16_t receptionQueueInPosition;
+	static uint8_t receptionFrameLength;
 
 	uint8_t udr = UDR0;
 
@@ -136,55 +167,88 @@ ISR(USART0_RX_vect)
 			if (udr == SOF)
 			{
 				state = STATE_RECEIVING;
-				receiverBufferIndex = 0;
+				receptionLengthPosition = receiverQueueIn;
+				receptionQueueInPosition = receiverQueueIn;
+				if (++receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
+				{
+					state = STATE_IDLE;
+				}
+				else
+				{
+					receptionFrameLength = 0;
+				}
 			}
 			break;
 
 		case STATE_RECEIVING:
-			if (udr == SOF)
-			{
-				receiverBufferIndex = 0;
-			}
-			else if (udr == ESC)
+			if (udr == ESC)
 			{
 				state = STATE_RECEIVING_ESC;
 			}
+			else if (udr == SOF)
+			{
+				receptionQueueInPosition = receiverQueueIn;
+				if (++receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
+				{
+					state = STATE_IDLE;
+				}
+				else
+				{
+					receptionFrameLength = 0;
+				}
+			}
 			else if (udr == EOF)
 			{
-				FIFO_Put(receiverQueue, &receiverBufferIndex, 1);
-				FIFO_Put(receiverQueue, receiverBuffer, receiverBufferIndex);
+				receiverQueue[receptionLengthPosition] = receptionFrameLength; // store length of received frame
+				receiverQueueIn = receptionQueueInPosition; // update new actual position of the in pointer
 				receiverQueueFrameCount++;
 				state = STATE_IDLE;
 			}
 			else
 			{
-				if (receiverBufferIndex >= FRAMETRANSCEIVER_MAXIMUM_FRAME_SIZE) // rx temp buffer overflow => reset receiver
+				receiverQueue[receptionQueueInPosition] = udr;
+
+				if (++receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
 				{
 					state = STATE_IDLE;
 				}
 				else
 				{
-					receiverBuffer[receiverBufferIndex++] = udr;
+					receptionFrameLength++;
 				}
 			}
 			break;
 
 		case STATE_RECEIVING_ESC:
-			if (udr >= ESC) // frame error
+			if (udr == SOF)
 			{
-				state = STATE_IDLE;
-			}
-			else
-			{
-				if (receiverBufferIndex >= FRAMETRANSCEIVER_MAXIMUM_FRAME_SIZE) // rx temp buffer overflow => reset receiver
+				state = STATE_RECEIVING;
+				receptionQueueInPosition = receiverQueueIn;
+				if (++receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
 				{
 					state = STATE_IDLE;
 				}
 				else
 				{
-					receiverBuffer[receiverBufferIndex++] = udr | 0x80; // un escape value and store it
+					receptionFrameLength = 0;
+				}
+			}
+			else if (udr >= ESC) // frame error
+			{
+				state = STATE_IDLE;
+			}
+			else
+			{
+				receiverQueue[receptionQueueInPosition] = udr | 0x80; // un escape value and store it
 
+				if (++receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
+				{
+					state = STATE_IDLE;
+				}
+				else // nope - all is well
+				{
 					state = STATE_RECEIVING;
+					receptionFrameLength++;
 				}
 			}
 			break;
@@ -206,6 +270,7 @@ ISR(USART0_RX_vect)
 // Transmitter part of the transceiver
 ISR(USART0_UDRE_vect)
 {
+	static uint8_t bytesRemaining;
 	static uint8_t value;
 
 	switch (state)
@@ -213,13 +278,27 @@ ISR(USART0_UDRE_vect)
 		case STATE_SEND_SOF:
 			{
 				UDR0 = SOF;
+
+				frameLength = transmitterQueue[transmitterQueueOut]; // load frame length
+				bytesRemaining = frameLength;
+				if (++transmitterQueueOut >= FRAMETRANSCEIVER_TX_BUFFER_SIZE) // remove length specifier from buffer
+				{
+					transmitterQueueOut = 0;
+				}
+
 				state = STATE_SEND_DATA;
 			}
 			break;
 
 		case STATE_SEND_DATA:
 			{
-				FIFO_GetByte(transmitterQueue, &value);
+				value = transmitterQueue[transmitterQueueOut]; // load next byte from buffer
+				if (++transmitterQueueOut >= FRAMETRANSCEIVER_TX_BUFFER_SIZE) // remove data from buffer
+				{
+					transmitterQueueOut = 0;
+				}
+				bytesRemaining--;
+
 				if (value >= ESC)
 				{
 					UDR0 = ESC;
@@ -228,7 +307,7 @@ ISR(USART0_UDRE_vect)
 				else
 				{
 					UDR0 = value;
-					if (FIFO_Used(transmitterQueue) == 0)
+					if (bytesRemaining == 0)
 					{
 						state = STATE_SEND_EOF;
 					}
@@ -239,7 +318,7 @@ ISR(USART0_UDRE_vect)
 		case STATE_SEND_DATA_ESC:
 			{
 				UDR0 = value & 0x7f;
-				if (FIFO_Used(transmitterQueue) == 0)
+				if (bytesRemaining == 0)
 				{
 					state = STATE_SEND_EOF;
 				}
@@ -270,7 +349,8 @@ ISR(USART0_UDRE_vect)
 
 ISR(USART0_TX_vect)
 {
-	transmitterQueueCount--;
+	transmitterQueueFree += 1 + frameLength; // free up space from the buffer and its length specifier
+	transmitterQueueFrameCount--; // remove the frame from the queue
 
 	state = STATE_IDLE;
 

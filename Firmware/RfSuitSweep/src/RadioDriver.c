@@ -52,11 +52,11 @@ enum
 #define WaitWhileStatus(s)											while ((TRX_STATUS & TRX_STATUS_MASK) == s);
 #define ReadStatus()														(TRX_STATUS & TRX_STATUS_MASK)
 
-static frameHandlerCallback frameHandler = NULL;
+static blockHandlerCallback frameHandler = NULL;
 static volatile bool transmitting = false;
 static volatile uint8_t rssi = 0;
 
-void RadioDriver_Initialize(BlockHandlerCallback fh)
+void RadioDriver_Initialize(blockHandlerCallback fh)
 {
 	frameHandler = fh;
 
