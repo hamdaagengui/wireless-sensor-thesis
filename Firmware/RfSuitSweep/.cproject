@@ -400,6 +400,11 @@
 <tool id="de.innot.avreclipse.tool.compiler.winavr.app.release.1585421248" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.release">
 <option id="de.innot.avreclipse.compiler.option.debug.level.59289617" name="Generate Debugging Info" superClass="de.innot.avreclipse.compiler.option.debug.level" value="de.innot.avreclipse.compiler.option.debug.level.none" valueType="enumerated"/>
 <option id="de.innot.avreclipse.compiler.option.optimize.365106560" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize" value="de.innot.avreclipse.compiler.optimize.size" valueType="enumerated"/>
+<option id="de.innot.avreclipse.compiler.option.incpath.2012484827" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/RfSuitSweep/src}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/RfSuitSweep/mros}&quot;"/>
+</option>
+<option id="de.innot.avreclipse.compiler.option.std.2080479970" superClass="de.innot.avreclipse.compiler.option.std" value="de.innot.avreclipse.compiler.option.std.gnu99" valueType="enumerated"/>
 <inputType id="de.innot.avreclipse.compiler.winavr.input.1005227749" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 </tool>
 <tool id="de.innot.avreclipse.tool.cppcompiler.app.release.690632366" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.release">
