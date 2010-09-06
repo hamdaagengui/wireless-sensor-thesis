@@ -168,6 +168,7 @@
       this.playButton.TabIndex = 6;
       this.playButton.Text = "Play";
       this.playButton.UseVisualStyleBackColor = true;
+      this.playButton.Click += new System.EventHandler(this.PlayButtonClick);
       // 
       // openFileDialog
       // 

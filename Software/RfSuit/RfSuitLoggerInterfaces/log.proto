@@ -2,7 +2,7 @@ package dk.iha;
 
 message Entry {
 	repeated Picture pictures = 1;
-	required int32 timestamp = 2;
+	required double timestamp = 2;
 	repeated SweepResult results = 3;
 }
 

@@ -22,9 +22,9 @@ namespace dk.iha
       get { return _pictures; }
     }
   
-    private int _timestamp;
+    private double _timestamp;
     [global::ProtoBuf.ProtoMember(2, IsRequired = true, Name=@"timestamp", DataFormat = global::ProtoBuf.DataFormat.TwosComplement)]
-    public int timestamp
+    public double timestamp
     {
       get { return _timestamp; }
       set { _timestamp = value; }

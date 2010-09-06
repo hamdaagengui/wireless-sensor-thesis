@@ -6,6 +6,7 @@ using AForge.Video;
 using AForge.Video.DirectShow;
 using System.IO;
 using RfSuit;
+using RfSuitLoggerInterfaces;
 
 namespace RfSuitLogger
 {
@@ -127,7 +128,7 @@ namespace RfSuitLogger
         DisplayError("Please select a serial port!", "Missing Serial Port");
         return;
       }
-      _logger.Start(new FileStream(Directory.GetParent(Application.ExecutablePath) + @"\log" + (int)Utils.UnixTime(), FileMode.CreateNew), serialPortInfo.Name);
+      _logger.Start(new FileStream(Directory.GetParent(Application.ExecutablePath) + @"\log" + (int)Utils.MillisecondsSinceEpoch(), FileMode.CreateNew), serialPortInfo.Name);
     }
 
     private static void DisplayError(string title, string msg)
