@@ -88,7 +88,6 @@ void Run()
 		atomic(receiverQueueFrameCount--);
 
 		if (checksum == 0) // valid checksum?
-
 		{
 			frameHandler(frame, length - 1); // call back with the frame (dumping checksum)
 		}
@@ -97,10 +96,8 @@ void Run()
 	Critical();
 
 	if (state == STATE_IDLE) // is the transmitter idle?
-
 	{
 		if (transmitterQueueFrameCount > 0) // any frames waiting to be sent?
-
 		{
 			state = STATE_SEND_SOF; // tell transmitter to start sending a frame
 
