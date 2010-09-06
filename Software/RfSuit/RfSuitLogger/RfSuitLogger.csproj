@@ -60,12 +60,6 @@
   <ItemGroup>
     <Compile Include="ConnectionSimulator.cs" />
     <Compile Include="VisualSource.cs" />
-    <Compile Include="log.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>log.proto</DependentUpon>
-    </Compile>
     <Compile Include="Logger.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="MainForm.cs">
@@ -88,10 +82,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <None Include="log.proto">
-      <Generator>ProtoBufTool</Generator>
-      <LastGenOutput>log.cs</LastGenOutput>
-    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -111,6 +101,10 @@
     <ProjectReference Include="..\RfSuitLink\RfSuitConnection.csproj">
       <Project>{4F8244C7-6122-4C50-9F35-4264CAD48122}</Project>
       <Name>RfSuitConnection</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RfSuitLoggerInterfaces\RfSuitLoggerInterfaces.csproj">
+      <Project>{CBB3583C-7031-4BAB-8401-525C6711B309}</Project>
+      <Name>RfSuitLoggerInterfaces</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

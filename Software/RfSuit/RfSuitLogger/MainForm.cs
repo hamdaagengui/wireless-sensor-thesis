@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using AForge.Video;
 using AForge.Video.DirectShow;
 using System.IO;
+using RfSuit;
 
 namespace RfSuitLogger
 {
@@ -16,7 +17,7 @@ namespace RfSuitLogger
 
       RefreshButtonClick(this, EventArgs.Empty);
       _visualSource = new VisualSource(1);
-      _logger = new Logger(_visualSource);
+      _logger = new Logger(_visualSource, new ConnectionSimulator(10));
     }
 
     //    private Connection connection;
@@ -35,7 +36,7 @@ namespace RfSuitLogger
         try
         {
           if (p.Created) {
-            _visualSource.SetVisual(0, bitmap);
+            _visualSource.SetVisual(0, (Bitmap)bitmap.Clone());
             p.Image = bitmap;
           }
         }
@@ -75,6 +76,7 @@ namespace RfSuitLogger
       if (videoSource.VideoCapabilities == null) {
         videoCapabilitiesComboBox.Items.Clear();
         videoCapabilitiesComboBox.Items.Add("N/A");
+        videoCapabilitiesComboBox.SelectedIndex = 0;
         _videoSource = null;
         return;
       }
@@ -83,6 +85,7 @@ namespace RfSuitLogger
       videoCapabilitiesComboBox.Items.Clear();
       videoCapabilitiesComboBox.Items.AddRange(
         Array.ConvertAll(_videoSource.VideoCapabilities, vc => new DisplayableVideoCapabilities { VideoCapabilities = vc }));
+      videoCapabilitiesComboBox.SelectedIndex = 0;
     }
 
     private void StopVideoSource()
@@ -134,7 +137,7 @@ namespace RfSuitLogger
 
     private void StopLogButtonClick(object sender, EventArgs e)
     {
-      _logger.stop();
+      _logger.Stop();
     }
 
     private void SerialPortsComboBoxDropDown(object sender, EventArgs e)
