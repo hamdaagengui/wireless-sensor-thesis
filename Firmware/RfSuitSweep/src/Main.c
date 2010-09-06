@@ -67,7 +67,7 @@ int main()
 	// Initialize kernel
 	Kernel_Initialize();
 
-	FrameTransceiver_Initialize(BAUDRATE_115200, CableFrameHandler);
+	FrameTransceiver_Initialize(BAUDRATE_500000, CableFrameHandler);
 	//	RadioDriver_Initialize(RadioFrameHandler);
 
 	Kernel_CreateTask(Run);

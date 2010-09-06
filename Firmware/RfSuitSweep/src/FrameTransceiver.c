@@ -79,6 +79,7 @@ void Run()
 			checksum += value;
 
 			frame[i] = value;
+
 			if (++receiverQueueOut >= FRAMETRANSCEIVER_RX_BUFFER_SIZE)
 			{
 				receiverQueueOut = 0;
@@ -137,6 +138,7 @@ void FrameTransceiver_Send(void* data, uint8_t length)
 		checksum += value; // calculate checksum
 
 		transmitterQueue[transmitterQueueIn] = value; // add data
+
 		if (++transmitterQueueIn >= FRAMETRANSCEIVER_TX_BUFFER_SIZE)
 		{
 			transmitterQueueIn = 0;
@@ -172,15 +174,19 @@ ISR(USART0_RX_vect)
 		case STATE_IDLE:
 			if (udr == SOF)
 			{
-				state = STATE_RECEIVING;
-				receptionLengthPosition = receiverQueueIn;
 				receptionQueueInPosition = receiverQueueIn;
-				if (++receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
+				if (++receptionQueueInPosition == FRAMETRANSCEIVER_RX_BUFFER_SIZE)
+				{
+					receptionQueueInPosition = 0;
+				}
+				if (receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
 				{
 					state = STATE_IDLE;
 				}
 				else
 				{
+					state = STATE_RECEIVING;
+					receptionLengthPosition = receiverQueueIn;
 					receptionFrameLength = 0;
 				}
 			}
@@ -194,7 +200,11 @@ ISR(USART0_RX_vect)
 			else if (udr == SOF)
 			{
 				receptionQueueInPosition = receiverQueueIn;
-				if (++receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
+				if (++receptionQueueInPosition == FRAMETRANSCEIVER_RX_BUFFER_SIZE)
+				{
+					receptionQueueInPosition = 0;
+				}
+				if (receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
 				{
 					state = STATE_IDLE;
 				}
@@ -214,7 +224,11 @@ ISR(USART0_RX_vect)
 			{
 				receiverQueue[receptionQueueInPosition] = udr;
 
-				if (++receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
+				if (++receptionQueueInPosition == FRAMETRANSCEIVER_RX_BUFFER_SIZE)
+				{
+					receptionQueueInPosition = 0;
+				}
+				if (receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
 				{
 					state = STATE_IDLE;
 				}
@@ -229,8 +243,13 @@ ISR(USART0_RX_vect)
 			if (udr == SOF)
 			{
 				state = STATE_RECEIVING;
+
 				receptionQueueInPosition = receiverQueueIn;
-				if (++receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
+				if (++receptionQueueInPosition == FRAMETRANSCEIVER_RX_BUFFER_SIZE)
+				{
+					receptionQueueInPosition = 0;
+				}
+				if (receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
 				{
 					state = STATE_IDLE;
 				}
@@ -247,7 +266,11 @@ ISR(USART0_RX_vect)
 			{
 				receiverQueue[receptionQueueInPosition] = udr | 0x80; // un escape value and store it
 
-				if (++receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
+				if (++receptionQueueInPosition == FRAMETRANSCEIVER_RX_BUFFER_SIZE)
+				{
+					receptionQueueInPosition = 0;
+				}
+				if (receptionQueueInPosition == receiverQueueOut) // did the receiver queue just get full (=> overflow)?
 				{
 					state = STATE_IDLE;
 				}
@@ -286,11 +309,12 @@ ISR(USART0_UDRE_vect)
 				UDR0 = SOF;
 
 				frameLength = transmitterQueue[transmitterQueueOut]; // load frame length
-				bytesRemaining = frameLength;
 				if (++transmitterQueueOut >= FRAMETRANSCEIVER_TX_BUFFER_SIZE) // remove length specifier from buffer
 				{
 					transmitterQueueOut = 0;
 				}
+
+				bytesRemaining = frameLength;
 
 				state = STATE_SEND_DATA;
 			}
