@@ -20,7 +20,7 @@ namespace RfSuitConnectionTester
 		private void Form1_Load(object sender, EventArgs e)
 		{
 			Connection con = new Connection();
-			con.Start("COM4");
-		}		
+			con.Start("COM9");
+		}
 	}
 }

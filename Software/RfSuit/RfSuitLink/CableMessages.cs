@@ -188,71 +188,11 @@ namespace RfSuit
 		}
 	}
 
-	class EnableSweepingTokenMessage
-	{
-		public Byte Destination;
-		public Byte Source;
-		static readonly Byte MessageId = 4;
-
-		public EnableSweepingTokenMessage()
-		{ }
-
-		public EnableSweepingTokenMessage(Byte[] frame)
-		{
-			Destination = frame[0];
-			Source = frame[1];
-		}
-
-		static public Byte[] Create(Byte destination, Byte source)
-		{
-			Byte[] buffer = new Byte[3];
-			buffer[0] = destination;
-			buffer[1] = source;
-			buffer[2] = MessageId;
-			return buffer;
-		}
-
-		public Byte[] Create()
-		{
-			return Create(Destination, Source);
-		}
-	}
-
-	class DisableSweepingTokenMessage
-	{
-		public Byte Destination;
-		public Byte Source;
-		static readonly Byte MessageId = 5;
-
-		public DisableSweepingTokenMessage()
-		{ }
-
-		public DisableSweepingTokenMessage(Byte[] frame)
-		{
-			Destination = frame[0];
-			Source = frame[1];
-		}
-
-		static public Byte[] Create(Byte destination, Byte source)
-		{
-			Byte[] buffer = new Byte[3];
-			buffer[0] = destination;
-			buffer[1] = source;
-			buffer[2] = MessageId;
-			return buffer;
-		}
-
-		public Byte[] Create()
-		{
-			return Create(Destination, Source);
-		}
-	}
-
 	class ReportTokenMessage
 	{
 		public Byte Destination;
 		public Byte Source;
-		static readonly Byte MessageId = 6;
+		static readonly Byte MessageId = 4;
 		public Byte[] Rssis = new Byte[16];
 
 		public ReportTokenMessage()
