@@ -1,13 +1,12 @@
 ﻿using System;
-using System.IO;
 using System.IO.Ports;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-namespace RfSuitLogger
+namespace RfSuitLoggerInterfaces
 {
-  static class Utils
+  public static class Utils
   {
     public static void BeginInvokeIfRequired<T>(this T c, Action<T> action) where T : Control
     {
@@ -21,14 +20,14 @@ namespace RfSuitLogger
       }
     }
 
-    public static readonly DateTime EPOCH = new DateTime(1970, 1, 1);
-    public static double UnixTime()
+    public static readonly DateTime Epoch = new DateTime(1970, 1, 1);
+    public static double MillisecondsSinceEpoch()
     {
-      return UnixTime(DateTime.Now);
+      return MillisecondsSinceEpoch(DateTime.Now);
     }
-    public static double UnixTime(DateTime dt)
+    public static double MillisecondsSinceEpoch(DateTime dt)
     {
-      return (dt - EPOCH).TotalSeconds;
+      return (dt - Epoch).TotalMilliseconds;
     }
   }
 

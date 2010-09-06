@@ -61,7 +61,6 @@
     <Compile Include="ConnectionSimulator.cs" />
     <Compile Include="VisualSource.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="Utils.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

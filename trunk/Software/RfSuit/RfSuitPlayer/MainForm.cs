@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using dk.iha;
 using ProtoBuf;
 using System.Drawing;
+using System.Threading;
 
 namespace RfSuitPlayer
 {
@@ -13,9 +14,32 @@ namespace RfSuitPlayer
     public MainForm()
     {
       InitializeComponent();
+
+      _isRunning = false;
+      _threadStartPlayer = new ThreadStart(() =>
+      {
+        int nextPosition;
+        while (_isRunning && (nextPosition = _position + 1) < _entries.Length)
+        {
+          double now = _entries[_position].timestamp;
+          double next = _entries[nextPosition].timestamp;
+          ++_position;
+          Thread.Sleep((int) (next - now));
+          int position = nextPosition;
+          trackBar.BeginInvoke(new MethodInvoker(() =>
+          {
+            trackBar.Value = position;
+          }));
+        }
+        _isRunning = false;
+      });
     }
 
     private Entry[] _entries;
+    private int _position;
+    private volatile bool _isRunning;
+    private Thread _thread;
+    private readonly ThreadStart _threadStartPlayer;
 
     private void OpenToolStripMenuItemClick(object sender, EventArgs e)
     {
@@ -30,6 +54,7 @@ namespace RfSuitPlayer
       _entries = entries.ToArray();
       trackBar.Minimum = 0;
       trackBar.Maximum = _entries.Length - 1;
+      trackBar.Value = 0;
     }
 
     private void ExitToolStripMenuItemClick(object sender, EventArgs e)
@@ -47,14 +72,42 @@ namespace RfSuitPlayer
 
     private void PreviousButtonClick(object sender, EventArgs e)
     {
+      _isRunning = false;
       if (trackBar.Value > trackBar.Minimum)
         --trackBar.Value;
     }
 
     private void NextButtonClick(object sender, EventArgs e)
     {
+      _isRunning = false;
       if(trackBar.Value < trackBar.Maximum)
         ++trackBar.Value;
+    }
+
+    private void PlayButtonClick(object sender, EventArgs e)
+    {
+      if (_isRunning)
+      {
+        StopPlayer();
+      }
+      else
+      {
+        StartPlayer();
+      }
+    }
+
+    private void StartPlayer()
+    {
+      _thread = new Thread(_threadStartPlayer);
+      _thread.Start();
+    }
+
+    private void StopPlayer()
+    {
+      _isRunning = false;
+      if(_thread.Join(1000) == false)
+        _thread.Interrupt();
+      _thread = null;
     }
   }
 }

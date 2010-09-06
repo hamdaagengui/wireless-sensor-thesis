@@ -6,6 +6,7 @@ using System;
 using RfSuit;
 using ProtoBuf;
 using System.Diagnostics;
+using RfSuitLoggerInterfaces;
 
 namespace RfSuitLogger
 {
@@ -45,7 +46,7 @@ namespace RfSuitLogger
         if (_stream == null)
           return;
         var stopwatch = Stopwatch.StartNew();
-        var entry = new Entry {timestamp = (int) Utils.UnixTime()};
+        var entry = new Entry {timestamp = (int) Utils.MillisecondsSinceEpoch()};
 
         foreach (var sweepResults in results) {
           var tmp = new SweepResult();
