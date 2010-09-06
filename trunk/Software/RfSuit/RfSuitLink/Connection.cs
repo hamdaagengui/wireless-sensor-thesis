@@ -12,14 +12,14 @@ namespace RfSuit
 {
 	public delegate void SweepCompletedDelegate(SweepResults[] results);
 
-	public class Connection
+	public class Connection : IConnection
 	{
 		public event SweepCompletedDelegate SweepCompleted;
 
 		const byte LOCAL_ADDRESS = 0;
 
 		static readonly byte[] nothingToken = NothingTokenMessage.Create(1, 0);
-		
+
 		IDataLinkLayer dll;
 		MessageDispatcher md;
 
@@ -38,10 +38,7 @@ namespace RfSuit
 			});
 			md.AddHandler<NothingTokenMessage>(m =>
 			{
-				if (m.Destination == LOCAL_ADDRESS || m.Destination == tokenRingLength)
-				{
-					TokenReceived();
-				}
+				TokenReceived(m.Destination);
 			});
 			md.AddHandler<ReportTokenMessage>(m =>
 			{
@@ -50,15 +47,12 @@ namespace RfSuit
 					sweepResults[m.Source - 1].Rssis[i] = m.Rssis[i];
 				}
 
-				if (m.Destination == LOCAL_ADDRESS || m.Destination == tokenRingLength)
-				{
-					TokenReceived();
-				}
+				TokenReceived(m.Destination);
 			});
-
+			
 			try
 			{
-				var sp = new SerialPort(portName, 500000);
+				var sp = new SerialPort(portName, 115200);
 				var pl = new SerialPortWrapper(sp);
 				dll = new FrameTransceiver(pl);
 				dll.FrameReceived += md.HandleFrame;
@@ -71,7 +65,11 @@ namespace RfSuit
 
 			DetectDevices(); // detect which devices are online and detect the length of the ring
 
-
+			sweepResults = new SweepResults[16];
+			for (int i = 0; i < sweepResults.Length; i++)
+			{
+				sweepResults[i].Rssis = new int[16];
+			}
 
 			dll.Send(nothingToken); // start the token passing
 
@@ -88,7 +86,7 @@ namespace RfSuit
 			for (byte i = 0; i < devicePresence.Length; i++)
 			{
 				devicePresence[i] = false;
-				dll.Send(PingRequestMessage.Create(i, 0));
+				dll.Send(PingRequestMessage.Create((byte)(i + 1), 0));
 				Thread.Sleep(5);
 			}
 
@@ -110,14 +108,19 @@ namespace RfSuit
 
 		public void Send(byte[] message)
 		{
-			
+
 			txQueue.Enqueue(message);
 		}
 
 
 
-		void TokenReceived()
+		void TokenReceived(byte destination)
 		{
+			if (destination != LOCAL_ADDRESS && destination != tokenRingLength)
+			{
+				return;
+			}
+
 			byte[] msg;
 			if (txQueue.TryDequeue(out msg))
 			{
