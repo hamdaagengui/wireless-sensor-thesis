@@ -1,0 +1,15 @@
+package dk.iha;
+
+message Entry {
+	repeated Picture pictures = 1;
+	required int32 timestamp = 2;
+	repeated SweepResult results = 3;
+}
+
+message SweepResult {
+	repeated int32 rssis = 1;
+}
+
+message Picture {
+	required bytes data = 1;
+}
