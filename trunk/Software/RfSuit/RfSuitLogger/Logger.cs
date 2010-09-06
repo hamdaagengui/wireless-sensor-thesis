@@ -14,10 +14,10 @@ namespace RfSuitLogger
     private readonly object _sync = new object();
     private Stream _stream;
     private readonly VisualSource _visualSource;
-    private readonly Connection _connection;
+    private readonly IConnection _connection;
 
-    public Logger(VisualSource vs) {
-      _connection = new Connection();
+    public Logger(VisualSource vs, IConnection connection) {
+      _connection = connection;
       _visualSource = vs;
     }
 
@@ -31,7 +31,7 @@ namespace RfSuitLogger
       lock (_sync)
       {
         if (IsLogging())
-          stop();
+          Stop();
         _stream = s;
         _connection.SweepCompleted += ConnectionSweepCompleted;
         _connection.Start(connectionPort);
@@ -67,7 +67,7 @@ namespace RfSuitLogger
       }
     }
 
-    public void stop() {
+    public void Stop() {
       lock (_sync)
       {
         if (IsLogging())

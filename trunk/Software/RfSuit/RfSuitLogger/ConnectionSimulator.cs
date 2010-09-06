@@ -8,7 +8,7 @@ namespace RfSuitLogger
   {
     private readonly int _numberOfDevices;
 
-    private Thread t;
+    private Thread _thread;
     private volatile bool _isRunning;
 
     public ConnectionSimulator(int numberOfDevices)
@@ -21,11 +21,11 @@ namespace RfSuitLogger
     }
 
     public bool Start(string portName) {
-      if(t != null) {
+      if(_thread != null) {
         return false;
       }
       Console.WriteLine("Starting simulation [" + portName + "]");
-      t = new Thread(() => {
+      _thread = new Thread(() => {
         var sweepResults = new SweepResults[_numberOfDevices];
         for (int i = 0; i < _numberOfDevices; i++)
         {
@@ -36,15 +36,18 @@ namespace RfSuitLogger
           {
             tmp.Rssis[j] = i * _numberOfDevices + j;
           }
+          sweepResults[i] = tmp;
         }
         _isRunning = true;
         while (_isRunning) {
           if (SweepCompleted != null) {
             SweepCompleted(sweepResults);
+            Thread.Sleep(1000);
           }
         }
-        t = null;
+        _thread = null;
       });
+      _thread.Start();
       return true;
     }
 
