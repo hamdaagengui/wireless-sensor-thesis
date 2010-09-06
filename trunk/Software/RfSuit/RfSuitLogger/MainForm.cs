@@ -15,14 +15,15 @@ namespace RfSuitLogger
       InitializeComponent();
 
       RefreshButtonClick(this, EventArgs.Empty);
-      //Task.Factory.StartNew(() => { capture = new Capture(0, 30, 640, 480); });
+      _visualSource = new VisualSource(1);
+      _logger = new Logger(_visualSource);
     }
 
     //    private Connection connection;
     private FilterInfoCollection _videoDevices;
     private VideoCaptureDevice _videoSource;
-    private VisualSource _visualSource;
-    private Logger _logger;
+    private readonly VisualSource _visualSource;
+    private readonly Logger _logger;
 
     private void VideoNewFrame(object sender,
         NewFrameEventArgs eventArgs)
@@ -49,6 +50,7 @@ namespace RfSuitLogger
     {
       _videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
       captureDevicesComboBox.Items.Clear();
+      videoCapabilitiesComboBox.Items.Clear();
       foreach (var fi in _videoDevices.OfType<FilterInfo>()) {
         captureDevicesComboBox.Items.Add(new DisplayableFilterInfo { FilterInfo = fi });
       }
@@ -69,8 +71,15 @@ namespace RfSuitLogger
       var dfi = captureDevicesComboBox.SelectedItem as DisplayableFilterInfo;
       if (dfi == null)
         return;
+      var videoSource = new VideoCaptureDevice(dfi.FilterInfo.MonikerString);
+      if (videoSource.VideoCapabilities == null) {
+        videoCapabilitiesComboBox.Items.Clear();
+        videoCapabilitiesComboBox.Items.Add("N/A");
+        _videoSource = null;
+        return;
+      }
       StopVideoSource();
-      _videoSource = new VideoCaptureDevice(dfi.FilterInfo.MonikerString);
+      _videoSource = videoSource;
       videoCapabilitiesComboBox.Items.Clear();
       videoCapabilitiesComboBox.Items.AddRange(
         Array.ConvertAll(_videoSource.VideoCapabilities, vc => new DisplayableVideoCapabilities { VideoCapabilities = vc }));
@@ -86,6 +95,7 @@ namespace RfSuitLogger
     }
 
     private void StartVideoSource(VideoCapabilities vc) {
+      if (_videoSource == null) return;
       _videoSource.DesiredFrameRate = vc.MaxFrameRate;
       _videoSource.DesiredFrameSize = vc.FrameSize;
       _videoSource.NewFrame += VideoNewFrame;
@@ -103,6 +113,7 @@ namespace RfSuitLogger
 
     private void PropertiesButtonClick(object sender, EventArgs e)
     {
+      if(_videoSource != null)
       _videoSource.DisplayPropertyPage(Handle);
     }
 
