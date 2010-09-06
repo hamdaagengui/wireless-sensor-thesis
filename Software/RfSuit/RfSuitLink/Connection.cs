@@ -7,6 +7,7 @@ using System.IO.Ports;
 using Coma.Net.Embedded.PhysicalLayer;
 using Coma.Net.Embedded.DataLinkLayer;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace RfSuit
 {
@@ -29,6 +30,7 @@ namespace RfSuit
 		SweepResults[] sweepResults;
 		ConcurrentQueue<byte[]> txQueue = new ConcurrentQueue<byte[]>();
 
+		DateTime lastTime = DateTime.Now;
 		public bool Start(string portName)
 		{
 			md = new MessageDispatcher();
@@ -42,17 +44,28 @@ namespace RfSuit
 			});
 			md.AddHandler<ReportTokenMessage>(m =>
 			{
-				for (int i = 0; i < m.Rssis.Length; i++)
+				for (int i = 0; i < sweepResults.Length; i++)
 				{
 					sweepResults[m.Source - 1].Rssis[i] = m.Rssis[i];
 				}
 
+				if (m.Source == (tokenRingLength - 1))
+				{
+					Parallel.Invoke(() =>
+					{
+						var now = DateTime.Now;
+						var time = now - lastTime;
+						lastTime = now;
+						Console.WriteLine("Rx Report @ " + string.Format("{0:0.0}", 1000.0 / time.TotalMilliseconds) + " reports per second");
+					});
+				}
+
 				TokenReceived(m.Destination);
 			});
-			
+
 			try
 			{
-				var sp = new SerialPort(portName, 115200);
+				var sp = new SerialPort(portName, 500000);
 				var pl = new SerialPortWrapper(sp);
 				dll = new FrameTransceiver(pl);
 				dll.FrameReceived += md.HandleFrame;
@@ -65,13 +78,18 @@ namespace RfSuit
 
 			DetectDevices(); // detect which devices are online and detect the length of the ring
 
-			sweepResults = new SweepResults[16];
+			sweepResults = new SweepResults[tokenRingLength - 1];
 			for (int i = 0; i < sweepResults.Length; i++)
 			{
-				sweepResults[i].Rssis = new int[16];
+				sweepResults[i] = new SweepResults();
+				sweepResults[i].Rssis = new int[sweepResults.Length];
 			}
 
+			Console.WriteLine("Found " + (tokenRingLength - 1) + " devices");
+
 			dll.Send(nothingToken); // start the token passing
+
+			Console.WriteLine("Started");
 
 			return true;
 		}
@@ -106,13 +124,10 @@ namespace RfSuit
 			return devicePresence;
 		}
 
-		public void Send(byte[] message)
+		void Send(byte[] message)
 		{
-
 			txQueue.Enqueue(message);
 		}
-
-
 
 		void TokenReceived(byte destination)
 		{
