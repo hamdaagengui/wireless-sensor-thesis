@@ -2,7 +2,7 @@
 
 namespace RfSuit
 {
-	interface IConnection
+	public interface IConnection
 	{
 		bool[] DetectDevices();
 		bool Start(string portName);
