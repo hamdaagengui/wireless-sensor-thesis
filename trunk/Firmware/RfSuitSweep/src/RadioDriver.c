@@ -1,6 +1,6 @@
+#if defined(__AVR_ATmega128RFA1__)
+
 #include "RadioDriver.h"
-#include <avr/interrupt.h>
-#include <avr/iom128rfa1.h>
 #include <Config.h>
 
 // Transceiver state status
@@ -259,3 +259,5 @@ ISR(TRX24_RX_START_vect)
 //ISR(TRX24_PLL_LOCK_vect)
 //{
 //}
+
+#endif

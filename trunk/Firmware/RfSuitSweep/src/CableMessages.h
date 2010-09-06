@@ -11,8 +11,6 @@ enum
 	MESSAGEID_PINGREPLY,
 	MESSAGEID_NOTHINGTOKEN,
 	MESSAGEID_SETTXPOWERTOKEN,
-	MESSAGEID_ENABLESWEEPINGTOKEN,
-	MESSAGEID_DISABLESWEEPINGTOKEN,
 	MESSAGEID_REPORTTOKEN
 };
 
@@ -21,9 +19,9 @@ typedef struct
 	uint8_t destination;
 	uint8_t source;
 	uint8_t messageId;
-} msgMessageBase;
+} cableMsgMessageBase;
 
-#define AsMsgMessageBase(x) ((msgMessageBase*)x)
+#define AsCableMsgMessageBase(x) ((cableMsgMessageBase*)x)
 
 typedef struct
 {
@@ -61,24 +59,6 @@ typedef struct
 } setTxPowerTokenMessage;
 
 #define AsSetTxPowerTokenMessage(x) ((setTxPowerTokenMessage*)x)
-
-typedef struct
-{
-	uint8_t destination;
-	uint8_t source;
-	uint8_t messageId;
-} enableSweepingTokenMessage;
-
-#define AsEnableSweepingTokenMessage(x) ((enableSweepingTokenMessage*)x)
-
-typedef struct
-{
-	uint8_t destination;
-	uint8_t source;
-	uint8_t messageId;
-} disableSweepingTokenMessage;
-
-#define AsDisableSweepingTokenMessage(x) ((disableSweepingTokenMessage*)x)
 
 typedef struct
 {
