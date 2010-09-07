@@ -22,6 +22,6 @@ typedef struct
 {
 	uint8_t source;
 	uint8_t messageId;
-} ShoutMessage;
+} shoutMessage;
 
-#define AsShoutMessage(x) ((ShoutMessage*)x)
+#define AsShoutMessage(x) ((shoutMessage*)x)
