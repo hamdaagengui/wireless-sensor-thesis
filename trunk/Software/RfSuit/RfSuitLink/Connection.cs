@@ -69,7 +69,7 @@ namespace RfSuit
 						}
 						if (SweepCompleted != null)
 						{
-							SweepCompleted(sweepResults);
+							SweepCompleted(null);
 						}
 					});
 				}
