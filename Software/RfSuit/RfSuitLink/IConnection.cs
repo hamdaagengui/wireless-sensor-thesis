@@ -1,8 +1,9 @@
 ﻿using System;
+using dk.iha;
 
 namespace RfSuit
 {
-	public delegate void SweepCompletedDelegate(dk.iha.LinkQualityIndicator[] linkQualityIndicators);
+	public delegate void SweepCompletedDelegate(LinkQualityIndicator[] linkQualityIndicators);
 
 	public interface IConnection
 	{
