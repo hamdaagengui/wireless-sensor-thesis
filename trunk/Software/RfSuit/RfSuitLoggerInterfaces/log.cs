@@ -15,23 +15,23 @@ namespace dk.iha
   {
     public Entry() {}
     
-    private readonly global::System.Collections.Generic.List<dk.iha.Picture> _pictures = new global::System.Collections.Generic.List<dk.iha.Picture>();
-    [global::ProtoBuf.ProtoMember(1, Name=@"pictures", DataFormat = global::ProtoBuf.DataFormat.Default)]
-    public global::System.Collections.Generic.List<dk.iha.Picture> pictures
-    {
-      get { return _pictures; }
-    }
-  
     private double _timestamp;
-    [global::ProtoBuf.ProtoMember(2, IsRequired = true, Name=@"timestamp", DataFormat = global::ProtoBuf.DataFormat.TwosComplement)]
+    [global::ProtoBuf.ProtoMember(1, IsRequired = true, Name=@"timestamp", DataFormat = global::ProtoBuf.DataFormat.TwosComplement)]
     public double timestamp
     {
       get { return _timestamp; }
       set { _timestamp = value; }
     }
-    private readonly global::System.Collections.Generic.List<dk.iha.SweepResult> _results = new global::System.Collections.Generic.List<dk.iha.SweepResult>();
+    private readonly global::System.Collections.Generic.List<dk.iha.Picture> _pictures = new global::System.Collections.Generic.List<dk.iha.Picture>();
+    [global::ProtoBuf.ProtoMember(2, Name=@"pictures", DataFormat = global::ProtoBuf.DataFormat.Default)]
+    public global::System.Collections.Generic.List<dk.iha.Picture> pictures
+    {
+      get { return _pictures; }
+    }
+  
+    private readonly global::System.Collections.Generic.List<dk.iha.LinkQualityIndicator> _results = new global::System.Collections.Generic.List<dk.iha.LinkQualityIndicator>();
     [global::ProtoBuf.ProtoMember(3, Name=@"results", DataFormat = global::ProtoBuf.DataFormat.Default)]
-    public global::System.Collections.Generic.List<dk.iha.SweepResult> results
+    public global::System.Collections.Generic.List<dk.iha.LinkQualityIndicator> results
     {
       get { return _results; }
     }
@@ -41,16 +41,30 @@ namespace dk.iha
       { return global::ProtoBuf.Extensible.GetExtensionObject(ref extensionObject, createIfMissing); }
   }
   
-  [global::System.Serializable, global::ProtoBuf.ProtoContract(Name=@"SweepResult")]
-  public partial class SweepResult : global::ProtoBuf.IExtensible
+  [global::System.Serializable, global::ProtoBuf.ProtoContract(Name=@"LinkQualityIndicator")]
+  public partial class LinkQualityIndicator : global::ProtoBuf.IExtensible
   {
-    public SweepResult() {}
+    public LinkQualityIndicator() {}
     
-    private readonly global::System.Collections.Generic.List<int> _rssis = new global::System.Collections.Generic.List<int>();
-    [global::ProtoBuf.ProtoMember(1, Name=@"rssis", DataFormat = global::ProtoBuf.DataFormat.TwosComplement)]
-    public global::System.Collections.Generic.List<int> rssis
+    private int _EndPointA;
+    [global::ProtoBuf.ProtoMember(1, IsRequired = true, Name=@"EndPointA", DataFormat = global::ProtoBuf.DataFormat.TwosComplement)]
+    public int EndPointA
     {
-      get { return _rssis; }
+      get { return _EndPointA; }
+      set { _EndPointA = value; }
+    }
+    private int _EndPointB;
+    [global::ProtoBuf.ProtoMember(2, IsRequired = true, Name=@"EndPointB", DataFormat = global::ProtoBuf.DataFormat.TwosComplement)]
+    public int EndPointB
+    {
+      get { return _EndPointB; }
+      set { _EndPointB = value; }
+    }
+    private readonly global::System.Collections.Generic.List<double> _Quality = new global::System.Collections.Generic.List<double>();
+    [global::ProtoBuf.ProtoMember(3, Name=@"Quality", DataFormat = global::ProtoBuf.DataFormat.TwosComplement)]
+    public global::System.Collections.Generic.List<double> Quality
+    {
+      get { return _Quality; }
     }
   
     private global::ProtoBuf.IExtension extensionObject;

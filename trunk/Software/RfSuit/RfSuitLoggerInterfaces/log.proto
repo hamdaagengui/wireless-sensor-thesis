@@ -6,7 +6,7 @@ message Entry {
 	repeated LinkQualityIndicator results = 3;
 }
 
-message LinkQualityIndicator {
+message LinkQualityIndicator { 
 	required int32 EndPointA = 1;
 	required int32 EndPointB = 2;
 	repeated double Quality = 3;
