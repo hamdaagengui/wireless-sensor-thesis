@@ -39,20 +39,16 @@ namespace RfSuitLogger
       }
     }
 
-    private void ConnectionSweepCompleted(RfSuit.SweepResults[] results)
+    private void ConnectionSweepCompleted(LinkQualityIndicator[] results)
     {
       lock (_sync)
       {
         if (_stream == null)
           return;
         var stopwatch = Stopwatch.StartNew();
-        var entry = new Entry {timestamp = (int) Utils.MillisecondsSinceEpoch()};
+        var entry = new Entry {timestamp = Utils.MillisecondsSinceEpoch()};
 
-        foreach (var sweepResults in results) {
-          var tmp = new SweepResult();
-          tmp.rssis.AddRange(sweepResults.Rssis); 
-          entry.results.Add(tmp);
-        }
+        entry.results.AddRange(results);
 
         Bitmap[] visuals = _visualSource.GetLastVisuals();
         foreach (var visual in visuals) {

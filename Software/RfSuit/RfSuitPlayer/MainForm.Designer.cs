@@ -33,21 +33,27 @@
       this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
       this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.pictureBox = new System.Windows.Forms.PictureBox();
-      this.splitContainer = new System.Windows.Forms.SplitContainer();
-      this.propertyGrid = new System.Windows.Forms.PropertyGrid();
       this.trackBar = new System.Windows.Forms.TrackBar();
       this.nextButton = new System.Windows.Forms.Button();
       this.previousButton = new System.Windows.Forms.Button();
       this.playButton = new System.Windows.Forms.Button();
       this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+      this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+      this.splitContainer = new System.Windows.Forms.SplitContainer();
+      this.pictureBox = new System.Windows.Forms.PictureBox();
+      this.propertyGrid = new System.Windows.Forms.PropertyGrid();
+      this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
       this.menuStrip.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.trackBar)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+      this.splitContainer1.Panel1.SuspendLayout();
+      this.splitContainer1.Panel2.SuspendLayout();
+      this.splitContainer1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
       this.splitContainer.Panel1.SuspendLayout();
       this.splitContainer.Panel2.SuspendLayout();
       this.splitContainer.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.trackBar)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
       this.SuspendLayout();
       // 
       // menuStrip
@@ -56,7 +62,7 @@
             this.fileToolStripMenuItem});
       this.menuStrip.Location = new System.Drawing.Point(0, 0);
       this.menuStrip.Name = "menuStrip";
-      this.menuStrip.Size = new System.Drawing.Size(633, 24);
+      this.menuStrip.Size = new System.Drawing.Size(702, 24);
       this.menuStrip.TabIndex = 0;
       // 
       // fileToolStripMenuItem
@@ -89,51 +95,13 @@
       this.exitToolStripMenuItem.Text = "E&xit";
       this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItemClick);
       // 
-      // pictureBox
-      // 
-      this.pictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.pictureBox.Location = new System.Drawing.Point(0, 0);
-      this.pictureBox.Name = "pictureBox";
-      this.pictureBox.Size = new System.Drawing.Size(420, 308);
-      this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-      this.pictureBox.TabIndex = 0;
-      this.pictureBox.TabStop = false;
-      // 
-      // splitContainer
-      // 
-      this.splitContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                  | System.Windows.Forms.AnchorStyles.Left)
-                  | System.Windows.Forms.AnchorStyles.Right)));
-      this.splitContainer.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-      this.splitContainer.Location = new System.Drawing.Point(12, 107);
-      this.splitContainer.Name = "splitContainer";
-      // 
-      // splitContainer.Panel1
-      // 
-      this.splitContainer.Panel1.Controls.Add(this.pictureBox);
-      // 
-      // splitContainer.Panel2
-      // 
-      this.splitContainer.Panel2.Controls.Add(this.propertyGrid);
-      this.splitContainer.Size = new System.Drawing.Size(609, 308);
-      this.splitContainer.SplitterDistance = 420;
-      this.splitContainer.TabIndex = 10;
-      // 
-      // propertyGrid
-      // 
-      this.propertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.propertyGrid.Location = new System.Drawing.Point(0, 0);
-      this.propertyGrid.Name = "propertyGrid";
-      this.propertyGrid.Size = new System.Drawing.Size(185, 308);
-      this.propertyGrid.TabIndex = 0;
-      // 
       // trackBar
       // 
       this.trackBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                   | System.Windows.Forms.AnchorStyles.Right)));
-      this.trackBar.Location = new System.Drawing.Point(12, 56);
+      this.trackBar.Location = new System.Drawing.Point(34, 56);
       this.trackBar.Name = "trackBar";
-      this.trackBar.Size = new System.Drawing.Size(609, 45);
+      this.trackBar.Size = new System.Drawing.Size(656, 45);
       this.trackBar.TabIndex = 9;
       this.trackBar.Scroll += new System.EventHandler(this.TrackBarScroll);
       this.trackBar.ValueChanged += new System.EventHandler(this.TrackBarValueChanged);
@@ -141,7 +109,7 @@
       // nextButton
       // 
       this.nextButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.nextButton.Location = new System.Drawing.Point(546, 27);
+      this.nextButton.Location = new System.Drawing.Point(615, 27);
       this.nextButton.Name = "nextButton";
       this.nextButton.Size = new System.Drawing.Size(75, 23);
       this.nextButton.TabIndex = 8;
@@ -165,7 +133,7 @@
                   | System.Windows.Forms.AnchorStyles.Right)));
       this.playButton.Location = new System.Drawing.Point(93, 27);
       this.playButton.Name = "playButton";
-      this.playButton.Size = new System.Drawing.Size(447, 23);
+      this.playButton.Size = new System.Drawing.Size(516, 23);
       this.playButton.TabIndex = 6;
       this.playButton.Text = "Play";
       this.playButton.UseVisualStyleBackColor = true;
@@ -176,12 +144,84 @@
       this.openFileDialog.DefaultExt = "rflog";
       this.openFileDialog.Filter = "RfSuit Log|*.rflog|All files|*.*";
       // 
+      // splitContainer1
+      // 
+      this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                  | System.Windows.Forms.AnchorStyles.Left)
+                  | System.Windows.Forms.AnchorStyles.Right)));
+      this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+      this.splitContainer1.Location = new System.Drawing.Point(12, 107);
+      this.splitContainer1.Name = "splitContainer1";
+      this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+      // 
+      // splitContainer1.Panel1
+      // 
+      this.splitContainer1.Panel1.Controls.Add(this.zedGraphControl1);
+      // 
+      // splitContainer1.Panel2
+      // 
+      this.splitContainer1.Panel2.Controls.Add(this.splitContainer);
+      this.splitContainer1.Size = new System.Drawing.Size(678, 389);
+      this.splitContainer1.SplitterDistance = 194;
+      this.splitContainer1.TabIndex = 11;
+      // 
+      // splitContainer
+      // 
+      this.splitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.splitContainer.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+      this.splitContainer.Location = new System.Drawing.Point(0, 0);
+      this.splitContainer.Name = "splitContainer";
+      // 
+      // splitContainer.Panel1
+      // 
+      this.splitContainer.Panel1.Controls.Add(this.pictureBox);
+      // 
+      // splitContainer.Panel2
+      // 
+      this.splitContainer.Panel2.Controls.Add(this.propertyGrid);
+      this.splitContainer.Size = new System.Drawing.Size(678, 191);
+      this.splitContainer.SplitterDistance = 489;
+      this.splitContainer.TabIndex = 11;
+      // 
+      // pictureBox
+      // 
+      this.pictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.pictureBox.Location = new System.Drawing.Point(0, 0);
+      this.pictureBox.Name = "pictureBox";
+      this.pictureBox.Size = new System.Drawing.Size(489, 191);
+      this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+      this.pictureBox.TabIndex = 0;
+      this.pictureBox.TabStop = false;
+      // 
+      // propertyGrid
+      // 
+      this.propertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.propertyGrid.Location = new System.Drawing.Point(0, 0);
+      this.propertyGrid.Name = "propertyGrid";
+      this.propertyGrid.Size = new System.Drawing.Size(185, 191);
+      this.propertyGrid.TabIndex = 0;
+      // 
+      // zedGraphControl1
+      // 
+      this.zedGraphControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.zedGraphControl1.Location = new System.Drawing.Point(0, 0);
+      this.zedGraphControl1.Name = "zedGraphControl1";
+      this.zedGraphControl1.ScrollGrace = 0D;
+      this.zedGraphControl1.ScrollMaxX = 0D;
+      this.zedGraphControl1.ScrollMaxY = 0D;
+      this.zedGraphControl1.ScrollMaxY2 = 0D;
+      this.zedGraphControl1.ScrollMinX = 0D;
+      this.zedGraphControl1.ScrollMinY = 0D;
+      this.zedGraphControl1.ScrollMinY2 = 0D;
+      this.zedGraphControl1.Size = new System.Drawing.Size(678, 194);
+      this.zedGraphControl1.TabIndex = 0;
+      // 
       // MainForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(633, 427);
-      this.Controls.Add(this.splitContainer);
+      this.ClientSize = new System.Drawing.Size(702, 508);
+      this.Controls.Add(this.splitContainer1);
       this.Controls.Add(this.trackBar);
       this.Controls.Add(this.nextButton);
       this.Controls.Add(this.previousButton);
@@ -192,13 +232,17 @@
       this.Text = "RfSuit Player";
       this.menuStrip.ResumeLayout(false);
       this.menuStrip.PerformLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.trackBar)).EndInit();
+      this.splitContainer1.Panel1.ResumeLayout(false);
+      this.splitContainer1.Panel2.ResumeLayout(false);
+      ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+      this.splitContainer1.ResumeLayout(false);
       this.splitContainer.Panel1.ResumeLayout(false);
       this.splitContainer.Panel1.PerformLayout();
       this.splitContainer.Panel2.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
       this.splitContainer.ResumeLayout(false);
-      ((System.ComponentModel.ISupportInitialize)(this.trackBar)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -207,9 +251,6 @@
     #endregion
 
     private System.Windows.Forms.MenuStrip menuStrip;
-    private System.Windows.Forms.PictureBox pictureBox;
-    private System.Windows.Forms.SplitContainer splitContainer;
-    private System.Windows.Forms.PropertyGrid propertyGrid;
     private System.Windows.Forms.TrackBar trackBar;
     private System.Windows.Forms.Button nextButton;
     private System.Windows.Forms.Button previousButton;
@@ -219,6 +260,11 @@
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
     private System.Windows.Forms.OpenFileDialog openFileDialog;
+    private System.Windows.Forms.SplitContainer splitContainer1;
+    private ZedGraph.ZedGraphControl zedGraphControl1;
+    private System.Windows.Forms.SplitContainer splitContainer;
+    private System.Windows.Forms.PictureBox pictureBox;
+    private System.Windows.Forms.PropertyGrid propertyGrid;
 
   }
 }
