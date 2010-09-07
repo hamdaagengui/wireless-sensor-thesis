@@ -86,9 +86,9 @@ void ShoutAndPass(uint8_t address)
 		shoutMessage m;
 		m.messageId = MESSAGEID_SHOUT;
 		m.source = localAddress;
-		RadioDriver_Send(&m, sizeof(m));
+		RadioDriver_Send(&m, sizeof(m)); // shout
 
-		RadioDriver_WaitForSendToComplete();
+		RadioDriver_WaitForSendToComplete(); // wait for shouting to complete...
 
 		if (reportReady)
 		{
