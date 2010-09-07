@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using AForge.Video;
@@ -7,6 +9,8 @@ using AForge.Video.DirectShow;
 using System.IO;
 using RfSuit;
 using RfSuitLoggerInterfaces;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RfSuitLogger
 {
@@ -16,10 +20,24 @@ namespace RfSuitLogger
     {
       InitializeComponent();
 
+      //ChangeLanguage("da", this);
+
       RefreshButtonClick(this, EventArgs.Empty);
       _visualSource = new VisualSource(1);
       _logger = new Logger(_visualSource, new ConnectionSimulator(10));
     }
+
+    private readonly ComponentResourceManager _resources = new ComponentResourceManager(typeof (MainForm));
+
+    private void ChangeLanguage(string lang, Control control)
+    {
+      _resources.ApplyResources(control, control.Name, new CultureInfo("da"));
+      foreach (Control c in control.Controls.AsParallel())
+      {
+        ChangeLanguage(lang, c);
+      }
+    }
+
 
     //    private Connection connection;
     private FilterInfoCollection _videoDevices;
