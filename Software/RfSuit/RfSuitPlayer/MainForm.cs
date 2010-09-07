@@ -19,7 +19,6 @@ namespace RfSuitPlayer
     }
 
     private Entry[] _entries;
-    private int _position;
     private Player _player;
 
     // ZedGraph stuff
@@ -43,6 +42,8 @@ namespace RfSuitPlayer
       if (_player != null)
         _player.StopPlayer();
       _player = new Player(_entries, trackBar);
+
+      CreateChart(zedGraphControl1, new GraphData(_entries));
     }
 
     public void CreateChart(ZedGraphControl zgc, GraphData graphData)
@@ -50,12 +51,12 @@ namespace RfSuitPlayer
       var myPane = zgc.GraphPane;
 
       // Set the title and axis labels
-      myPane.Title.Text = "Line Graph with Band Demo";
-      myPane.XAxis.Title.Text = "Sequence";
-      myPane.YAxis.Title.Text = "Temperature, C";
+      myPane.Title.Text = "RfData";
+      myPane.XAxis.Title.Text = "Timestamp [ms since Epoch]";
+      myPane.YAxis.Title.Text = "Link Quality [dBm]";
 
 
-      var timeline = new double[graphData.ConnectionDatas[0].Quality.Length];
+      var timeline = graphData.Timeline;
 
       var rotator = ColorSymbolRotator.StaticInstance;
       foreach (var connectionData in graphData.ConnectionDatas)
@@ -104,6 +105,7 @@ namespace RfSuitPlayer
 
       // Calculate the Axis Scale Ranges
       zgc.AxisChange();
+      zgc.Refresh();
     }
 
     private void ExitToolStripMenuItemClick(object sender, EventArgs e)
