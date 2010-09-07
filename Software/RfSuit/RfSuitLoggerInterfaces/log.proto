@@ -1,13 +1,15 @@
 package dk.iha;
 
 message Entry {
-	repeated Picture pictures = 1;
-	required double timestamp = 2;
-	repeated SweepResult results = 3;
+	required double timestamp = 1;
+	repeated Picture pictures = 2;
+	repeated LinkQualityIndicator results = 3;
 }
 
-message SweepResult {
-	repeated int32 rssis = 1;
+message LinkQualityIndicator {
+	required int32 EndPointA = 1;
+	required int32 EndPointB = 2;
+	repeated double Quality = 3;
 }
 
 message Picture {
