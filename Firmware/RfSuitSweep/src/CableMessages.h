@@ -10,6 +10,7 @@ enum
 	MESSAGEID_PINGREQUEST,
 	MESSAGEID_PINGREPLY,
 	MESSAGEID_NOTHINGTOKEN,
+	MESSAGEID_SETCHANNELTOKEN,
 	MESSAGEID_SETTXPOWERTOKEN,
 	MESSAGEID_REPORTTOKEN
 };
@@ -49,6 +50,16 @@ typedef struct
 } nothingTokenMessage;
 
 #define AsNothingTokenMessage(x) ((nothingTokenMessage*)x)
+
+typedef struct
+{
+	uint8_t destination;
+	uint8_t source;
+	uint8_t messageId;
+	uint8_t channel;
+} setChannelTokenMessage;
+
+#define AsSetChannelTokenMessage(x) ((setChannelTokenMessage*)x)
 
 typedef struct
 {

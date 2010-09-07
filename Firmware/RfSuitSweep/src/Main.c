@@ -9,7 +9,7 @@
 #include <Kernel/Kernel.h>
 #include <FrameTransceiver.h>
 #include "CableMessages.h"
-#include "RadioDriver.h"
+#include <Peripherals/RadioDriver.h>
 #include "RadioMessages.h"
 
 #define BAUDRATE_115200													16
@@ -21,7 +21,7 @@ void RadioFrameHandler(uint8_t* data, uint8_t length);
 
 uint8_t adr = 1;
 
-uint8_t reports[16] = { 0 };
+uint8_t rssis[16] = { 0 };
 bool reportReady = false;
 
 uint8_t ledTimer = 0;
@@ -67,7 +67,7 @@ int main()
 	// Initialize kernel
 	Kernel_Initialize();
 
-	FrameTransceiver_Initialize(BAUDRATE_500000, CableFrameHandler);
+	FrameTransceiver_Initialize(BAUDRATE_115200, CableFrameHandler);
 	//	RadioDriver_Initialize(RadioFrameHandler);
 
 	Kernel_CreateTask(Run);
@@ -81,6 +81,11 @@ int main()
 
 void ShoutAndPass(uint8_t address)
 {
+	if (address == 0)
+	{
+
+	}
+
 	if (address == adr)
 	{
 		static uint8_t counter = 0;
@@ -93,6 +98,7 @@ void ShoutAndPass(uint8_t address)
 
 		// shout
 		// wait for shout to be out there
+
 		if (reportReady)
 		{
 			reportReady = false;
@@ -101,9 +107,9 @@ void ShoutAndPass(uint8_t address)
 			m.destination = address + 1;
 			m.source = adr;
 			m.messageId = MESSAGEID_REPORTTOKEN;
-			for (uint8_t i = 0; i < lengthof(reports); i++)
+			for (uint8_t i = 0; i < lengthof(rssis); i++)
 			{
-				m.rssis[i] = reports[i];
+				m.rssis[i] = rssis[i];
 			}
 			FrameTransceiver_Send(&m, sizeof(m));
 		}
@@ -140,9 +146,20 @@ void CableFrameHandler(uint8_t* data, uint8_t length)
 			ShoutAndPass(mb->destination);
 			break;
 
+		case MESSAGEID_SETCHANNELTOKEN:
+			{
+				setChannelTokenMessage* m = AsSetChannelTokenMessage(data);
+				RadioDriver_SetChannel(m->channel);
+				ShoutAndPass(mb->destination);
+			}
+			break;
+
 		case MESSAGEID_SETTXPOWERTOKEN:
-			// set rf tx power = AsSetTxPowerTokenMessage(data)->txPower
-			ShoutAndPass(mb->destination);
+			{
+				setTxPowerTokenMessage* m = AsSetTxPowerTokenMessage(data);
+				//	RadioDriver_SetTxPower(m->txPower);
+				ShoutAndPass(mb->destination);
+			}
 			break;
 
 		case MESSAGEID_REPORTTOKEN:
@@ -163,5 +180,24 @@ void CableFrameHandler(uint8_t* data, uint8_t length)
 
 void RadioFrameHandler(uint8_t* data, uint8_t length)
 {
+	static uint8_t lastSource = 0;
 
+	radioMsgMessageBase* mb = AsRadioMsgMessageBase(data);
+
+	switch (mb->messageId)
+	{
+		case MESSAGEID_SHOUT:
+			{
+				shoutMessage* m = AsShoutMessage(data);
+				//	rssis[m->source] = RadioDriver_GetRssi();
+
+				if (lastSource > m->source)
+				{
+					reportReady = true;
+				}
+
+				lastSource = m->source;
+			}
+			break;
+	}
 }
