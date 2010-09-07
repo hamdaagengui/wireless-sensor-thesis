@@ -11,8 +11,6 @@ using System.Threading.Tasks;
 
 namespace RfSuit
 {
-	public delegate void SweepCompletedDelegate(SweepResults[] results);
-
 	public class Connection : IConnection
 	{
 		public event SweepCompletedDelegate SweepCompleted;
@@ -44,28 +42,42 @@ namespace RfSuit
 			});
 			md.AddHandler<ReportTokenMessage>(m =>
 			{
+				TokenReceived(m.Destination);
+
 				for (int i = 0; i < sweepResults.Length; i++)
 				{
-					sweepResults[m.Source - 1].Rssis[i] = m.Rssis[i];
+					sweepResults[m.Source - 1].Rssis[i] = ((int)m.Rssis[i]) - 256;
 				}
 
-				if (m.Source == (tokenRingLength - 1))
+				if (m.Source == (tokenRingLength - 1)) // last device in the ring means a full sweep has been made
 				{
-					Parallel.Invoke(() =>
+					Task.Factory.StartNew(() =>
 					{
 						var now = DateTime.Now;
 						var time = now - lastTime;
 						lastTime = now;
 						Console.WriteLine("Rx Report @ " + string.Format("{0:0.0}", 1000.0 / time.TotalMilliseconds) + " reports per second");
+						for (int i = 0; i < sweepResults.Length; i++)
+						{
+							for (int j = 0; j < sweepResults.Length; j++)
+							{
+								//if (i != j)
+								//{
+								Console.WriteLine("{0} <--> {1}: {2} dBm", i, j, sweepResults[i].Rssis[j]);
+								//}
+							}
+						}
+						if (SweepCompleted != null)
+						{
+							SweepCompleted(sweepResults);
+						}
 					});
 				}
-
-				TokenReceived(m.Destination);
 			});
 
 			try
 			{
-				var sp = new SerialPort(portName, 500000);
+				var sp = new SerialPort(portName, 115200);
 				var pl = new SerialPortWrapper(sp);
 				dll = new FrameTransceiver(pl);
 				dll.FrameReceived += md.HandleFrame;
