@@ -19,7 +19,7 @@
 void CableFrameHandler(uint8_t* data, uint8_t length);
 void RadioFrameHandler(uint8_t* data, uint8_t length);
 
-uint8_t adr = 1;
+uint8_t localAddress = 1;
 
 uint8_t rssis[16] = { 0 };
 bool reportReady = false;
@@ -68,7 +68,7 @@ int main()
 	Kernel_Initialize();
 
 	FrameTransceiver_Initialize(BAUDRATE_115200, CableFrameHandler);
-	//	RadioDriver_Initialize(RadioFrameHandler);
+	RadioDriver_Initialize(RadioFrameHandler);
 
 	Kernel_CreateTask(Run);
 
@@ -81,23 +81,14 @@ int main()
 
 void ShoutAndPass(uint8_t address)
 {
-	if (address == 0)
+	if (address == localAddress)
 	{
+		shoutMessage m;
+		m.messageId = MESSAGEID_SHOUT;
+		m.source = localAddress;
+		RadioDriver_Send(&m, sizeof(m));
 
-	}
-
-	if (address == adr)
-	{
-		static uint8_t counter = 0;
-		if (++counter >= 16)
-		{
-			counter = 0;
-			reportReady = true;
-		}
-
-
-		// shout
-		// wait for shout to be out there
+		RadioDriver_WaitForSendToComplete();
 
 		if (reportReady)
 		{
@@ -105,7 +96,7 @@ void ShoutAndPass(uint8_t address)
 
 			reportTokenMessage m;
 			m.destination = address + 1;
-			m.source = adr;
+			m.source = localAddress;
 			m.messageId = MESSAGEID_REPORTTOKEN;
 			for (uint8_t i = 0; i < lengthof(rssis); i++)
 			{
@@ -117,7 +108,7 @@ void ShoutAndPass(uint8_t address)
 		{
 			nothingTokenMessage m;
 			m.destination = address + 1;
-			m.source = adr;
+			m.source = localAddress;
 			m.messageId = MESSAGEID_NOTHINGTOKEN;
 			FrameTransceiver_Send(&m, sizeof(m));
 		}
@@ -132,11 +123,11 @@ void CableFrameHandler(uint8_t* data, uint8_t length)
 	switch (mb->messageId)
 	{
 		case MESSAGEID_PINGREQUEST:
-			if (mb->destination == adr)
+			if (mb->destination == localAddress)
 			{
 				pingReplyMessage m;
 				m.destination = mb->source;
-				m.source = adr;
+				m.source = localAddress;
 				m.messageId = MESSAGEID_PINGREPLY;
 				FrameTransceiver_Send(&m, sizeof(m));
 			}
@@ -157,7 +148,7 @@ void CableFrameHandler(uint8_t* data, uint8_t length)
 		case MESSAGEID_SETTXPOWERTOKEN:
 			{
 				setTxPowerTokenMessage* m = AsSetTxPowerTokenMessage(data);
-				//	RadioDriver_SetTxPower(m->txPower);
+				RadioDriver_SetTxPower(m->txPower);
 				ShoutAndPass(mb->destination);
 			}
 			break;
@@ -189,7 +180,7 @@ void RadioFrameHandler(uint8_t* data, uint8_t length)
 		case MESSAGEID_SHOUT:
 			{
 				shoutMessage* m = AsShoutMessage(data);
-				//	rssis[m->source] = RadioDriver_GetRssi();
+				rssis[m->source] = RadioDriver_GetRssi();
 
 				if (lastSource > m->source)
 				{

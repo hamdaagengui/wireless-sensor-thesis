@@ -10,6 +10,13 @@
 
 #include <Globals.h>
 
+typedef struct
+{
+	uint8_t uart;
+	uint16_t ubrr;
+	blockHandlerCallback frameHandler;
+} frameTransceiver;
+
 extern void FrameTransceiver_Initialize(uint16_t ubrr, blockHandlerCallback frameReceivedHandler);
 extern void FrameTransceiver_Send(void* data, uint8_t length);
 
