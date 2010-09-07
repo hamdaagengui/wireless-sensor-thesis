@@ -9,7 +9,7 @@ message Entry {
 message LinkQualityIndicator { 
 	required int32 EndPointA = 1;
 	required int32 EndPointB = 2;
-	repeated double Quality = 3;
+	required double Quality = 3;
 }
 
 message Picture {
