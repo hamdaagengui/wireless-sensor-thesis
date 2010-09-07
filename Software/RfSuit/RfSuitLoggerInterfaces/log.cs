@@ -60,13 +60,13 @@ namespace dk.iha
       get { return _EndPointB; }
       set { _EndPointB = value; }
     }
-    private readonly global::System.Collections.Generic.List<double> _Quality = new global::System.Collections.Generic.List<double>();
-    [global::ProtoBuf.ProtoMember(3, Name=@"Quality", DataFormat = global::ProtoBuf.DataFormat.TwosComplement)]
-    public global::System.Collections.Generic.List<double> Quality
+    private double _Quality;
+    [global::ProtoBuf.ProtoMember(3, IsRequired = true, Name=@"Quality", DataFormat = global::ProtoBuf.DataFormat.TwosComplement)]
+    public double Quality
     {
       get { return _Quality; }
+      set { _Quality = value; }
     }
-  
     private global::ProtoBuf.IExtension extensionObject;
     global::ProtoBuf.IExtension global::ProtoBuf.IExtensible.GetExtensionObject(bool createIfMissing)
       { return global::ProtoBuf.Extensible.GetExtensionObject(ref extensionObject, createIfMissing); }
