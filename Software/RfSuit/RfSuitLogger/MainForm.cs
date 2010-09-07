@@ -65,6 +65,7 @@ namespace RfSuitLogger
 
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
+      _logger.Stop();
       StopVideoSource();
     }
 
@@ -128,7 +129,7 @@ namespace RfSuitLogger
         DisplayError("Please select a serial port!", "Missing Serial Port");
         return;
       }
-      _logger.Start(new FileStream(Directory.GetParent(Application.ExecutablePath) + @"\log" + (int)Utils.MillisecondsSinceEpoch(), FileMode.CreateNew), serialPortInfo.Name);
+      _logger.Start(new FileStream(Directory.GetParent(Application.ExecutablePath) + @"\log" + (long)Utils.MillisecondsSinceEpoch() + ".rflog", FileMode.CreateNew), serialPortInfo.Name);
     }
 
     private static void DisplayError(string title, string msg)

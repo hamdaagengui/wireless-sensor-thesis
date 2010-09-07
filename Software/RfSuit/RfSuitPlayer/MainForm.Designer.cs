@@ -135,6 +135,7 @@
       this.trackBar.Name = "trackBar";
       this.trackBar.Size = new System.Drawing.Size(609, 45);
       this.trackBar.TabIndex = 9;
+      this.trackBar.Scroll += new System.EventHandler(this.TrackBarScroll);
       this.trackBar.ValueChanged += new System.EventHandler(this.TrackBarValueChanged);
       // 
       // nextButton
