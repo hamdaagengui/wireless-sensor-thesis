@@ -2,7 +2,7 @@
 
 namespace RfSuit
 {
-	public delegate void SweepCompletedDelegate(SweepResults[] results);
+	public delegate void SweepCompletedDelegate(LinkQualityIndicator[] linkQualityIndicators);
 
 	public interface IConnection
 	{

@@ -21,10 +21,10 @@ namespace RfSuitConnectionTester
 		{
 			Connection con = new Connection();
 			con.SweepCompleted += new SweepCompletedDelegate(con_SweepCompleted);
-			con.Start("COM9");
+			con.Start("COM11");
 		}
 
-		void con_SweepCompleted(SweepResults[] results)
+		void con_SweepCompleted(LinkQualityIndicator[] results)
 		{
 			if (InvokeRequired)
 			{
@@ -32,7 +32,7 @@ namespace RfSuitConnectionTester
 				return;
 			}
 
-			Text = results[0].Rssis[0].ToString() + " dBm";
+			Text = results[0].Quality.ToString() + " dBm";
 		}
 	}
 }
