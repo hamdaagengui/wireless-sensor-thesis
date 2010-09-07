@@ -20,7 +20,19 @@ namespace RfSuitConnectionTester
 		private void Form1_Load(object sender, EventArgs e)
 		{
 			Connection con = new Connection();
+			con.SweepCompleted += new SweepCompletedDelegate(con_SweepCompleted);
 			con.Start("COM9");
+		}
+
+		void con_SweepCompleted(SweepResults[] results)
+		{
+			if (InvokeRequired)
+			{
+				BeginInvoke(new SweepCompletedDelegate(con_SweepCompleted), new object[] { results });
+				return;
+			}
+
+			Text = results[0].Rssis[0].ToString() + " dBm";
 		}
 	}
 }
