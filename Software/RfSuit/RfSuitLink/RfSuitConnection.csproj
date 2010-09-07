@@ -53,6 +53,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="libs\ComaLib.dll" />
+    <Content Include="libs\protobuf-net.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RfSuitLoggerInterfaces\RfSuitLoggerInterfaces.csproj">
+      <Project>{CBB3583C-7031-4BAB-8401-525C6711B309}</Project>
+      <Name>RfSuitLoggerInterfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
