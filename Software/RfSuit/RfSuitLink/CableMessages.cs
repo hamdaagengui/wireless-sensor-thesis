@@ -155,11 +155,44 @@ namespace RfSuit
 		}
 	}
 
-	class SetTxPowerTokenMessage
+	class SetChannelTokenMessage
 	{
 		public Byte Destination;
 		public Byte Source;
 		static readonly Byte MessageId = 3;
+		public Byte Channel;
+
+		public SetChannelTokenMessage()
+		{ }
+
+		public SetChannelTokenMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+			Channel = frame[3];
+		}
+
+		static public Byte[] Create(Byte destination, Byte source, Byte channel)
+		{
+			Byte[] buffer = new Byte[4];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			buffer[3] = channel;
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source, Channel);
+		}
+	}
+
+	class SetTxPowerTokenMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 4;
 		public Byte TxPower;
 
 		public SetTxPowerTokenMessage()
@@ -192,7 +225,7 @@ namespace RfSuit
 	{
 		public Byte Destination;
 		public Byte Source;
-		static readonly Byte MessageId = 4;
+		static readonly Byte MessageId = 5;
 		public Byte[] Rssis = new Byte[16];
 
 		public ReportTokenMessage()

@@ -62,7 +62,7 @@ namespace RfSuit
 						lastTime = now;
 						Console.WriteLine("Rx Report @ " + string.Format("{0:0.0}", 1000.0 / time.TotalMilliseconds) + " reports per second");
 
-						foreach (var lqi in lqis)
+						foreach (var lqi in lqis) // calculate lqi as the average of sensed RSSI by either end point of a link
 						{
 							int a = lqi.EndPointA;
 							int b = lqi.EndPointB;
