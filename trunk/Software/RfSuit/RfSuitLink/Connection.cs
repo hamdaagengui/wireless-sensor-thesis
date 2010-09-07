@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.IO.Ports;
-using Coma.Net.Embedded.PhysicalLayer;
-using Coma.Net.Embedded.DataLinkLayer;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO.Ports;
+using System.Threading;
 using System.Threading.Tasks;
+using Coma.Net.Embedded.DataLinkLayer;
+using Coma.Net.Embedded.PhysicalLayer;
 using dk.iha;
 
 namespace RfSuit
@@ -50,9 +48,9 @@ namespace RfSuit
 			{
 				TokenReceived(m.Destination);
 
-				for (int i = 0; i < m.Rssis.Length; i++)
+				for (int i = 0; i < tokenRingLength - 1; i++)
 				{
-					qualityMatrix[m.Source, i] = ((int)m.Rssis[i]) - 256;
+					qualityMatrix[m.Source - 1, i] = ((int)m.Rssis[i]) - 256;
 				}
 
 				if (m.Destination == tokenRingLength) // last device in the ring means a full sweep has been made
@@ -103,7 +101,7 @@ namespace RfSuit
 			{
 				for (int j = 0; j < tokenRingLength - 1; j++)
 				{
-					qualityMatrix[i, j] = double.NaN;
+					qualityMatrix[i, j] = 0.0;
 
 					if (i < j)
 					{

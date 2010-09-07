@@ -33,7 +33,7 @@ namespace RfSuitConnectionTester
 				return;
 			}
 
-			Text = results[0].Quality.ToString() + " dBm";
+		//	Text = results[0].Quality.ToString() + " dBm";
 		}
 	}
 }
