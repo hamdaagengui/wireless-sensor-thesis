@@ -34,6 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="protobuf-net, Version=1.0.0.280, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>morelibs\protobuf-net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -81,6 +85,13 @@
       <Project>{4F8244C7-6122-4C50-9F35-4264CAD48122}</Project>
       <Name>RfSuitConnection</Name>
     </ProjectReference>
+    <ProjectReference Include="..\RfSuitLoggerInterfaces\RfSuitLoggerInterfaces.csproj">
+      <Project>{CBB3583C-7031-4BAB-8401-525C6711B309}</Project>
+      <Name>RfSuitLoggerInterfaces</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="morelibs\protobuf-net.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

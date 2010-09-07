@@ -8,6 +8,7 @@ using Coma.Net.Embedded.PhysicalLayer;
 using Coma.Net.Embedded.DataLinkLayer;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using dk.iha;
 
 namespace RfSuit
 {
@@ -25,12 +26,17 @@ namespace RfSuit
 		bool[] devicePresence = new bool[16];
 		int tokenRingLength = -1;
 
-		SweepResults[] sweepResults;
-		ConcurrentQueue<byte[]> txQueue = new ConcurrentQueue<byte[]>();
+		ConcurrentQueue<byte[]> txQueue;
+
+
+		LinkQualityIndicator[] lqis;
+		double[,] qualityMatrix;
 
 		DateTime lastTime = DateTime.Now;
 		public bool Start(string portName)
 		{
+			txQueue = new ConcurrentQueue<byte[]>();
+
 			md = new MessageDispatcher();
 			md.AddHandler<PingReplyMessage>(m =>
 			{
@@ -44,12 +50,12 @@ namespace RfSuit
 			{
 				TokenReceived(m.Destination);
 
-				for (int i = 0; i < sweepResults.Length; i++)
+				for (int i = 0; i < m.Rssis.Length; i++)
 				{
-					sweepResults[m.Source - 1].Rssis[i] = ((int)m.Rssis[i]) - 256;
+					qualityMatrix[m.Source, i] = ((int)m.Rssis[i]) - 256;
 				}
 
-				if (m.Source == (tokenRingLength - 1)) // last device in the ring means a full sweep has been made
+				if (m.Destination == tokenRingLength) // last device in the ring means a full sweep has been made
 				{
 					Task.Factory.StartNew(() =>
 					{
@@ -57,19 +63,19 @@ namespace RfSuit
 						var time = now - lastTime;
 						lastTime = now;
 						Console.WriteLine("Rx Report @ " + string.Format("{0:0.0}", 1000.0 / time.TotalMilliseconds) + " reports per second");
-						for (int i = 0; i < sweepResults.Length; i++)
+
+						foreach (var lqi in lqis)
 						{
-							for (int j = 0; j < sweepResults.Length; j++)
-							{
-								//if (i != j)
-								//{
-								Console.WriteLine("{0} <--> {1}: {2} dBm", i, j, sweepResults[i].Rssis[j]);
-								//}
-							}
+							int a = lqi.EndPointA;
+							int b = lqi.EndPointB;
+							lqi.Quality = (qualityMatrix[a, b] + qualityMatrix[b, a]) / 2.0;
+
+							Console.WriteLine("{0} <--> {1}: {2} dBm", a, b, lqi.Quality);
 						}
+
 						if (SweepCompleted != null)
 						{
-							SweepCompleted(null);
+							SweepCompleted(lqis);
 						}
 					});
 				}
@@ -90,12 +96,23 @@ namespace RfSuit
 
 			DetectDevices(); // detect which devices are online and detect the length of the ring
 
-			sweepResults = new SweepResults[tokenRingLength - 1];
-			for (int i = 0; i < sweepResults.Length; i++)
+			List<LinkQualityIndicator> l = new List<LinkQualityIndicator>();
+			qualityMatrix = new double[tokenRingLength - 1, tokenRingLength - 1];
+
+			for (int i = 0; i < tokenRingLength - 1; i++)
 			{
-				sweepResults[i] = new SweepResults();
-				sweepResults[i].Rssis = new int[sweepResults.Length];
+				for (int j = 0; j < tokenRingLength - 1; j++)
+				{
+					qualityMatrix[i, j] = double.NaN;
+
+					if (i < j)
+					{
+						l.Add(new LinkQualityIndicator { EndPointA = i, EndPointB = j, Quality = 0.0 });
+					}
+				}
 			}
+
+			lqis = l.ToArray();
 
 			Console.WriteLine("Found " + (tokenRingLength - 1) + " devices");
 
