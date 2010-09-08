@@ -39,10 +39,12 @@ namespace RfSuit
 			md.AddHandler<PingReplyMessage>(m =>
 			{
 				devicePresence[m.Source - 1] = true;
+				Console.WriteLine("Device {0} is present [{1}]", m.Source, (DateTime.Now - pingTimer).TotalMilliseconds);
 			});
 			md.AddHandler<NothingTokenMessage>(m =>
 			{
 				TokenReceived(m.Destination);
+				//	Console.WriteLine("Nothing");
 			});
 			md.AddHandler<ReportTokenMessage>(m =>
 			{
@@ -50,8 +52,9 @@ namespace RfSuit
 
 				for (int i = 0; i < tokenRingLength - 1; i++)
 				{
-					qualityMatrix[m.Source - 1, i] = ((int)m.Rssis[i]) - 256;
+					qualityMatrix[m.Source - 1, i] = ((sbyte)m.Rssis[i]) - 256;
 				}
+				Console.WriteLine("{0}: {1} {2} {3}", m.Source, (sbyte)m.Rssis[0], (sbyte)m.Rssis[1], (sbyte)m.Rssis[2]);
 
 				if (m.Destination == tokenRingLength) // last device in the ring means a full sweep has been made
 				{
@@ -67,8 +70,8 @@ namespace RfSuit
 							int a = lqi.EndPointA;
 							int b = lqi.EndPointB;
 							lqi.Quality = (qualityMatrix[a, b] + qualityMatrix[b, a]) / 2.0;
-
-							Console.WriteLine("{0} <--> {1}: {2} dBm", a, b, lqi.Quality);
+							//	Console.WriteLine("Raw: a->b {0} b->a{1}", qualityMatrix[a, b], qualityMatrix[b, a]);
+							//	Console.WriteLine("{0} <--> {1}: {2} dBm", a, b, lqi.Quality);
 						}
 
 						if (SweepCompleted != null)
@@ -78,6 +81,8 @@ namespace RfSuit
 					});
 				}
 			});
+
+			Thread.Sleep(2000);
 
 			try
 			{
@@ -126,13 +131,24 @@ namespace RfSuit
 			dll.Stop();
 		}
 
+		DateTime pingTimer;
 		public bool[] DetectDevices()
 		{
-			for (byte i = 0; i < devicePresence.Length; i++)
+			for (int i = 0; i < devicePresence.Length; i++)
 			{
 				devicePresence[i] = false;
-				dll.Send(PingRequestMessage.Create((byte)(i + 1), 0));
-				Thread.Sleep(5);
+			}
+
+			for (byte i = 1; i <= devicePresence.Length; i++)
+			{
+				if (i > 1 && devicePresence[i - 2] == false)
+				{
+					break;
+				}
+
+				pingTimer = DateTime.Now;
+				dll.Send(PingRequestMessage.Create(i, 0));
+				Thread.Sleep(200);
 			}
 
 			tokenRingLength = 1;
