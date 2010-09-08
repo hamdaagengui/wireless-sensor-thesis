@@ -31,7 +31,7 @@ static void Run()
 	{
 		if (--ledTimer == 0)
 		{
-			SetBit(PORTC, 0);
+			SetBit(PORTE, 2);
 		}
 	}
 
@@ -40,28 +40,33 @@ static void Run()
 
 int main()
 {
-	//	// Initialize IO ports
-	//	DDRE = 0x1c; // LEDs, button and UART
-	//	PORTE = 0x3c;
-	//	PORTD = 0xaa; // Id configuration
-	//	DDRD = 0x55;
+	//real board
+	// Initialize IO ports
+	DDRE = 0x1c; // LEDs, button and UART
+	PORTE = 0x3c;
+
+	PORTD = 0b10101010; // Id configuration
+	DDRD = 0b01010101;
+
+	PORTG = 0x00; // test probe pins
+	DDRG = 0xff;
+
+
+	// mega2560 board
+	//	DDRE = 0x02;
+	//	PORTE = 0x02;
 	//
-	//	PORTG = 0x00; // test probe pins
-	//	DDRG = 0xff;
-
-	DDRE = 0x02;
-	PORTE = 0x02;
-
-	DDRC = 0xff;
-	PORTC = 0xff;
+	//	DDRC = 0xff;
+	//	PORTC = 0xff;
 
 
-	// Read id [0-15]
-	//	uint8_t sn = 0x00;
-	//	sn += ReadBit(PIND, 1) ? 0 : 1;
-	//	sn += ReadBit(PIND, 3) ? 0 : 2;
-	//	sn += ReadBit(PIND, 5) ? 0 : 4;
-	//	sn += ReadBit(PIND, 7) ? 0 : 8;
+	// Read address (1 - 16)
+	localAddress += ReadBit(PIND, 1) ? 0 : 1;
+	localAddress += ReadBit(PIND, 3) ? 0 : 2;
+	localAddress += ReadBit(PIND, 5) ? 0 : 4;
+	localAddress += ReadBit(PIND, 7) ? 0 : 8;
+
+	PORTG = ~localAddress;
 
 
 	// Initialize kernel
@@ -83,12 +88,16 @@ void ShoutAndPass(uint8_t address)
 {
 	if (address == localAddress)
 	{
+		ClearBit(PORTE, 3);
+
 		shoutMessage m;
 		m.messageId = MESSAGEID_SHOUT;
 		m.source = localAddress;
 		RadioDriver_Send(&m, sizeof(m)); // shout
 
 		RadioDriver_WaitForSendToComplete(); // wait for shouting to complete...
+
+		SetBit(PORTE, 3);
 
 		if (reportReady)
 		{
@@ -164,7 +173,7 @@ void CableFrameHandler(uint8_t* data, uint8_t length)
 
 	if (doLed)
 	{
-		ClearBit(PORTC, 0);
+		ClearBit(PORTE, 2);
 		ledTimer = 4;
 	}
 }
