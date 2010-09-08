@@ -22,7 +22,7 @@ namespace RfSuitConnectionTester
 		{
 			Connection con = new Connection();
 			con.SweepCompleted += new SweepCompletedDelegate(con_SweepCompleted);
-			con.Start("COM11");
+			con.Start("COM15");
 		}
 
 		void con_SweepCompleted(LinkQualityIndicator[] results)
