@@ -25,6 +25,7 @@ namespace RfSuitConnectionTester
 			con.Start("COM15");
 		}
 
+		Int64 counter = 0;
 		void con_SweepCompleted(LinkQualityIndicator[] results)
 		{
 			if (InvokeRequired)
@@ -33,7 +34,23 @@ namespace RfSuitConnectionTester
 				return;
 			}
 
-		//	Text = results[0].Quality.ToString() + " dBm";
+			if (results.Length == 1)
+			{
+				progressBar1.Value = (int)(results[0].Quality + 90);
+				textBox1.Text = results[0].Quality + " dBm";
+			}
+			if (results.Length == 3)
+			{
+				progressBar1.Value = (int)(results[0].Quality + 90);
+				textBox1.Text = results[0].Quality + " dBm";
+				progressBar2.Value = (int)(results[1].Quality + 90);
+				textBox2.Text = results[1].Quality + " dBm";
+				progressBar3.Value = (int)(results[2].Quality + 90);
+				textBox3.Text = results[2].Quality + " dBm";
+			}
+
+			counter++;
+			Text = counter.ToString();
 		}
 	}
 }
