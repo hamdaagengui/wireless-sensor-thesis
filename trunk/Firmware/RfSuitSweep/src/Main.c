@@ -11,6 +11,7 @@
 #include "CableMessages.h"
 #include <Peripherals/RadioDriver.h>
 #include "RadioMessages.h"
+#include <util/delay.h>
 
 #define BAUDRATE_115200													16
 #define BAUDRATE_250000													7
@@ -22,7 +23,7 @@ void RadioFrameHandler(uint8_t* data, uint8_t length);
 uint8_t localAddress = 1;
 
 uint8_t rssis[16] = { 0 };
-bool reportReady = false;
+bool hasFullSweep = false;
 
 uint8_t ledTimer = 0;
 static void Run()
@@ -38,9 +39,19 @@ static void Run()
 	Kernel_Sleep(10);
 }
 
+void BlinkTrigger()
+{
+	ToggleBit(PORTE, 3);
+
+	uint8_t data[20];
+	data[0] = 123;
+	RadioDriver_Send(data, 1);
+
+	Kernel_Sleep(500);
+}
+
 int main()
 {
-	//real board
 	// Initialize IO ports
 	DDRE = 0x1c; // LEDs, button and UART
 	PORTE = 0x3c;
@@ -52,31 +63,29 @@ int main()
 	DDRG = 0xff;
 
 
-	// mega2560 board
-	//	DDRE = 0x02;
-	//	PORTE = 0x02;
-	//
-	//	DDRC = 0xff;
-	//	PORTC = 0xff;
-
-
 	// Read address (1 - 16)
 	localAddress += ReadBit(PIND, 1) ? 0 : 1;
 	localAddress += ReadBit(PIND, 3) ? 0 : 2;
 	localAddress += ReadBit(PIND, 5) ? 0 : 4;
 	localAddress += ReadBit(PIND, 7) ? 0 : 8;
 
-	PORTG = ~localAddress;
-
 
 	// Initialize kernel
 	Kernel_Initialize();
 
+
+	// Initialize sub systems
 	FrameTransceiver_Initialize(BAUDRATE_115200, CableFrameHandler);
+
 	RadioDriver_Initialize(RadioFrameHandler);
+	RadioDriver_SetBitRate(RADIODRIVER_BITRATE_250_KBPS);
+	RadioDriver_SetChannel(RADIODRIVER_CHANNEL_11);
+	RadioDriver_SetReceiverSensitivityThreshold(RADIODRIVER_RECEIVER_SENSITIVITY_THRESHOLD_DISABLE);
+	RadioDriver_SetTxPower(RADIODRIVER_TX_POWER_MAXIMUM);
 
 	Kernel_CreateTask(Run);
 
+	Kernel_CreateTask(BlinkTrigger);
 
 	// Start the system
 	Kernel_Run();
@@ -84,44 +93,47 @@ int main()
 	return 0;
 }
 
-void ShoutAndPass(uint8_t address)
+void ShoutAndPass()
 {
-	if (address == localAddress)
-	{
-		ClearBit(PORTE, 3);
+	// shout
+	ClearBit(PORTE, 3);
 
+	{
 		shoutMessage m;
 		m.messageId = MESSAGEID_SHOUT;
 		m.source = localAddress;
 		RadioDriver_Send(&m, sizeof(m)); // shout
-
-		RadioDriver_WaitForSendToComplete(); // wait for shouting to complete...
-
-		SetBit(PORTE, 3);
-
-		if (reportReady)
-		{
-			reportReady = false;
-
-			reportTokenMessage m;
-			m.destination = address + 1;
-			m.source = localAddress;
-			m.messageId = MESSAGEID_REPORTTOKEN;
-			for (uint8_t i = 0; i < lengthof(rssis); i++)
-			{
-				m.rssis[i] = rssis[i];
-			}
-			FrameTransceiver_Send(&m, sizeof(m));
-		}
-		else
-		{
-			nothingTokenMessage m;
-			m.destination = address + 1;
-			m.source = localAddress;
-			m.messageId = MESSAGEID_NOTHINGTOKEN;
-			FrameTransceiver_Send(&m, sizeof(m));
-		}
 	}
+
+	RadioDriver_WaitForSendToComplete(); // wait for shouting to complete...
+
+	SetBit(PORTE, 3);
+
+
+	// and pass
+	//	if (hasFullSweep)
+	{
+		reportTokenMessage m;
+		m.destination = localAddress + 1;
+		m.source = localAddress;
+		m.messageId = MESSAGEID_REPORTTOKEN;
+		for (uint8_t i = 0; i < lengthof(rssis); i++)
+		{
+			m.rssis[i] = rssis[i];
+			rssis[i] = 0;
+		}
+		FrameTransceiver_Send(&m, sizeof(m));
+	}
+	//	else
+	//	{
+	//		nothingTokenMessage m;
+	//		m.destination = localAddress + 1;
+	//		m.source = localAddress;
+	//		m.messageId = MESSAGEID_NOTHINGTOKEN;
+	//		FrameTransceiver_Send(&m, sizeof(m));
+	//
+	//		hasFullSweep = true; // once the first shout has been sent switch to hasFullSweep mode and start reporting RSSIs.
+	//	}
 }
 
 void CableFrameHandler(uint8_t* data, uint8_t length)
@@ -143,27 +155,33 @@ void CableFrameHandler(uint8_t* data, uint8_t length)
 			break;
 
 		case MESSAGEID_NOTHINGTOKEN:
-			ShoutAndPass(mb->destination);
+			if (mb->destination == localAddress)
+			{
+				ShoutAndPass();
+			}
 			break;
 
 		case MESSAGEID_SETCHANNELTOKEN:
+			RadioDriver_SetChannel(AsSetChannelTokenMessage(data)->channel);
+			if (mb->destination == localAddress)
 			{
-				setChannelTokenMessage* m = AsSetChannelTokenMessage(data);
-				RadioDriver_SetChannel(m->channel);
-				ShoutAndPass(mb->destination);
+				ShoutAndPass();
 			}
 			break;
 
 		case MESSAGEID_SETTXPOWERTOKEN:
+			RadioDriver_SetTxPower(AsSetTxPowerTokenMessage(data)->txPower);
+			if (mb->destination == localAddress)
 			{
-				setTxPowerTokenMessage* m = AsSetTxPowerTokenMessage(data);
-				RadioDriver_SetTxPower(m->txPower);
-				ShoutAndPass(mb->destination);
+				ShoutAndPass();
 			}
 			break;
 
 		case MESSAGEID_REPORTTOKEN:
-			ShoutAndPass(mb->destination);
+			if (mb->destination == localAddress)
+			{
+				ShoutAndPass();
+			}
 			break;
 
 		default:
@@ -180,24 +198,13 @@ void CableFrameHandler(uint8_t* data, uint8_t length)
 
 void RadioFrameHandler(uint8_t* data, uint8_t length)
 {
-	static uint8_t lastSource = 0;
-
 	radioMsgMessageBase* mb = AsRadioMsgMessageBase(data);
 
 	switch (mb->messageId)
 	{
 		case MESSAGEID_SHOUT:
-			{
-				shoutMessage* m = AsShoutMessage(data);
-				rssis[m->source] = RadioDriver_GetRssi();
-
-				if (lastSource > m->source)
-				{
-					reportReady = true;
-				}
-
-				lastSource = m->source;
-			}
+			ToggleBit(PORTE, 4);
+			rssis[mb->source - 1] = RadioDriver_GetRssi();
 			break;
 	}
 }
