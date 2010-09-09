@@ -26,9 +26,10 @@ namespace RfSuit
 
 		ConcurrentQueue<byte[]> txQueue;
 
-
 		LinkQualityIndicator[] lqis;
 		double[,] qualityMatrix;
+
+		int bla = 0;
 
 		DateTime lastTime = DateTime.Now;
 		public bool Start(string portName)
@@ -39,22 +40,25 @@ namespace RfSuit
 			md.AddHandler<PingReplyMessage>(m =>
 			{
 				devicePresence[m.Source - 1] = true;
-				Console.WriteLine("Device {0} is present [{1}]", m.Source, (DateTime.Now - pingTimer).TotalMilliseconds);
+				Console.WriteLine("Device {0} is present [{1:0.0} ms]", m.Source, (DateTime.Now - pingTimer).TotalMilliseconds);
 			});
 			md.AddHandler<NothingTokenMessage>(m =>
 			{
 				TokenReceived(m.Destination);
-				//	Console.WriteLine("Nothing");
 			});
 			md.AddHandler<ReportTokenMessage>(m =>
 			{
 				TokenReceived(m.Destination);
 
+				//	Console.WriteLine("Report from {0}", m.Source);
+
+				//	Console.Write("{0}: ", m.Source);
 				for (int i = 0; i < tokenRingLength - 1; i++)
 				{
-					qualityMatrix[m.Source - 1, i] = ((sbyte)m.Rssis[i]) - 256;
+					qualityMatrix[m.Source - 1, i] = ((sbyte)m.Rssis[i]);
+					//		Console.Write("{0} ", qualityMatrix[m.Source - 1, i]);
 				}
-				Console.WriteLine("{0}: {1} {2} {3}", m.Source, (sbyte)m.Rssis[0], (sbyte)m.Rssis[1], (sbyte)m.Rssis[2]);
+				//	Console.WriteLine();
 
 				if (m.Destination == tokenRingLength) // last device in the ring means a full sweep has been made
 				{
@@ -63,15 +67,24 @@ namespace RfSuit
 						var now = DateTime.Now;
 						var time = now - lastTime;
 						lastTime = now;
-						Console.WriteLine("Rx Report @ " + string.Format("{0:0.0}", 1000.0 / time.TotalMilliseconds) + " reports per second");
+						//		Console.WriteLine("Rx Report @ " + string.Format("{0:0.0}", 1000.0 / time.TotalMilliseconds) + " reports per second");
 
 						foreach (var lqi in lqis) // calculate lqi as the average of sensed RSSI by either end point of a link
 						{
 							int a = lqi.EndPointA;
 							int b = lqi.EndPointB;
 							lqi.Quality = (qualityMatrix[a, b] + qualityMatrix[b, a]) / 2.0;
-							//	Console.WriteLine("Raw: a->b {0} b->a{1}", qualityMatrix[a, b], qualityMatrix[b, a]);
-							//	Console.WriteLine("{0} <--> {1}: {2} dBm", a, b, lqi.Quality);
+							Console.WriteLine("Raw: a->b {0} b->a {1}", qualityMatrix[a, b], qualityMatrix[b, a]);
+
+							//if (a == 0 && b == 1)
+							//{
+							//  bla++;
+							//  if (bla >= 10)
+							//  {
+							//    bla = 0;
+							//    Console.WriteLine("{0} <--> {1}: {2} dBm", a, b, lqi.Quality);
+							//  }
+							//}
 						}
 
 						if (SweepCompleted != null)
@@ -81,8 +94,6 @@ namespace RfSuit
 					});
 				}
 			});
-
-			Thread.Sleep(2000);
 
 			try
 			{
@@ -96,6 +107,8 @@ namespace RfSuit
 			{
 				return false;
 			}
+
+			Thread.Sleep(200);
 
 			DetectDevices(); // detect which devices are online and detect the length of the ring
 
@@ -152,7 +165,7 @@ namespace RfSuit
 			}
 
 			tokenRingLength = 1;
-			for (byte i = 0; i < devicePresence.Length; i++)
+			for (int i = 0; i < devicePresence.Length; i++)
 			{
 				if (devicePresence[i])
 				{
@@ -178,6 +191,8 @@ namespace RfSuit
 			{
 				return;
 			}
+
+			Thread.Sleep(100);
 
 			byte[] msg;
 			if (txQueue.TryDequeue(out msg))
