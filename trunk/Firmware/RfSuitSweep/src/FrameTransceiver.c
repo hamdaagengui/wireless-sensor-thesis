@@ -47,7 +47,7 @@ static uint16_t receiverQueueIn = 0;
 static uint16_t receiverQueueOut = 0;
 static uint8_t receiverQueueFrameCount = 0;
 
-void FrameTransceiver_Initialize(uint8_t uart, uint16_t ubrr, blockHandlerCallback frameReceivedHandler)
+void FrameTransceiver_Initialize(uint16_t ubrr, blockHandlerCallback frameReceivedHandler)
 {
 	frameHandler = frameReceivedHandler;
 
@@ -109,7 +109,7 @@ void Run()
 	NonCritical();
 }
 
-void FrameTransceiver_Send(uint8_t uart, void* data, uint8_t length)
+void FrameTransceiver_Send(void* data, uint8_t length)
 {
 	if (length > (255 - 1)) // frames (including the checksum) in the buffer can not exceed what can be specified by an uint8_t
 	{
