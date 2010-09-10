@@ -62,6 +62,10 @@ int main()
 	PORTG = 0x00; // test probe pins
 	DDRG = 0xff;
 
+	PORTG = 0xf0;
+
+	while (1)
+		;
 
 	// Read address (1 - 16)
 	localAddress += ReadBit(PIND, 1) ? 0 : 1;
@@ -86,6 +90,7 @@ int main()
 	Kernel_CreateTask(Run);
 
 	Kernel_CreateTask(BlinkTrigger);
+
 
 	// Start the system
 	Kernel_Run();
