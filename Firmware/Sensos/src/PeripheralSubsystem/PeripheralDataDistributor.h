@@ -8,12 +8,20 @@
 #ifndef PERIPHERALDATADISTRIBUTOR_H_
 #define PERIPHERALDATADISTRIBUTOR_H_
 
-void PDD_Initialize();
-void PDD_Run();
+#include <Globals.h>
 
-void PDD_Subscribe(uint8_t peripheral);
+typedef void (*peripheralEventHandler)(uint8_t peripheral, void* data);
 
-void* PDD_AcquireDetailsObject();
-void PDD_Publish(uint8_t peripheral, void* details);
+// Initialization
+void PeripheralDataDistributor_Initialize();
+void PeripheralDataDistributor_Start();
+void PeripheralDataDistributor_ProcessEvents();
+
+// Subscribers
+void PeripheralDataDistributor_RegisterSubscriber(void* configuration, uint8_t id, peripheralEventHandler handler);
+
+// Publishers
+void* PeripheralDataDistributor_RegisterPublisher(uint8_t id);
+void* PeripheralDataDistributor_Publish(uint8_t peripheral, void* data);
 
 #endif /* PERIPHERALDATADISTRIBUTOR_H_ */

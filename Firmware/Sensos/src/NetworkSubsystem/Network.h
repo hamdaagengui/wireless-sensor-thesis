@@ -10,8 +10,16 @@
 
 #include <Globals.h>
 
+enum
+{
+	CLASSIFICATION_BULK,
+	CLASSIFICATION_STREAM,
+	CLASSIFICATION_NOTIFICATION
+};
+
 void Network_Initialize();
 void Network_Run();
-void Network_Send(void* data, uint8_t length);
+uint8_t Network_CreateChannel(uint8_t classification);
+void Network_SendSensorData(uint8_t sensorId, void* data, uint8_t length);
 
 #endif /* NETWORK_H_ */
