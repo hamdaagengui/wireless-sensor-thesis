@@ -5,8 +5,9 @@
  *      Author: Coma
  */
 
-#include <stdint.h>
+#include <Globals.h>
 
+// Device statistics
 typedef struct
 {
 	uint8_t txPower;
@@ -19,39 +20,51 @@ typedef struct
 
 deviceInfo devices[16];
 
+// Routing
 typedef struct
 {
 	uint8_t hops;
 } routeInfo;
 routeInfo routingTable[16][16];
 
+// Frames
 enum
 {
 	FRAME_TYPE_DATA,
 	FRAME_TYPE_MANAGEMENT
 };
 
+typedef struct
+{
+	uint8_t source :4;
+	uint8_t destination :4;
+	uint8_t commands[];
+} networkFrame;
+
+// Commands
 enum
 {
-	COMMAND_ACKNOWLEDGE,
-	COMMAND_NOT_ACKNOWLEDGE,
+	COMMAND_CONFIGURATION,
 	COMMAND_ENERGY_LEVEL,
 	COMMAND_QUEUE_LEVEL,
-	COMMAND_BUSY_LEVEL
+	COMMAND_BUSY_LEVEL,
+	COMMAND_ACKNOWLEDGE,
+	COMMAND_NOT_ACKNOWLEDGE,
+	COMMAND_SENSOR_DATA
 };
 
 typedef struct
 {
-	uint8_t id :3;
+	uint8_t commandId :3;
 	uint8_t parameter :5;
-	uint8_t data[];
-} command;
+} baseCommand;
 
 typedef struct
 {
-	uint8_t source;
-	uint8_t payload[];
-} frame;
+	uint8_t commandId :3;
+	uint8_t sensorId :5;
+	uint8_t data[];
+} sensorDataCommand;
 
 void Network_Initialize()
 {
