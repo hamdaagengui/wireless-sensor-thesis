@@ -59,10 +59,10 @@ int main()
 	PORTD = 0b10101010; // Id configuration
 	DDRD = 0b01010101;
 
-	PORTG = 0x00; // test probe pins
-	DDRG = 0xff;
+	PORTF = 0x00; // test probe pins
+	DDRF = 0xff;
 
-	PORTG = 0xf0;
+	PORTF = 0xa5;
 
 	while (1)
 		;
