@@ -59,13 +59,19 @@ int main()
 	PORTD = 0b10101010; // Id configuration
 	DDRD = 0b01010101;
 
-	PORTF = 0x00; // test probe pins
-	DDRF = 0xff;
-
-	PORTF = 0xa5;
-
 	while (1)
-		;
+	{
+		ToggleBit(PORTE, 4);
+		if (ReadBit(PINE, 5))
+		{
+			SetBit(PORTE, 2);
+		}
+		else
+		{
+			ClearBit(PORTE, 2);
+		}
+		_delay_ms(500);
+	}
 
 	// Read address (1 - 16)
 	localAddress += ReadBit(PIND, 1) ? 0 : 1;
