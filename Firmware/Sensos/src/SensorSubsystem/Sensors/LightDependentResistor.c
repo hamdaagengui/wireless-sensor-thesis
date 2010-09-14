@@ -13,7 +13,7 @@ void LightDependentResistor_Initialize()
 {
 	adcConfiguration c;
 	//	c.base.peripheralId = PERIPHERAL_ADC;
-	c.sampleInterval = 1000;
+	c.interval = 1000;
 	//	Adc_Configure(&c);
 }
 

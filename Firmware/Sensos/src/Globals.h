@@ -28,11 +28,9 @@ typedef uint8_t bool;
 
 #define MemoryBarrier()													__asm__ volatile ("" : : : "memory")
 
-typedef uint8_t event;
-
 typedef void (*blockHandlerCallback)(uint8_t* data, uint8_t length);
 typedef void (*notificationHandlerCallback)();
 
-typedef void (*eventHandler)(uint8_t event, void* arguments);
+typedef void (*eventHandler)();
 
 #endif /* GLOBALS_H_ */

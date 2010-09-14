@@ -10,7 +10,7 @@
 
 #include <Globals.h>
 
-typedef void (*peripheralEventHandler)(uint8_t peripheral, void* data);
+typedef void (*peripheralEventHandler)(void* data);
 
 // Initialization
 void PeripheralDataDistributor_Initialize();
@@ -18,9 +18,10 @@ void PeripheralDataDistributor_Start();
 void PeripheralDataDistributor_ProcessEvents();
 
 // Subscribers
-void PeripheralDataDistributor_RegisterSubscriber(void* configuration, uint8_t id, peripheralEventHandler handler);
+void PeripheralDataDistributor_RegisterSubscriber(uint8_t event, peripheralEventHandler handler);
 
 // Publishers
+void* PeripheralDataDistributor_GetBuffer();
 void* PeripheralDataDistributor_RegisterPublisher(uint8_t id);
 void* PeripheralDataDistributor_Publish(uint8_t peripheral, void* data);
 
