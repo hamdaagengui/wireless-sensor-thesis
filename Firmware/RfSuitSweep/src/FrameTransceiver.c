@@ -9,6 +9,8 @@
 #include <Config.h>
 #include <Kernel/Kernel.h>
 
+#if defined(FRAMETRANSCEIVER)
+
 #define SOF																			255
 #define EOF																			254
 #define ESC																			253
@@ -386,3 +388,5 @@ ISR(USART0_TX_vect)
 
 	ClearBit(UCSR0B, TXCIE0); // disable TXC interrupt
 }
+
+#endif
