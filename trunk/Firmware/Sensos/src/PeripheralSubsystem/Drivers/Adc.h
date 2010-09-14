@@ -15,11 +15,20 @@
 
 typedef struct
 {
-//	peripheralUsageRequest base;
-	uint32_t sampleInterval;
+	uint8_t channel;
+	uint16_t value;
+} adcEvent;
+
+typedef struct
+{
+	//	peripheralUsageRequest base;
+	uint32_t interval;
+	uint8_t channel;
+	void (*handler)(adcEvent* event);
 } adcConfiguration;
 
-void Adc_Configure(adcConfiguration* configuration);
-void Adc_Subscribe();
+extern void Adc_Initialize();
+extern void Adc_Subscribe(adcConfiguration* configuration);
+extern void Adc_Start();
 
 #endif /* ADC_H_ */
