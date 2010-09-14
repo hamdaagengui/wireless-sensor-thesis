@@ -41,13 +41,34 @@ static void Run()
 
 void BlinkTrigger()
 {
-	ToggleBit(PORTE, 3);
+	ToggleBit(PORTE, 2);
 
 	uint8_t data[20];
 	data[0] = 123;
+
+	if (ReadBit(PINE, 5))
+	{
+		data[0] = 0;
+	}
+	else
+	{
+		data[0] = 1;
+	}
 	RadioDriver_Send(data, 1);
+	RadioDriver_WaitForSendToComplete();
+
+	RadioDriver_Calibrate();
 
 	Kernel_Sleep(500);
+}
+
+void BlinkSlave()
+{
+	ToggleBit(PORTE, 2);
+
+	RadioDriver_Calibrate();
+
+	Kernel_Sleep(400);
 }
 
 int main()
@@ -56,28 +77,15 @@ int main()
 	DDRE = 0x1c; // LEDs, button and UART
 	PORTE = 0x3c;
 
-	PORTD = 0b10101010; // Id configuration
-	DDRD = 0b01010101;
+	PORTD = 0b01010101; // Id configuration
+	DDRD = 0b10101010;
 
-	while (1)
-	{
-		ToggleBit(PORTE, 4);
-		if (ReadBit(PINE, 5))
-		{
-			SetBit(PORTE, 2);
-		}
-		else
-		{
-			ClearBit(PORTE, 2);
-		}
-		_delay_ms(500);
-	}
 
 	// Read address (1 - 16)
-	localAddress += ReadBit(PIND, 1) ? 0 : 1;
-	localAddress += ReadBit(PIND, 3) ? 0 : 2;
-	localAddress += ReadBit(PIND, 5) ? 0 : 4;
-	localAddress += ReadBit(PIND, 7) ? 0 : 8;
+	localAddress += ReadBit(PIND, 0) ? 0 : 1;
+	localAddress += ReadBit(PIND, 2) ? 0 : 2;
+	localAddress += ReadBit(PIND, 4) ? 0 : 4;
+	localAddress += ReadBit(PIND, 6) ? 0 : 8;
 
 
 	// Initialize kernel
@@ -85,18 +93,25 @@ int main()
 
 
 	// Initialize sub systems
-	FrameTransceiver_Initialize(BAUDRATE_115200, CableFrameHandler);
+	//	FrameTransceiver_Initialize(BAUDRATE_115200, CableFrameHandler);
 
 	RadioDriver_Initialize(RadioFrameHandler);
-	RadioDriver_SetBitRate(RADIODRIVER_BITRATE_250_KBPS);
-	RadioDriver_SetChannel(RADIODRIVER_CHANNEL_11);
-	RadioDriver_SetReceiverSensitivityThreshold(RADIODRIVER_RECEIVER_SENSITIVITY_THRESHOLD_DISABLE);
-	RadioDriver_SetTxPower(RADIODRIVER_TX_POWER_MAXIMUM);
+	//	RadioDriver_SetBitRate(RADIODRIVER_BITRATE_250_KBPS);
+	  RadioDriver_SetChannel(RADIODRIVER_CHANNEL_20);
+	//	RadioDriver_SetReceiverSensitivityThreshold(RADIODRIVER_RECEIVER_SENSITIVITY_THRESHOLD_DISABLE);
+	//	RadioDriver_SetTxPower(RADIODRIVER_TX_POWER_MAXIMUM);
 
-	Kernel_CreateTask(Run);
 
-	Kernel_CreateTask(BlinkTrigger);
+	//	Kernel_CreateTask(Run);
 
+	if (localAddress == 1)
+	{
+		Kernel_CreateTask(BlinkTrigger);
+	}
+	else
+	{
+		Kernel_CreateTask(BlinkSlave);
+	}
 
 	// Start the system
 	Kernel_Run();
@@ -209,6 +224,19 @@ void CableFrameHandler(uint8_t* data, uint8_t length)
 
 void RadioFrameHandler(uint8_t* data, uint8_t length)
 {
+	ToggleBit(PORTE, 4);
+
+	if (data[0] == 0)
+	{
+		SetBit(PORTE, 3);
+	}
+	else
+	{
+		ClearBit(PORTE, 3);
+	}
+
+	return;
+
 	radioMsgMessageBase* mb = AsRadioMsgMessageBase(data);
 
 	switch (mb->messageId)
