@@ -5,77 +5,6 @@
  *      Author: Coma
  */
 
-#include <Peripherals/RadioDriver.h>
-#include <util/delay.h>
-#include <Peripherals/UART0.h>
-#include <FIFO.h>
-
-//void RadioHandler(uint8_t* data, uint8_t length)
-//{
-//	uint8_t buf[10];
-//	buf[0] = RadioDriver_GetRssi() + 90;
-//	FIFO_Put(uart0TxFifo, buf, 1);
-//
-//	ToggleBit(PORTE, 3);
-//	if (data[0] == 123)
-//	{
-//		SetBit(PORTE, 4);
-//	}
-//	else
-//	{
-//		ClearBit(PORTE, 4);
-//	}
-//}
-//
-//uint8_t localAddress = 0;
-//int main()
-//{
-//	DDRE = 0x1c;
-//	PORTE = 0x3c;
-//
-//	PORTD = 0b01010101; // Id configuration
-//	DDRD = 0b10101010;
-//
-//
-//	// Read address (1 - 16)
-//	localAddress += ReadBit(PIND, 0) ? 0 : 1;
-//	localAddress += ReadBit(PIND, 2) ? 0 : 2;
-//	localAddress += ReadBit(PIND, 4) ? 0 : 4;
-//	localAddress += ReadBit(PIND, 6) ? 0 : 8;
-//
-//	RadioDriver_Initialize(RadioHandler);
-//	UART0_Initialize(UART0_ConvertBaudrateToDivisor(115200));
-//
-////	RadioDriver_EnableReceiveMode();
-//
-//	sei();
-//
-//	while (1)
-//	{
-//		if (localAddress > 0)
-//		{
-//			uint8_t data[10] = { 1 };
-//
-////			RadioDriver_DisableReceiveMode();
-//
-//			data[0] = PINE & (1 << 5) ? 123 : 0;
-//
-//			RadioDriver_Send(data, 1);
-//
-////			RadioDriver_WaitForSendToComplete();
-//
-////			RadioDriver_EnableReceiveMode();
-//
-//			ToggleBit(PORTE, 2);
-//
-//			_delay_ms(20);
-//		}
-//	}
-//
-//	return 0;
-//}
-
-
 #include <Globals.h>
 #include <Kernel/Kernel.h>
 #include <Network/FrameTransceiver.h>
@@ -110,40 +39,6 @@ static void BlinkerTask()
 	Kernel_Sleep(10);
 }
 
-//void BlinkTrigger()
-//{
-//	ToggleBit(PORTE, 2);
-//
-//	uint8_t data[20];
-//	data[0] = 123;
-//
-//	if (ReadBit(PINE, 5))
-//	{
-//		data[0] = 0;
-//	}
-//	else
-//	{
-//		data[0] = 1;
-//	}
-//	RadioDriver_Send(data, 1);
-//	RadioDriver_WaitForSendToComplete();
-//
-//
-//	//	RadioDriver_Calibrate();
-//
-//	Kernel_Sleep(500);
-//}
-
-//void BlinkSlave()
-//{
-//	ToggleBit(PORTE, 2);
-//
-//
-//	//	RadioDriver_Calibrate();
-//
-//	Kernel_Sleep(400);
-//}
-
 int main()
 {
 	// Initialize IO ports
@@ -177,15 +72,6 @@ int main()
 
 	Kernel_CreateTask(BlinkerTask);
 
-
-	//	if (localAddress == 1)
-	//	{
-	//		Kernel_CreateTask(BlinkTrigger);
-	//	}
-	//	else
-	//	{
-	//		Kernel_CreateTask(BlinkSlave);
-	//	}
 
 	// Start the system
 	Kernel_Run();
