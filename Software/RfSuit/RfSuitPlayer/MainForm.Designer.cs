@@ -77,20 +77,20 @@
       // openToolStripMenuItem
       // 
       this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-      this.openToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+      this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.openToolStripMenuItem.Text = "&Open";
       this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItemClick);
       // 
       // toolStripSeparator1
       // 
       this.toolStripSeparator1.Name = "toolStripSeparator1";
-      this.toolStripSeparator1.Size = new System.Drawing.Size(131, 6);
+      this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
       // 
       // exitToolStripMenuItem
       // 
       this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
       this.exitToolStripMenuItem.ShortcutKeyDisplayString = "Alt+F4";
-      this.exitToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+      this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
       this.exitToolStripMenuItem.Text = "E&xit";
       this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItemClick);
       // 
@@ -189,6 +189,7 @@
       // flowLayoutPanel1
       // 
       this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
       this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
       this.flowLayoutPanel1.Size = new System.Drawing.Size(194, 220);
@@ -215,7 +216,6 @@
       this.Controls.Add(this.previousButton);
       this.Controls.Add(this.menuStrip);
       this.DataBindings.Add(new System.Windows.Forms.Binding("Location", global::RfSuitPlayer.Properties.Settings.Default, "FormLocation", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-      this.DataBindings.Add(new System.Windows.Forms.Binding("WindowState", global::RfSuitPlayer.Properties.Settings.Default, "FormState", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
       this.Location = global::RfSuitPlayer.Properties.Settings.Default.FormLocation;
       this.MainMenuStrip = this.menuStrip;
       this.Name = "MainForm";
