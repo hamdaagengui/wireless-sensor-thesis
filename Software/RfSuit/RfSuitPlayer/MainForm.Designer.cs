@@ -150,7 +150,6 @@
       // 
       this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
       this.splitContainer1.Size = new System.Drawing.Size(678, 418);
-      this.splitContainer1.SplitterDistance = global::RfSuitPlayer.Properties.Settings.Default.SplitterHorz;
       this.splitContainer1.TabIndex = 11;
       // 
       // zedGraphControl1
@@ -165,13 +164,15 @@
       this.zedGraphControl1.ScrollMinX = 0D;
       this.zedGraphControl1.ScrollMinY = 0D;
       this.zedGraphControl1.ScrollMinY2 = 0D;
-      this.zedGraphControl1.Size = new System.Drawing.Size(678, 194);
+      this.zedGraphControl1.Size = new System.Drawing.Size(678, 50);
       this.zedGraphControl1.TabIndex = 0;
       // 
       // splitContainer2
       // 
+      this.splitContainer2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.splitContainer2.DataBindings.Add(new System.Windows.Forms.Binding("SplitterDistance", global::RfSuitPlayer.Properties.Settings.Default, "SplitterVert", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
       this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
       this.splitContainer2.Location = new System.Drawing.Point(0, 0);
       this.splitContainer2.Name = "splitContainer2";
       // 
@@ -182,8 +183,8 @@
       // splitContainer2.Panel2
       // 
       this.splitContainer2.Panel2.Controls.Add(this.pictureBox);
-      this.splitContainer2.Size = new System.Drawing.Size(678, 220);
-      this.splitContainer2.SplitterDistance = global::RfSuitPlayer.Properties.Settings.Default.SplitterVert;
+      this.splitContainer2.Size = new System.Drawing.Size(678, 364);
+      this.splitContainer2.SplitterDistance = 226;
       this.splitContainer2.TabIndex = 0;
       // 
       // flowLayoutPanel1
@@ -192,7 +193,7 @@
       this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
       this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(194, 220);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(224, 362);
       this.flowLayoutPanel1.TabIndex = 0;
       // 
       // pictureBox
@@ -200,7 +201,7 @@
       this.pictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
       this.pictureBox.Location = new System.Drawing.Point(0, 0);
       this.pictureBox.Name = "pictureBox";
-      this.pictureBox.Size = new System.Drawing.Size(480, 220);
+      this.pictureBox.Size = new System.Drawing.Size(446, 362);
       this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
       this.pictureBox.TabIndex = 2;
       this.pictureBox.TabStop = false;
@@ -216,7 +217,6 @@
       this.Controls.Add(this.previousButton);
       this.Controls.Add(this.menuStrip);
       this.DataBindings.Add(new System.Windows.Forms.Binding("Location", global::RfSuitPlayer.Properties.Settings.Default, "FormLocation", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-      this.Location = global::RfSuitPlayer.Properties.Settings.Default.FormLocation;
       this.MainMenuStrip = this.menuStrip;
       this.Name = "MainForm";
       this.Text = "RfSuit Player";

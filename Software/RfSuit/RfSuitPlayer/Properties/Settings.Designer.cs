@@ -22,41 +22,5 @@ namespace RfSuitPlayer.Properties {
                 return defaultInstance;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
-        public global::System.Drawing.Point FormLocation {
-            get {
-                return ((global::System.Drawing.Point)(this["FormLocation"]));
-            }
-            set {
-                this["FormLocation"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("194")]
-        public int SplitterHorz {
-            get {
-                return ((int)(this["SplitterHorz"]));
-            }
-            set {
-                this["SplitterHorz"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("194")]
-        public int SplitterVert {
-            get {
-                return ((int)(this["SplitterVert"]));
-            }
-            set {
-                this["SplitterVert"] = value;
-            }
-        }
     }
 }
