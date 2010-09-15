@@ -84,7 +84,8 @@ namespace RfSuitLogger
 
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
-      _logger.Stop();
+      if(_logger != null)
+        _logger.Stop();
       StopVideoSource();
     }
 

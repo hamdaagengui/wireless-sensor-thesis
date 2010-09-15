@@ -71,7 +71,7 @@ namespace RfSuitPlayer
       }
       
       // Fill the axis background with a color gradient
-      myPane.Chart.Fill = new Fill(Color.FromArgb(255, 255, 245), Color.FromArgb(255, 255, 190), 90F);
+      myPane.Chart.Fill = new Fill(Color.Black);
 
       // Display the Y axis grid lines
 //      myPane.YAxis.MajorGrid.IsVisible = true;
@@ -107,7 +107,7 @@ namespace RfSuitPlayer
       zgc.IsEnableZoom = false;
 
       // Fill the pane background with a gradient
-      myPane.Fill = new Fill(Color.Black, Color.Black, 0F);
+      myPane.Fill = new Fill(Color.White, Color.WhiteSmoke, 0F);
 
       UpdateGraphLine();
 
