@@ -64,7 +64,7 @@ namespace RfSuitPlayer
       _timeline = graphData.Timeline;
 
       myPane.XAxis.Scale.Min = _timeline.First();
-      myPane.XAxis.Scale.Min = _timeline.Last();
+      myPane.XAxis.Scale.Max = _timeline.Last();
 
       var rotator = ColorSymbolRotator.StaticInstance;
       foreach (var connectionData in graphData.ConnectionDatas)
