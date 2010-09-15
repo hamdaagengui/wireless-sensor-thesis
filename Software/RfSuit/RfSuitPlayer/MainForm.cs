@@ -25,6 +25,8 @@ namespace RfSuitPlayer
     private Player _player;
     private double[] _timeline;
     private GraphData _graphData;
+    private bool _enableCurveUpdates = true;
+    private CheckBox _allCheckBox;
 
     // ZedGraph stuff
 
@@ -56,6 +58,14 @@ namespace RfSuitPlayer
         checkBox.CheckedChanged += CheckBoxClick;
         flowLayoutPanel1.Controls.Add(checkBox);
       }
+      _allCheckBox = new CheckBox
+      {
+        Text = "All",
+        Checked = true,
+        ForeColor = Color.White,
+      };
+      _allCheckBox.CheckedChanged += CheckAllCheckedChanged;
+      flowLayoutPanel1.Controls.Add(_allCheckBox);
 
       CreateChart();
 
@@ -65,12 +75,48 @@ namespace RfSuitPlayer
       _player = new Player(_entries, trackBar);
     }
 
-    void CheckBoxClick(object sender, EventArgs e)
+    void CheckAllCheckedChanged(object sender, EventArgs e)
     {
+      if (_enableCurveUpdates == false) return;
+      var checkAllCheckBox = sender as CheckBox;
+      if (checkAllCheckBox == null) return;
+      _enableCurveUpdates = false;
+      foreach (var checkBox in flowLayoutPanel1.Controls.OfType<CheckBox>())
+        checkBox.Checked = checkAllCheckBox.Checked;
+      _enableCurveUpdates = true;
       UpdateCurves();
     }
 
+    void CheckBoxClick(object sender, EventArgs e)
+    {
+      UpdateCurves();
+
+      if(_enableCurveUpdates) {
+        _enableCurveUpdates = false;
+        var cbs = from cb in flowLayoutPanel1.Controls.OfType<CheckBox>()
+                where cb.Tag is ConnectionData
+                select cb;
+        bool isAllSelected = true;
+        bool isNoneSelected = true;
+        foreach (var checkBox in cbs) {
+          if (checkBox.Checked) {
+            isNoneSelected = false;
+          } else {
+            isAllSelected = false;
+          }
+        }
+        if (isAllSelected)
+          _allCheckBox.Checked = true;
+        else if (isNoneSelected)
+          _allCheckBox.Checked = false;
+        else
+          _allCheckBox.CheckState = CheckState.Indeterminate;
+        _enableCurveUpdates = true;
+      }
+    }
+
     public void UpdateCurves() {
+      if (_enableCurveUpdates == false) return;
       var myPane = zedGraphControl1.GraphPane;
       myPane.CurveList.Clear();
 
