@@ -231,11 +231,11 @@ namespace RfSuitPlayer
         var mousePt = new PointF(e.X, e.Y);
         CurveItem ci;
         int i;
-        sender.GraphPane.FindNearestPoint(mousePt, out ci, out i);
-        if(i != -1) {
-          _position = i;
-          UpdateGraphLine();
-        }
+        double x;
+        double y;
+        sender.GraphPane.ReverseTransform(mousePt, out x, out y);
+        _position = _graphData.GetNearestIndex(x);
+        UpdateGraphLine();
       }
       return default(bool);
     }

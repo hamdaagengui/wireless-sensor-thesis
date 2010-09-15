@@ -8,6 +8,24 @@ namespace RfSuitPlayer {
     public ConnectionData[] ConnectionDatas { get; private set; }
     public double[] Timeline { get; private set; }
     public int DeviceCount { get; private set; }
+    public int GetNearestIndex(double timestamp) {
+      int i = Array.BinarySearch(Timeline, timestamp);
+      if (i < 0) {
+        i = ~i;
+        if (i >= Timeline.Length)
+          i = Timeline.Length - 1;
+        if (i == 0)
+          return i;
+        double prev = Timeline[i - 1];
+        double next = Timeline[i];
+        if (timestamp - prev < next - timestamp)
+          return i - 1;
+        return i;
+      } else {
+        return i;
+      }
+
+    }
 
     public GraphData(Entry[] entries) {
       var rotator = new ColorSymbolRotator();
