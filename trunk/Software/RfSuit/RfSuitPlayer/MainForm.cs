@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Windows.Forms;
 using dk.iha;
@@ -20,6 +21,7 @@ namespace RfSuitPlayer
 
     private Entry[] _entries;
     private Player _player;
+    private double[] _timeline;
 
     // ZedGraph stuff
 
@@ -38,12 +40,13 @@ namespace RfSuitPlayer
       _entries = entries.ToArray();
       trackBar.Minimum = 0;
       trackBar.Maximum = _entries.Length - 1;
+      
+      CreateChart(zedGraphControl1, new GraphData(_entries));
+
       trackBar.Value = 0;
       if (_player != null)
         _player.StopPlayer();
       _player = new Player(_entries, trackBar);
-
-      CreateChart(zedGraphControl1, new GraphData(_entries));
     }
 
     public void CreateChart(ZedGraphControl zgc, GraphData graphData)
@@ -52,60 +55,82 @@ namespace RfSuitPlayer
 
       // Set the title and axis labels
       myPane.Title.Text = "RfData";
-      myPane.XAxis.Title.Text = "Timestamp [ms since Epoch]";
+      myPane.XAxis.Type = AxisType.Date;
       myPane.YAxis.Title.Text = "Link Quality [dBm]";
 
-
-      var timeline = graphData.Timeline;
+      _timeline = graphData.Timeline;
 
       var rotator = ColorSymbolRotator.StaticInstance;
       foreach (var connectionData in graphData.ConnectionDatas)
       {
-        var curve = myPane.AddCurve(connectionData.EndPointA + " <> " + connectionData.EndPointB, timeline, connectionData.Quality, rotator.NextColor);
-        curve.Symbol.Fill = new Fill(Color.White);
+        var curve = myPane.AddCurve(connectionData.EndPointA + " <> " + connectionData.EndPointB, _timeline, connectionData.Quality, rotator.NextColor);
+        curve.Symbol.IsVisible = false;
+        //curve.Symbol.Fill = new Fill(Color.White);
       }
       
       // Fill the axis background with a color gradient
       myPane.Chart.Fill = new Fill(Color.FromArgb(255, 255, 245), Color.FromArgb(255, 255, 190), 90F);
 
-      // Manually set the x axis range
-//      myPane.XAxis.Scale.Min = 0;
-//      myPane.XAxis.Scale.Max = 800;
-
       // Display the Y axis grid lines
-      myPane.YAxis.MajorGrid.IsVisible = true;
-      myPane.YAxis.MinorGrid.IsVisible = true;
+//      myPane.YAxis.MajorGrid.IsVisible = true;
+//      myPane.YAxis.MinorGrid.IsVisible = true;
       #region bah
+/*
       // Draw a box item to highlight a value range
-//      BoxObj box = new BoxObj(0, 100, 1, 30, Color.Empty,
-//              Color.FromArgb(150, Color.LightGreen));
-//      box.Fill = new Fill(Color.White, Color.FromArgb(200, Color.LightGreen), 45.0F);
+      BoxObj box = new BoxObj(0, 100, 1, 30, Color.Empty,
+              Color.FromArgb(150, Color.LightGreen));
+      box.Fill = new Fill(Color.White, Color.FromArgb(200, Color.LightGreen), 45.0F);
       // Use the BehindAxis zorder to draw the highlight beneath the grid lines
-//      box.ZOrder = ZOrder.E_BehindCurves;
+      box.ZOrder = ZOrder.E_BehindCurves;
       // Make sure that the boxObj does not extend outside the chart rect if the chart is zoomed
-//      box.IsClippedToChartRect = true;
+      box.IsClippedToChartRect = true;
       // Use a hybrid coordinate system so the X axis always covers the full x range
       // from chart fraction 0.0 to 1.0
-//      box.Location.CoordinateFrame = CoordType.XChartFractionYScale;
-//      myPane.GraphObjList.Add(box);
+      box.Location.CoordinateFrame = CoordType.XChartFractionYScale;
+      myPane.GraphObjList.Add(box);
 
       // Add a text item to label the highlighted range
-//      TextObj text = new TextObj("Optimal\nRange", 0.95f, 85, CoordType.AxisXYScale,
-//                              AlignH.Right, AlignV.Center);
-//      text.FontSpec.Fill.IsVisible = false;
-//      text.FontSpec.Border.IsVisible = false;
-//      text.FontSpec.IsBold = true;
-//      text.FontSpec.IsItalic = true;
-//      text.Location.CoordinateFrame = CoordType.XChartFractionYScale;
-//      text.IsClippedToChartRect = true;
-      //      myPane.GraphObjList.Add(text);
+      TextObj text = new TextObj("Optimal\nRange", 0.95f, 85, CoordType.AxisXYScale,
+                              AlignH.Right, AlignV.Center);
+      text.FontSpec.Fill.IsVisible = false;
+      text.FontSpec.Border.IsVisible = false;
+      text.FontSpec.IsBold = true;
+      text.FontSpec.IsItalic = true;
+      text.Location.CoordinateFrame = CoordType.XChartFractionYScale;
+      text.IsClippedToChartRect = true;
+      myPane.GraphObjList.Add(text);
+*/
       #endregion
+
+      zgc.IsEnableZoom = false;
+
       // Fill the pane background with a gradient
-      myPane.Fill = new Fill(Color.WhiteSmoke, Color.Lavender, 0F);
+      myPane.Fill = new Fill(Color.White, Color.WhiteSmoke, 0F);
+
+      UpdateGraphLine();
 
       // Calculate the Axis Scale Ranges
       zgc.AxisChange();
-      zgc.Refresh();
+
+      myPane.XAxis.Title.Text = "Timestamp [" + myPane.XAxis.Scale.Format + "]";
+      
+      zgc.Invalidate();
+    }
+
+    private void UpdateGraphLine() {
+      var zgc = zedGraphControl1;
+      var myPane = zgc.GraphPane;
+      var timestamp = _timeline[trackBar.Value];
+      myPane.GraphObjList.RemoveAll(c => c is LineObj);
+      var line = new LineObj(Color.DimGray, timestamp, 0, timestamp, 1)
+      {
+        Location = { CoordinateFrame = CoordType.XScaleYChartFraction },
+        ZOrder = ZOrder.E_BehindCurves,
+        IsClippedToChartRect = true,
+        Line = { Style = DashStyle.Dash }
+      };
+      myPane.GraphObjList.Add(line);      
+      zgc.Invalidate();
     }
 
     private void ExitToolStripMenuItemClick(object sender, EventArgs e)
@@ -119,6 +144,7 @@ namespace RfSuitPlayer
       var entry = _entries[trackBar.Value];
       pictureBox.Image = Image.FromStream(new MemoryStream(entry.pictures[0].data));
       propertyGrid.SelectedObjects = entry.results.ToArray();
+      UpdateGraphLine();
     }
 
     private void PreviousButtonClick(object sender, EventArgs e)
