@@ -85,6 +85,8 @@ namespace RfSuitPlayer
 
       // Calculate the Axis Scale Ranges
       zedGraphControl1.AxisChange();
+      myPane.XAxis.Title.Text = "Timestamp [" + myPane.XAxis.Scale.Format + "]";
+
       zedGraphControl1.Invalidate();
     }
 
@@ -97,51 +99,16 @@ namespace RfSuitPlayer
       myPane.Title.IsVisible = false;
       myPane.XAxis.Type = AxisType.Date;
       myPane.YAxis.Title.Text = "Link Quality [dBm]";
-      myPane.XAxis.Title.Text = "Timestamp [" + myPane.XAxis.Scale.Format + "]";
+
+      myPane.Fill = new Fill(Color.Transparent);
+      myPane.Border.IsVisible = false;
+
+      myPane.Chart.Fill = new Fill(Color.Black);
 
       _timeline = _graphData.Timeline;
 
       myPane.XAxis.Scale.Min = _timeline.First();
       myPane.XAxis.Scale.Max = _timeline.Last();
-
-      // Fill the axis background with a color gradient
-      myPane.Chart.Fill = new Fill(Color.Black);
-
-      // Display the Y axis grid lines
-//      myPane.YAxis.MajorGrid.IsVisible = true;
-//      myPane.YAxis.MinorGrid.IsVisible = true;
-      #region bah
-/*
-      // Draw a box item to highlight a value range
-      BoxObj box = new BoxObj(0, 100, 1, 30, Color.Empty,
-              Color.FromArgb(150, Color.LightGreen));
-      box.Fill = new Fill(Color.White, Color.FromArgb(200, Color.LightGreen), 45.0F);
-      // Use the BehindAxis zorder to draw the highlight beneath the grid lines
-      box.ZOrder = ZOrder.E_BehindCurves;
-      // Make sure that the boxObj does not extend outside the chart rect if the chart is zoomed
-      box.IsClippedToChartRect = true;
-      // Use a hybrid coordinate system so the X axis always covers the full x range
-      // from chart fraction 0.0 to 1.0
-      box.Location.CoordinateFrame = CoordType.XChartFractionYScale;
-      myPane.GraphObjList.Add(box);
-
-      // Add a text item to label the highlighted range
-      TextObj text = new TextObj("Optimal\nRange", 0.95f, 85, CoordType.AxisXYScale,
-                              AlignH.Right, AlignV.Center);
-      text.FontSpec.Fill.IsVisible = false;
-      text.FontSpec.Border.IsVisible = false;
-      text.FontSpec.IsBold = true;
-      text.FontSpec.IsItalic = true;
-      text.Location.CoordinateFrame = CoordType.XChartFractionYScale;
-      text.IsClippedToChartRect = true;
-      myPane.GraphObjList.Add(text);
-*/
-      #endregion
-
-      zedGraphControl1.IsEnableZoom = false;
-
-      // Fill the pane background with a gradient
-      myPane.Fill = new Fill(Color.White, Color.WhiteSmoke, 0F);
 
       UpdateGraphLine();
 
