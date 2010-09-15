@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfSuitLoggerInterfaces", "R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfSuitPlayer", "RfSuitPlayer\RfSuitPlayer.csproj", "{2E92F66F-29DC-443D-8DA4-EC8E97BF9E34}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfSuitCompressLog", "RfSuitCompressLog\RfSuitCompressLog.csproj", "{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -75,6 +77,16 @@ Global
 		{2E92F66F-29DC-443D-8DA4-EC8E97BF9E34}.Release|Mixed Platforms.Build.0 = Release|x86
 		{2E92F66F-29DC-443D-8DA4-EC8E97BF9E34}.Release|x86.ActiveCfg = Release|x86
 		{2E92F66F-29DC-443D-8DA4-EC8E97BF9E34}.Release|x86.Build.0 = Release|x86
+		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Debug|x86.ActiveCfg = Debug|x86
+		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Debug|x86.Build.0 = Debug|x86
+		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Release|Any CPU.ActiveCfg = Release|x86
+		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Release|Mixed Platforms.Build.0 = Release|x86
+		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Release|x86.ActiveCfg = Release|x86
+		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

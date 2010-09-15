@@ -204,6 +204,7 @@
       this.Controls.Add(this.splitContainer1);
       this.Controls.Add(this.menuStrip);
       this.DataBindings.Add(new System.Windows.Forms.Binding("Location", global::RfSuitPlayer.Properties.Settings.Default, "FormLocation", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.DoubleBuffered = true;
       this.MainMenuStrip = this.menuStrip;
       this.Name = "MainForm";
       this.Text = "RfSuit Player";
