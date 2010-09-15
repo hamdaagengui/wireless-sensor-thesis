@@ -29,6 +29,10 @@ namespace RfSuitLoggerInterfaces
     {
       return (dt - Epoch).TotalMilliseconds;
     }
+    public static DateTime MillisecondsSinceEpoch(double ms)
+    {
+      return Epoch + TimeSpan.FromMilliseconds(ms);
+    }
   }
 
   public class SerialPortInfo {
