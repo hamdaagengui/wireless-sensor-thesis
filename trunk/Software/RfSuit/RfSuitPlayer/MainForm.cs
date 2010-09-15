@@ -82,6 +82,10 @@ namespace RfSuitPlayer
         var curve = myPane.AddCurve(connectionData.EndPointA + " <> " + connectionData.EndPointB, _timeline, connectionData.Quality, rotator.NextColor);
         curve.Symbol.IsVisible = false;
       }
+
+      // Calculate the Axis Scale Ranges
+      zedGraphControl1.AxisChange();
+      zedGraphControl1.Invalidate();
     }
 
     public void CreateChart()
@@ -93,6 +97,7 @@ namespace RfSuitPlayer
       myPane.Title.IsVisible = false;
       myPane.XAxis.Type = AxisType.Date;
       myPane.YAxis.Title.Text = "Link Quality [dBm]";
+      myPane.XAxis.Title.Text = "Timestamp [" + myPane.XAxis.Scale.Format + "]";
 
       _timeline = _graphData.Timeline;
 
@@ -142,12 +147,6 @@ namespace RfSuitPlayer
 
       UpdateGraphLine();
 
-      // Calculate the Axis Scale Ranges
-      zedGraphControl1.AxisChange();
-
-      myPane.XAxis.Title.Text = "Timestamp [" + myPane.XAxis.Scale.Format + "]";
-
-      zedGraphControl1.Invalidate();
     }
 
     private void UpdateGraphLine() {
