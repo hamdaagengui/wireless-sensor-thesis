@@ -50,15 +50,10 @@ namespace RfSuit
 			{
 				TokenReceived(m.Destination);
 
-				//	Console.WriteLine("Report from {0}", m.Source);
-
-				//	Console.Write("{0}: ", m.Source);
 				for (int i = 0; i < tokenRingLength - 1; i++)
 				{
 					qualityMatrix[m.Source - 1, i] = ((sbyte)m.Rssis[i]);
-					//		Console.Write("{0} ", qualityMatrix[m.Source - 1, i]);
 				}
-				//	Console.WriteLine();
 
 				if (m.Destination == tokenRingLength) // last device in the ring means a full sweep has been made
 				{
@@ -67,24 +62,12 @@ namespace RfSuit
 						var now = DateTime.Now;
 						var time = now - lastTime;
 						lastTime = now;
-						//		Console.WriteLine("Rx Report @ " + string.Format("{0:0.0}", 1000.0 / time.TotalMilliseconds) + " reports per second");
 
 						foreach (var lqi in lqis) // calculate lqi as the average of sensed RSSI by either end point of a link
 						{
 							int a = lqi.EndPointA;
 							int b = lqi.EndPointB;
 							lqi.Quality = (qualityMatrix[a, b] + qualityMatrix[b, a]) / 2.0;
-							Console.WriteLine("Raw: a->b {0} b->a {1}", qualityMatrix[a, b], qualityMatrix[b, a]);
-
-							//if (a == 0 && b == 1)
-							//{
-							//  bla++;
-							//  if (bla >= 10)
-							//  {
-							//    bla = 0;
-							//    Console.WriteLine("{0} <--> {1}: {2} dBm", a, b, lqi.Quality);
-							//  }
-							//}
 						}
 
 						if (SweepCompleted != null)
@@ -192,7 +175,7 @@ namespace RfSuit
 				return;
 			}
 
-			Thread.Sleep(100);
+		//	Thread.Sleep(100);
 
 			byte[] msg;
 			if (txQueue.TryDequeue(out msg))
