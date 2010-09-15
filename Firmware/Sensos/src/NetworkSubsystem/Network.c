@@ -117,6 +117,8 @@ typedef struct
 	uint8_t data[];
 } sensorDataCommand;
 
+static void FrameReceived(uint8_t* data, uint8_t length);
+
 void Network_Initialize()
 {
 	for (uint8_t i = 0; i < 16; ++i)
@@ -133,6 +135,8 @@ void Network_Initialize()
 			}
 		}
 	}
+
+	RadioDriver_Initialize(FrameReceived);
 }
 
 void Network_Send(uint8_t channel, void* data, uint8_t length)

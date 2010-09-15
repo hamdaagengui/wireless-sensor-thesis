@@ -5,6 +5,8 @@
  *      Author: coma
  */
 
+// The IIC driver is an example off a "communicating peripheral driver"
+
 #ifndef IIC_H_
 #define IIC_H_
 
@@ -24,8 +26,6 @@ extern void Iic_Subscribe(iicConfiguration* configuration);
 extern void Iic_Start();
 
 extern void Iic_EnqueueRead(uint8_t device, uint16_t address, void* data, uint8_t length, eventHandler handler);
-extern void Iic_EnqueueContinuedRead(uint8_t device, void* data, uint8_t length, eventHandler handler);
 extern void Iic_EnqueueWrite(uint8_t device, uint16_t address, void* data, uint8_t length, eventHandler handler);
-extern void Iic_EnqueueContinuedWrite(uint8_t device, void* data, uint8_t length, eventHandler handler);
 
 #endif /* IIC_H_ */

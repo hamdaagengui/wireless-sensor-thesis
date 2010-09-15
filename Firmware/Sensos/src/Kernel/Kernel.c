@@ -10,7 +10,7 @@
 #include <PeripheralSubsystem/Drivers/Adc.h>
 #include <PeripheralSubsystem/PeripheralDataDistributor.h>
 
-void Start();
+extern void Start();
 
 int main()
 {

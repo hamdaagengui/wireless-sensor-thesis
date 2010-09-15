@@ -12,6 +12,21 @@
 
 enum
 {
+	FLOW_SPONTANEOUS,
+	FLOW_CONSTANT,
+	FLOW_BURSTY
+};
+
+typedef struct
+{
+	uint8_t id;
+	uint32_t bandwidth;
+	uint8_t flow;
+	uint8_t maxLoss;
+} sensor;
+
+enum
+{
 	CLASSIFICATION_BULK,
 	CLASSIFICATION_STREAM,
 	CLASSIFICATION_NOTIFICATION
