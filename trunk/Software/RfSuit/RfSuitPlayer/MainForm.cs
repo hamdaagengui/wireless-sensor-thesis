@@ -229,8 +229,6 @@ namespace RfSuitPlayer
     {
       if((ModifierKeys & Keys.Alt) != 0 && e.Button == MouseButtons.Left) {
         var mousePt = new PointF(e.X, e.Y);
-        CurveItem ci;
-        int i;
         double x;
         double y;
         sender.GraphPane.ReverseTransform(mousePt, out x, out y);
