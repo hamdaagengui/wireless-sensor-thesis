@@ -37,7 +37,7 @@ namespace RfSuitConnectionTester
 
 			counter++;
 			DateTime now = DateTime.Now;
-			Text = string.Format("{0:0.0} {1}", 1.0 / (now - time).TotalSeconds, counter.ToString());
+			Text = string.Format("{0:0.0} sweeps/second {1} sweeps", 1.0 / (now - time).TotalSeconds, counter.ToString());
 			time = now;
 
 			if (results.Length >= 1)
