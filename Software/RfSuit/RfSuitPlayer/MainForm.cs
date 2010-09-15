@@ -72,15 +72,13 @@ namespace RfSuitPlayer
     public void UpdateCurves() {
       var myPane = zedGraphControl1.GraphPane;
       myPane.CurveList.Clear();
-      var rotator = ColorSymbolRotator.StaticInstance;
-
 
       var filteredConnections = from cb in flowLayoutPanel1.Controls.OfType<CheckBox>()
                                 where cb.Checked && cb.Tag is ConnectionData
                                 select cb.Tag as ConnectionData;
       foreach (var connectionData in filteredConnections)
       {
-        var curve = myPane.AddCurve(connectionData.ToString(), _timeline, connectionData.Quality, rotator.NextColor);
+        var curve = myPane.AddCurve(connectionData.ToString(), _timeline, connectionData.Quality, connectionData.Color);
         curve.Symbol.IsVisible = false;
       }
 
@@ -105,8 +103,6 @@ namespace RfSuitPlayer
       myPane.XAxis.Scale.Min = _timeline.First();
       myPane.XAxis.Scale.Max = _timeline.Last();
 
-      UpdateCurves();
-      
       // Fill the axis background with a color gradient
       myPane.Chart.Fill = new Fill(Color.Black);
 
@@ -148,6 +144,7 @@ namespace RfSuitPlayer
 
       UpdateGraphLine();
 
+      UpdateCurves();
     }
 
     private void UpdateGraphLine() {
