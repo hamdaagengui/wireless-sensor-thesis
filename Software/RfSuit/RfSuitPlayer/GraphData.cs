@@ -1,5 +1,6 @@
 ﻿using dk.iha;
 using RfSuitLoggerInterfaces;
+using ZedGraph;
 
 namespace RfSuitPlayer {
   public class GraphData {
@@ -8,12 +9,14 @@ namespace RfSuitPlayer {
     public int DeviceCount { get; private set; }
 
     public GraphData(Entry[] entries) {
+      var rotator = new ColorSymbolRotator();
+
       var firstEntry = entries[0];
       DeviceCount = firstEntry.results.Count;
 
       ConnectionDatas = new ConnectionData[DeviceCount];
       for (int i = 0; i < ConnectionDatas.Length; i++) {
-        ConnectionDatas[i] = new ConnectionData(firstEntry.results[i].EndPointA, firstEntry.results[i].EndPointB, new double[entries.Length]);
+        ConnectionDatas[i] = new ConnectionData(firstEntry.results[i].EndPointA, firstEntry.results[i].EndPointB, new double[entries.Length], rotator.NextColor);
       }
 
       Timeline = new double[entries.Length];
