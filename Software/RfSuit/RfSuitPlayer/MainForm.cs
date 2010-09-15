@@ -159,6 +159,9 @@ namespace RfSuitPlayer
     }
 
     private void UpdateGraphLine() {
+
+      pictureBox.Image = new Bitmap(new MemoryStream(_entries[_position].pictures[0].data));
+
       var zgc = zedGraphControl1;
       var myPane = zgc.GraphPane;
       var timestamp = _timeline[_position];

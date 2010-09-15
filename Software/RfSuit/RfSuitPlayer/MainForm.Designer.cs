@@ -154,6 +154,7 @@
       this.zedGraphControl1.ScrollMinY2 = 0D;
       this.zedGraphControl1.Size = new System.Drawing.Size(678, 311);
       this.zedGraphControl1.TabIndex = 0;
+      this.zedGraphControl1.MouseDownEvent += new ZedGraph.ZedGraphControl.ZedMouseEventHandler(this.ZedGraphControlMouseEvent);
       this.zedGraphControl1.MouseMoveEvent += new ZedGraph.ZedGraphControl.ZedMouseEventHandler(this.ZedGraphControlMouseEvent);
       // 
       // splitContainer2
