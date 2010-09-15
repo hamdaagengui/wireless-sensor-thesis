@@ -220,6 +220,7 @@
       this.MainMenuStrip = this.menuStrip;
       this.Name = "MainForm";
       this.Text = "RfSuit Player";
+      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
       this.menuStrip.ResumeLayout(false);
       this.menuStrip.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.trackBar)).EndInit();

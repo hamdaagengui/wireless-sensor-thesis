@@ -10,6 +10,7 @@ using ProtoBuf;
 using System.Drawing;
 using System.Threading;
 using ZedGraph;
+using RfSuitPlayer.Properties;
 
 namespace RfSuitPlayer
 {
@@ -44,7 +45,7 @@ namespace RfSuitPlayer
       _graphData = new GraphData(_entries);
       
       CreateChart();
-
+      
       flowLayoutPanel1.Controls.Clear();
       foreach (var connectionData in _graphData.ConnectionDatas)
       {
@@ -79,7 +80,7 @@ namespace RfSuitPlayer
                                 select cb.Tag as ConnectionData;
       foreach (var connectionData in filteredConnections)
       {
-        var curve = myPane.AddCurve(connectionData.EndPointA + " <> " + connectionData.EndPointB, _timeline, connectionData.Quality, rotator.NextColor);
+        var curve = myPane.AddCurve(connectionData.ToString(), _timeline, connectionData.Quality, rotator.NextColor);
         curve.Symbol.IsVisible = false;
       }
 
@@ -203,6 +204,11 @@ namespace RfSuitPlayer
     {
       if (_player != null)
         _player.StopPlayer();
+    }
+
+    private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+    {
+      Settings.Default.Save();
     }
   }
 }
