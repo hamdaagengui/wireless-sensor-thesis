@@ -23,8 +23,9 @@ namespace RfSuitLogger
       //ChangeLanguage("da", this);
 
       RefreshButtonClick(this, EventArgs.Empty);
-      _visualSource = new VisualSource(1);
-      _logger = new Logger(_visualSource, new ConnectionSimulator(10));
+			_visualSource = new VisualSource(1);
+		//_logger = new Logger(_visualSource, new ConnectionSimulator(10));
+			_logger = new Logger(_visualSource, new Connection());
     }
 
     private readonly ComponentResourceManager _resources = new ComponentResourceManager(typeof (MainForm));
