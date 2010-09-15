@@ -220,7 +220,6 @@
       this.MainMenuStrip = this.menuStrip;
       this.Name = "MainForm";
       this.Text = "RfSuit Player";
-      this.WindowState = global::RfSuitPlayer.Properties.Settings.Default.FormState;
       this.menuStrip.ResumeLayout(false);
       this.menuStrip.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.trackBar)).EndInit();

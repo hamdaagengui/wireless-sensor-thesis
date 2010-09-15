@@ -5,9 +5,6 @@
     <Setting Name="FormLocation" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
-    <Setting Name="FormState" Type="System.Windows.Forms.FormWindowState" Scope="User">
-      <Value Profile="(Default)">Normal</Value>
-    </Setting>
     <Setting Name="SplitterHorz" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">194</Value>
     </Setting>

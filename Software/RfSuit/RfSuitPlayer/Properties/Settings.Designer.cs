@@ -37,18 +37,6 @@ namespace RfSuitPlayer.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Normal")]
-        public global::System.Windows.Forms.FormWindowState FormState {
-            get {
-                return ((global::System.Windows.Forms.FormWindowState)(this["FormState"]));
-            }
-            set {
-                this["FormState"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("194")]
         public int SplitterHorz {
             get {
