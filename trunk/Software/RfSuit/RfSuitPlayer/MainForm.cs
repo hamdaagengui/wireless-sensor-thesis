@@ -51,6 +51,7 @@ namespace RfSuitPlayer
         var checkBox = new CheckBox {
           Tag = connectionData,
           Text = connectionData.ToString(),
+          Checked = true,
         };
         checkBox.CheckedChanged += CheckBoxClick;
         flowLayoutPanel1.Controls.Add(checkBox);
