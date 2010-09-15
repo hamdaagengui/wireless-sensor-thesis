@@ -39,20 +39,14 @@
       this.playButton = new System.Windows.Forms.Button();
       this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
       this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-      this.splitContainer = new System.Windows.Forms.SplitContainer();
-      this.pictureBox = new System.Windows.Forms.PictureBox();
-      this.propertyGrid = new System.Windows.Forms.PropertyGrid();
       this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
+      this.pictureBox = new System.Windows.Forms.PictureBox();
       this.menuStrip.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.trackBar)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
       this.splitContainer1.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
-      this.splitContainer.Panel1.SuspendLayout();
-      this.splitContainer.Panel2.SuspendLayout();
-      this.splitContainer.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
       this.SuspendLayout();
       // 
@@ -160,46 +154,10 @@
       // 
       // splitContainer1.Panel2
       // 
-      this.splitContainer1.Panel2.Controls.Add(this.splitContainer);
+      this.splitContainer1.Panel2.Controls.Add(this.pictureBox);
       this.splitContainer1.Size = new System.Drawing.Size(678, 389);
       this.splitContainer1.SplitterDistance = 194;
       this.splitContainer1.TabIndex = 11;
-      // 
-      // splitContainer
-      // 
-      this.splitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.splitContainer.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-      this.splitContainer.Location = new System.Drawing.Point(0, 0);
-      this.splitContainer.Name = "splitContainer";
-      // 
-      // splitContainer.Panel1
-      // 
-      this.splitContainer.Panel1.Controls.Add(this.pictureBox);
-      // 
-      // splitContainer.Panel2
-      // 
-      this.splitContainer.Panel2.Controls.Add(this.propertyGrid);
-      this.splitContainer.Size = new System.Drawing.Size(678, 191);
-      this.splitContainer.SplitterDistance = 489;
-      this.splitContainer.TabIndex = 11;
-      // 
-      // pictureBox
-      // 
-      this.pictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.pictureBox.Location = new System.Drawing.Point(0, 0);
-      this.pictureBox.Name = "pictureBox";
-      this.pictureBox.Size = new System.Drawing.Size(489, 191);
-      this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-      this.pictureBox.TabIndex = 0;
-      this.pictureBox.TabStop = false;
-      // 
-      // propertyGrid
-      // 
-      this.propertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.propertyGrid.Location = new System.Drawing.Point(0, 0);
-      this.propertyGrid.Name = "propertyGrid";
-      this.propertyGrid.Size = new System.Drawing.Size(185, 191);
-      this.propertyGrid.TabIndex = 0;
       // 
       // zedGraphControl1
       // 
@@ -215,6 +173,16 @@
       this.zedGraphControl1.ScrollMinY2 = 0D;
       this.zedGraphControl1.Size = new System.Drawing.Size(678, 194);
       this.zedGraphControl1.TabIndex = 0;
+      // 
+      // pictureBox
+      // 
+      this.pictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.pictureBox.Location = new System.Drawing.Point(0, 0);
+      this.pictureBox.Name = "pictureBox";
+      this.pictureBox.Size = new System.Drawing.Size(678, 191);
+      this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+      this.pictureBox.TabIndex = 1;
+      this.pictureBox.TabStop = false;
       // 
       // MainForm
       // 
@@ -237,11 +205,6 @@
       this.splitContainer1.Panel2.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
       this.splitContainer1.ResumeLayout(false);
-      this.splitContainer.Panel1.ResumeLayout(false);
-      this.splitContainer.Panel1.PerformLayout();
-      this.splitContainer.Panel2.ResumeLayout(false);
-      ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
-      this.splitContainer.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
       this.ResumeLayout(false);
       this.PerformLayout();
@@ -262,9 +225,7 @@
     private System.Windows.Forms.OpenFileDialog openFileDialog;
     private System.Windows.Forms.SplitContainer splitContainer1;
     private ZedGraph.ZedGraphControl zedGraphControl1;
-    private System.Windows.Forms.SplitContainer splitContainer;
     private System.Windows.Forms.PictureBox pictureBox;
-    private System.Windows.Forms.PropertyGrid propertyGrid;
 
   }
 }
