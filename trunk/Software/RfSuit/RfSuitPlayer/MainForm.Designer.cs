@@ -136,8 +136,7 @@
       this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                   | System.Windows.Forms.AnchorStyles.Left)
                   | System.Windows.Forms.AnchorStyles.Right)));
-      this.splitContainer1.DataBindings.Add(new System.Windows.Forms.Binding("SplitterDistance", global::RfSuitPlayer.Properties.Settings.Default, "SplitterHorz", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-      this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+      this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
       this.splitContainer1.Location = new System.Drawing.Point(12, 78);
       this.splitContainer1.Name = "splitContainer1";
       this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -150,6 +149,7 @@
       // 
       this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
       this.splitContainer1.Size = new System.Drawing.Size(678, 418);
+      this.splitContainer1.SplitterDistance = 260;
       this.splitContainer1.TabIndex = 11;
       // 
       // zedGraphControl1
@@ -164,13 +164,12 @@
       this.zedGraphControl1.ScrollMinX = 0D;
       this.zedGraphControl1.ScrollMinY = 0D;
       this.zedGraphControl1.ScrollMinY2 = 0D;
-      this.zedGraphControl1.Size = new System.Drawing.Size(678, 50);
+      this.zedGraphControl1.Size = new System.Drawing.Size(678, 260);
       this.zedGraphControl1.TabIndex = 0;
       // 
       // splitContainer2
       // 
       this.splitContainer2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.splitContainer2.DataBindings.Add(new System.Windows.Forms.Binding("SplitterDistance", global::RfSuitPlayer.Properties.Settings.Default, "SplitterVert", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
       this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
       this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
       this.splitContainer2.Location = new System.Drawing.Point(0, 0);
@@ -183,7 +182,7 @@
       // splitContainer2.Panel2
       // 
       this.splitContainer2.Panel2.Controls.Add(this.pictureBox);
-      this.splitContainer2.Size = new System.Drawing.Size(678, 364);
+      this.splitContainer2.Size = new System.Drawing.Size(678, 154);
       this.splitContainer2.SplitterDistance = 226;
       this.splitContainer2.TabIndex = 0;
       // 
@@ -193,7 +192,7 @@
       this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
       this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(224, 362);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(224, 152);
       this.flowLayoutPanel1.TabIndex = 0;
       // 
       // pictureBox
@@ -201,7 +200,7 @@
       this.pictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
       this.pictureBox.Location = new System.Drawing.Point(0, 0);
       this.pictureBox.Name = "pictureBox";
-      this.pictureBox.Size = new System.Drawing.Size(446, 362);
+      this.pictureBox.Size = new System.Drawing.Size(446, 152);
       this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
       this.pictureBox.TabIndex = 2;
       this.pictureBox.TabStop = false;
