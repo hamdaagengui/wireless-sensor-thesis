@@ -6,10 +6,9 @@
  */
 
 #include "FrameTransceiver.h"
-#include <Config.h>
 #include <Kernel/Kernel.h>
 
-#if defined(FRAMETRANSCEIVER)
+#if defined(__FRAMETRANSCEIVER__)
 
 #define SOF																			255
 #define EOF																			254
