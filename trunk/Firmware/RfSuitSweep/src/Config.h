@@ -19,9 +19,4 @@
 #define RADIODRIVER_AUTO_RX
 #define RADIODRIVER_USE_CRC
 
-
-//
-//#define UART0_RX_BUFFER_SIZE  100
-//#define UART0_TX_BUFFER_SIZE  100
-
 #endif /* CONFIG_H_ */
