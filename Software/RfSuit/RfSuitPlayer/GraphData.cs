@@ -1,6 +1,7 @@
 ﻿using dk.iha;
 using RfSuitLoggerInterfaces;
 using ZedGraph;
+using System;
 
 namespace RfSuitPlayer {
   public class GraphData {

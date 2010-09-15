@@ -35,9 +35,6 @@
       this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.showLegendToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.trackBar = new System.Windows.Forms.TrackBar();
-      this.nextButton = new System.Windows.Forms.Button();
-      this.previousButton = new System.Windows.Forms.Button();
       this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
       this.splitContainer1 = new System.Windows.Forms.SplitContainer();
       this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
@@ -45,7 +42,6 @@
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
       this.pictureBox = new System.Windows.Forms.PictureBox();
       this.menuStrip.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.trackBar)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
@@ -110,41 +106,9 @@
       this.showLegendToolStripMenuItem.Checked = true;
       this.showLegendToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
       this.showLegendToolStripMenuItem.Name = "showLegendToolStripMenuItem";
-      this.showLegendToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+      this.showLegendToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
       this.showLegendToolStripMenuItem.Text = "Show legend";
       this.showLegendToolStripMenuItem.Click += new System.EventHandler(this.ShowLegendToolStripMenuItemClick);
-      // 
-      // trackBar
-      // 
-      this.trackBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                  | System.Windows.Forms.AnchorStyles.Right)));
-      this.trackBar.Location = new System.Drawing.Point(40, 27);
-      this.trackBar.Name = "trackBar";
-      this.trackBar.Size = new System.Drawing.Size(622, 45);
-      this.trackBar.TabIndex = 9;
-      this.trackBar.Scroll += new System.EventHandler(this.TrackBarScroll);
-      this.trackBar.ValueChanged += new System.EventHandler(this.TrackBarValueChanged);
-      // 
-      // nextButton
-      // 
-      this.nextButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.nextButton.Location = new System.Drawing.Point(668, 27);
-      this.nextButton.Name = "nextButton";
-      this.nextButton.Size = new System.Drawing.Size(22, 23);
-      this.nextButton.TabIndex = 8;
-      this.nextButton.Text = ">";
-      this.nextButton.UseVisualStyleBackColor = true;
-      this.nextButton.Click += new System.EventHandler(this.NextButtonClick);
-      // 
-      // previousButton
-      // 
-      this.previousButton.Location = new System.Drawing.Point(12, 27);
-      this.previousButton.Name = "previousButton";
-      this.previousButton.Size = new System.Drawing.Size(22, 23);
-      this.previousButton.TabIndex = 7;
-      this.previousButton.Text = "<";
-      this.previousButton.UseVisualStyleBackColor = true;
-      this.previousButton.Click += new System.EventHandler(this.PreviousButtonClick);
       // 
       // openFileDialog
       // 
@@ -157,7 +121,7 @@
                   | System.Windows.Forms.AnchorStyles.Left)
                   | System.Windows.Forms.AnchorStyles.Right)));
       this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-      this.splitContainer1.Location = new System.Drawing.Point(12, 78);
+      this.splitContainer1.Location = new System.Drawing.Point(12, 27);
       this.splitContainer1.Name = "splitContainer1";
       this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
       // 
@@ -168,8 +132,8 @@
       // splitContainer1.Panel2
       // 
       this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-      this.splitContainer1.Size = new System.Drawing.Size(678, 418);
-      this.splitContainer1.SplitterDistance = 260;
+      this.splitContainer1.Size = new System.Drawing.Size(678, 469);
+      this.splitContainer1.SplitterDistance = 311;
       this.splitContainer1.TabIndex = 11;
       // 
       // zedGraphControl1
@@ -188,8 +152,9 @@
       this.zedGraphControl1.ScrollMinX = 0D;
       this.zedGraphControl1.ScrollMinY = 0D;
       this.zedGraphControl1.ScrollMinY2 = 0D;
-      this.zedGraphControl1.Size = new System.Drawing.Size(678, 260);
+      this.zedGraphControl1.Size = new System.Drawing.Size(678, 311);
       this.zedGraphControl1.TabIndex = 0;
+      this.zedGraphControl1.MouseMoveEvent += new ZedGraph.ZedGraphControl.ZedMouseEventHandler(this.ZedGraphControlMouseEvent);
       // 
       // splitContainer2
       // 
@@ -236,9 +201,6 @@
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(702, 508);
       this.Controls.Add(this.splitContainer1);
-      this.Controls.Add(this.trackBar);
-      this.Controls.Add(this.nextButton);
-      this.Controls.Add(this.previousButton);
       this.Controls.Add(this.menuStrip);
       this.DataBindings.Add(new System.Windows.Forms.Binding("Location", global::RfSuitPlayer.Properties.Settings.Default, "FormLocation", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
       this.MainMenuStrip = this.menuStrip;
@@ -247,7 +209,6 @@
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
       this.menuStrip.ResumeLayout(false);
       this.menuStrip.PerformLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.trackBar)).EndInit();
       this.splitContainer1.Panel1.ResumeLayout(false);
       this.splitContainer1.Panel2.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
@@ -265,9 +226,6 @@
     #endregion
 
     private System.Windows.Forms.MenuStrip menuStrip;
-    private System.Windows.Forms.TrackBar trackBar;
-    private System.Windows.Forms.Button nextButton;
-    private System.Windows.Forms.Button previousButton;
     private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;

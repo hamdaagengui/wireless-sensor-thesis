@@ -22,11 +22,11 @@ namespace RfSuitPlayer
     }
 
     private Entry[] _entries;
-    private Player _player;
     private double[] _timeline;
     private GraphData _graphData;
     private bool _enableCurveUpdates = true;
     private CheckBox _allCheckBox;
+    private int _position;
 
     // ZedGraph stuff
 
@@ -42,8 +42,7 @@ namespace RfSuitPlayer
         entries.Add(entry);
       }
       _entries = entries.ToArray();
-      trackBar.Minimum = 0;
-      trackBar.Maximum = _entries.Length - 1;
+      _position = 0;
       _graphData = new GraphData(_entries);
       
       flowLayoutPanel1.Controls.Clear();
@@ -68,11 +67,6 @@ namespace RfSuitPlayer
       flowLayoutPanel1.Controls.Add(_allCheckBox);
 
       CreateChart();
-
-      trackBar.Value = 0;
-      if (_player != null)
-        _player.StopPlayer();
-      _player = new Player(_entries, trackBar);
     }
 
     void CheckAllCheckedChanged(object sender, EventArgs e)
@@ -167,7 +161,7 @@ namespace RfSuitPlayer
     private void UpdateGraphLine() {
       var zgc = zedGraphControl1;
       var myPane = zgc.GraphPane;
-      var timestamp = _timeline[trackBar.Value];
+      var timestamp = _timeline[_position];
       myPane.GraphObjList.RemoveAll(c => c is LineObj);
       var line = new LineObj(Color.White, timestamp, 0, timestamp, 1) {
         Location = {CoordinateFrame = CoordType.XScaleYChartFraction},
@@ -184,7 +178,7 @@ namespace RfSuitPlayer
       Close();
     }
 
-    private void TrackBarValueChanged(object sender, EventArgs e)
+/*    private void TrackBarValueChanged(object sender, EventArgs e)
     {
       if (_entries == null) return;
       var entry = _entries[trackBar.Value];
@@ -218,7 +212,7 @@ namespace RfSuitPlayer
     {
       if (_player != null)
         _player.StopPlayer();
-    }
+    }*/
 
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
@@ -229,6 +223,21 @@ namespace RfSuitPlayer
     {
       showLegendToolStripMenuItem.Checked = !showLegendToolStripMenuItem.Checked;
       CreateChart();
+    }
+
+    private bool ZedGraphControlMouseEvent(ZedGraphControl sender, MouseEventArgs e)
+    {
+      if((ModifierKeys & Keys.Alt) != 0 && e.Button == MouseButtons.Left) {
+        var mousePt = new PointF(e.X, e.Y);
+        CurveItem ci;
+        int i;
+        sender.GraphPane.FindNearestPoint(mousePt, out ci, out i);
+        if(i != -1) {
+          _position = i;
+          UpdateGraphLine();
+        }
+      }
+      return default(bool);
     }
   }
 }
