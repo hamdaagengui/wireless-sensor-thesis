@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using dk.iha;
 using ProtoBuf;
@@ -59,7 +60,11 @@ namespace RfSuitPlayer
       myPane.XAxis.Type = AxisType.Date;
       myPane.YAxis.Title.Text = "Link Quality [dBm]";
 
+
       _timeline = graphData.Timeline;
+
+      myPane.XAxis.Scale.Min = _timeline.First();
+      myPane.XAxis.Scale.Min = _timeline.Last();
 
       var rotator = ColorSymbolRotator.StaticInstance;
       foreach (var connectionData in graphData.ConnectionDatas)
