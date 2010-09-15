@@ -29,8 +29,6 @@ namespace RfSuit
 		LinkQualityIndicator[] lqis;
 		double[,] qualityMatrix;
 
-		int bla = 0;
-
 		DateTime lastTime = DateTime.Now;
 		public bool Start(string portName)
 		{
