@@ -54,7 +54,7 @@ namespace RfSuitPlayer
       var myPane = zgc.GraphPane;
 
       // Set the title and axis labels
-      myPane.Title.Text = "RfData";
+      //myPane.Title.Text = "RfData";
       myPane.XAxis.Type = AxisType.Date;
       myPane.YAxis.Title.Text = "Link Quality [dBm]";
 
@@ -65,6 +65,8 @@ namespace RfSuitPlayer
       {
         var curve = myPane.AddCurve(connectionData.EndPointA + " <> " + connectionData.EndPointB, _timeline, connectionData.Quality, rotator.NextColor);
         curve.Symbol.IsVisible = false;
+        curve.Line.IsSmooth = true;
+        curve.Line.SmoothTension = 0.5f;
         //curve.Symbol.Fill = new Fill(Color.White);
       }
       
@@ -105,7 +107,7 @@ namespace RfSuitPlayer
       zgc.IsEnableZoom = false;
 
       // Fill the pane background with a gradient
-      myPane.Fill = new Fill(Color.White, Color.WhiteSmoke, 0F);
+      myPane.Fill = new Fill(Color.Black, Color.Black, 0F);
 
       UpdateGraphLine();
 
@@ -143,7 +145,6 @@ namespace RfSuitPlayer
       if (_entries == null) return;
       var entry = _entries[trackBar.Value];
       pictureBox.Image = Image.FromStream(new MemoryStream(entry.pictures[0].data));
-      propertyGrid.SelectedObjects = entry.results.ToArray();
       UpdateGraphLine();
     }
 

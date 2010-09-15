@@ -17,9 +17,10 @@ namespace RfSuitPlayer {
       }
 
       Timeline = new double[entries.Length];
+      var firstTimestamp = firstEntry.timestamp;
       for (int i = 0; i < entries.Length; i++) {
         var entry = entries[i];
-        Timeline[i] = Utils.MillisecondsSinceEpoch(entry.timestamp).ToOADate();
+        Timeline[i] = Utils.MillisecondsSinceEpoch(entry.timestamp - firstTimestamp).ToOADate();
         for (int j = 0; j < ConnectionDatas.Length; j++) {
           ConnectionDatas[j].Quality[i] = entry.results[j].Quality;
         }
