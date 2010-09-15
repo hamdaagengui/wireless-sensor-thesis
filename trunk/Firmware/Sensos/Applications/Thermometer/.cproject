@@ -42,7 +42,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sensos}&quot;"/>
 								</option>
-								<option id="de.innot.avreclipse.compiler.option.def.1918279402" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
+								<option id="de.innot.avreclipse.compiler.option.def.1918279402" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG"/>
 								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1500778833" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>

@@ -6,6 +6,7 @@
  */
 
 #include "Network.h"
+#include "HardwareAbstractionLayer/RadioDriver.h"
 
 uint8_t assignedId;
 
