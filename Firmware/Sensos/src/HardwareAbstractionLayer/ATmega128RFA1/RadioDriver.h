@@ -224,3 +224,17 @@ extern void RadioDriver_EnableReceiveMode();
  */
 extern void RadioDriver_DisableReceiveMode();
 
+#ifdef STATISTICS
+
+typedef struct
+{
+	uint32_t framesReceived;
+	uint32_t framesDiscarded;
+	uint32_t framesSent;
+	int8_t maximumRawRssi;
+	int8_t minimumRawRssi;
+} radioDriverStatistics_t;
+
+extern radioDriverStatistics_t radioDriverStatistics;
+
+#endif

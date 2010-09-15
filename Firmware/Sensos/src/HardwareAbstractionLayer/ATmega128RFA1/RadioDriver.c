@@ -55,8 +55,20 @@ static blockHandlerCallback frameHandler = NULL;
 static volatile bool transmitting = false;
 static volatile uint8_t rssi = 0;
 
+#ifdef STATISTICS
+radioDriverStatistics_t radioDriverStatistics;
+#endif
+
 void RadioDriver_Initialize(blockHandlerCallback fh)
 {
+#ifdef STATISTICS
+	radioDriverStatistics.framesReceived = 0;
+	radioDriverStatistics.framesDiscarded = 0;
+	radioDriverStatistics.framesSent = 0;
+	radioDriverStatistics.maximumRawRssi = 0;
+	radioDriverStatistics.minimumRawRssi = 0;
+#endif
+
 	frameHandler = fh;
 
 
@@ -130,6 +142,7 @@ void RadioDriver_Send(void* data, uint8_t length)
 	if (length > 127)
 #endif
 	{
+		// debug => send error => log
 		return;
 	}
 
@@ -205,7 +218,7 @@ void RadioDriver_DisableReceiveMode()
 //{
 //}
 
-ISR(TRX24_TX_END_vect)
+ISR( TRX24_TX_END_vect)
 {
 	// Maybe this can be done immediately after starting the transmission (data sheet page 40).
 #if defined(RADIODRIVER_AUTO_RX)
@@ -215,6 +228,11 @@ ISR(TRX24_TX_END_vect)
 #endif
 
 	transmitting = false;
+
+
+#ifdef STATISTICS
+	radioDriverStatistics.framesSent++;
+#endif
 }
 
 //ISR(TRX24_XAH_AMI_vect)
@@ -225,11 +243,14 @@ ISR(TRX24_TX_END_vect)
 //{
 //}
 
-ISR(TRX24_RX_END_vect)
+ISR( TRX24_RX_END_vect)
 {
 #if defined(RADIODRIVER_USE_CRC)
 	if (ReadBit(PHY_RSSI, RX_CRC_VALID) == 0) // CRC error in frame => dump it
 	{
+#ifdef STATISTICS
+		radioDriverStatistics.framesDiscarded++;
+#endif
 		return;
 	}
 #endif
@@ -242,15 +263,31 @@ ISR(TRX24_RX_END_vect)
 		buffer[i] = TRX_BUF(i);
 	}
 
+#ifdef STATISTICS
+	radioDriverStatistics.framesReceived++;
+#endif
+
 	if (frameHandler != NULL)
 	{
 		frameHandler(buffer, length);
 	}
 }
 
-ISR(TRX24_RX_START_vect)
+ISR( TRX24_RX_START_vect)
 {
 	rssi = PHY_RSSI;
+
+
+#ifdef STATISTICS
+	if (rssi > radioDriverStatistics.maximumRawRssi)
+	{
+		radioDriverStatistics.maximumRawRssi = rssi;
+	}
+	else if (rssi < radioDriverStatistics.minimumRawRssi)
+	{
+		radioDriverStatistics.minimumRawRssi = rssi;
+	}
+#endif
 }
 
 //ISR(TRX24_PLL_UNLOCK_vect)
