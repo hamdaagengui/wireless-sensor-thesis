@@ -23,9 +23,9 @@ namespace RfSuitPlayer
     private Entry[] _entries;
     private Player _player;
     private double[] _timeline;
+    private GraphData _graphData;
 
     // ZedGraph stuff
-
 
     private void OpenToolStripMenuItemClick(object sender, EventArgs e)
     {
@@ -41,8 +41,20 @@ namespace RfSuitPlayer
       _entries = entries.ToArray();
       trackBar.Minimum = 0;
       trackBar.Maximum = _entries.Length - 1;
+      _graphData = new GraphData(_entries);
       
-      CreateChart(zedGraphControl1, new GraphData(_entries));
+      CreateChart();
+
+      flowLayoutPanel1.Controls.Clear();
+      foreach (var connectionData in _graphData.ConnectionDatas)
+      {
+        var checkBox = new CheckBox {
+          Tag = connectionData,
+          Text = connectionData.ToString(),
+        };
+        checkBox.CheckedChanged += CheckBoxClick;
+        flowLayoutPanel1.Controls.Add(checkBox);
+      }
 
       trackBar.Value = 0;
       if (_player != null)
@@ -50,9 +62,30 @@ namespace RfSuitPlayer
       _player = new Player(_entries, trackBar);
     }
 
-    public void CreateChart(ZedGraphControl zgc, GraphData graphData)
+    void CheckBoxClick(object sender, EventArgs e)
     {
-      var myPane = zgc.GraphPane;
+      UpdateCurves();
+    }
+
+    public void UpdateCurves() {
+      var myPane = zedGraphControl1.GraphPane;
+      myPane.CurveList.Clear();
+      var rotator = ColorSymbolRotator.StaticInstance;
+
+
+      var filteredConnections = from cb in flowLayoutPanel1.Controls.OfType<CheckBox>()
+                                where cb.Checked && cb.Tag is ConnectionData
+                                select cb.Tag as ConnectionData;
+      foreach (var connectionData in filteredConnections)
+      {
+        var curve = myPane.AddCurve(connectionData.EndPointA + " <> " + connectionData.EndPointB, _timeline, connectionData.Quality, rotator.NextColor);
+        curve.Symbol.IsVisible = false;
+      }
+    }
+
+    public void CreateChart()
+    {
+      var myPane = zedGraphControl1.GraphPane;
 
       // Set the title and axis labels
       myPane.Title.Text = "RfData";
@@ -60,21 +93,12 @@ namespace RfSuitPlayer
       myPane.XAxis.Type = AxisType.Date;
       myPane.YAxis.Title.Text = "Link Quality [dBm]";
 
-
-      _timeline = graphData.Timeline;
+      _timeline = _graphData.Timeline;
 
       myPane.XAxis.Scale.Min = _timeline.First();
       myPane.XAxis.Scale.Max = _timeline.Last();
 
-      var rotator = ColorSymbolRotator.StaticInstance;
-      foreach (var connectionData in graphData.ConnectionDatas)
-      {
-        var curve = myPane.AddCurve(connectionData.EndPointA + " <> " + connectionData.EndPointB, _timeline, connectionData.Quality, rotator.NextColor);
-        curve.Symbol.IsVisible = false;
-        curve.Line.IsSmooth = true;
-        curve.Line.SmoothTension = 2.5f;
-        //curve.Symbol.Fill = new Fill(Color.White);
-      }
+      UpdateCurves();
       
       // Fill the axis background with a color gradient
       myPane.Chart.Fill = new Fill(Color.Black);
@@ -110,7 +134,7 @@ namespace RfSuitPlayer
 */
       #endregion
 
-      zgc.IsEnableZoom = false;
+      zedGraphControl1.IsEnableZoom = false;
 
       // Fill the pane background with a gradient
       myPane.Fill = new Fill(Color.White, Color.WhiteSmoke, 0F);
@@ -118,11 +142,11 @@ namespace RfSuitPlayer
       UpdateGraphLine();
 
       // Calculate the Axis Scale Ranges
-      zgc.AxisChange();
+      zedGraphControl1.AxisChange();
 
       myPane.XAxis.Title.Text = "Timestamp [" + myPane.XAxis.Scale.Format + "]";
-      
-      zgc.Invalidate();
+
+      zedGraphControl1.Invalidate();
     }
 
     private void UpdateGraphLine() {
