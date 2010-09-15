@@ -5,6 +5,8 @@
  *      Author: coma
  */
 
+// The ADC driver is an example off a "sampling peripheral driver"
+
 #ifndef ADC_H_
 #define ADC_H_
 
@@ -21,7 +23,6 @@ typedef struct
 
 typedef struct
 {
-	//	peripheralUsageRequest base;
 	uint32_t interval;
 	uint8_t channel;
 	void (*handler)(adcEvent* event);
