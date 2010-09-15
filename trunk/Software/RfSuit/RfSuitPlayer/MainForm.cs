@@ -132,7 +132,6 @@ namespace RfSuitPlayer
       // Calculate the Axis Scale Ranges
       zedGraphControl1.AxisChange();
       myPane.XAxis.Title.Text = "Timestamp [" + myPane.XAxis.Scale.Format + "]";
-
       zedGraphControl1.Invalidate();
     }
 
@@ -145,6 +144,10 @@ namespace RfSuitPlayer
       myPane.Title.IsVisible = false;
       myPane.XAxis.Type = AxisType.Date;
       myPane.YAxis.Title.Text = "Link Quality [dBm]";
+      myPane.Legend.IsVisible = false;
+      myPane.YAxis.Title.IsVisible = showLegendToolStripMenuItem.Checked;
+      myPane.XAxis.Title.IsVisible = showLegendToolStripMenuItem.Checked;
+
 
       myPane.Fill = new Fill(Color.Transparent);
       myPane.Border.IsVisible = false;
@@ -220,6 +223,12 @@ namespace RfSuitPlayer
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
       Settings.Default.Save();
+    }
+
+    private void ShowLegendToolStripMenuItemClick(object sender, EventArgs e)
+    {
+      showLegendToolStripMenuItem.Checked = !showLegendToolStripMenuItem.Checked;
+      CreateChart();
     }
   }
 }
