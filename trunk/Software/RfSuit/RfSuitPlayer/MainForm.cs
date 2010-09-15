@@ -44,8 +44,6 @@ namespace RfSuitPlayer
       trackBar.Maximum = _entries.Length - 1;
       _graphData = new GraphData(_entries);
       
-      CreateChart();
-      
       flowLayoutPanel1.Controls.Clear();
       foreach (var connectionData in _graphData.ConnectionDatas)
       {
@@ -53,10 +51,13 @@ namespace RfSuitPlayer
           Tag = connectionData,
           Text = connectionData.ToString(),
           Checked = true,
+          ForeColor = connectionData.Color
         };
         checkBox.CheckedChanged += CheckBoxClick;
         flowLayoutPanel1.Controls.Add(checkBox);
       }
+
+      CreateChart();
 
       trackBar.Value = 0;
       if (_player != null)
