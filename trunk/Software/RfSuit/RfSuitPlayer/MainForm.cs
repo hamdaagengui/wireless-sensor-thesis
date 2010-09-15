@@ -54,7 +54,8 @@ namespace RfSuitPlayer
       var myPane = zgc.GraphPane;
 
       // Set the title and axis labels
-      //myPane.Title.Text = "RfData";
+      myPane.Title.Text = "RfData";
+      myPane.Title.IsVisible = false;
       myPane.XAxis.Type = AxisType.Date;
       myPane.YAxis.Title.Text = "Link Quality [dBm]";
 
