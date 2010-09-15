@@ -66,7 +66,7 @@ namespace RfSuitPlayer
         var curve = myPane.AddCurve(connectionData.EndPointA + " <> " + connectionData.EndPointB, _timeline, connectionData.Quality, rotator.NextColor);
         curve.Symbol.IsVisible = false;
         curve.Line.IsSmooth = true;
-        curve.Line.SmoothTension = 0.5f;
+        curve.Line.SmoothTension = 2.5f;
         //curve.Symbol.Fill = new Fill(Color.White);
       }
       
@@ -124,14 +124,13 @@ namespace RfSuitPlayer
       var myPane = zgc.GraphPane;
       var timestamp = _timeline[trackBar.Value];
       myPane.GraphObjList.RemoveAll(c => c is LineObj);
-      var line = new LineObj(Color.DimGray, timestamp, 0, timestamp, 1)
-      {
-        Location = { CoordinateFrame = CoordType.XScaleYChartFraction },
+      var line = new LineObj(Color.White, timestamp, 0, timestamp, 1) {
+        Location = {CoordinateFrame = CoordType.XScaleYChartFraction},
         ZOrder = ZOrder.E_BehindCurves,
         IsClippedToChartRect = true,
-        Line = { Style = DashStyle.Dash }
+        Line = {Style = DashStyle.Dash, Width = 2}
       };
-      myPane.GraphObjList.Add(line);      
+      myPane.GraphObjList.Add(line);
       zgc.Invalidate();
     }
 
