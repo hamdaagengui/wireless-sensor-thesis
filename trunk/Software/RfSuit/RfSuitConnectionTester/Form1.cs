@@ -26,6 +26,7 @@ namespace RfSuitConnectionTester
 		}
 
 		Int64 counter = 0;
+		DateTime time = DateTime.Now;
 		void con_SweepCompleted(LinkQualityIndicator[] results)
 		{
 			if (InvokeRequired)
@@ -34,23 +35,32 @@ namespace RfSuitConnectionTester
 				return;
 			}
 
-			if (results.Length == 1)
-			{
-				progressBar1.Value = (int)(results[0].Quality + 90);
-				textBox1.Text = results[0].Quality + " dBm";
-			}
-			if (results.Length == 3)
-			{
-				progressBar1.Value = (int)(results[0].Quality + 90);
-				textBox1.Text = results[0].Quality + " dBm";
-				progressBar2.Value = (int)(results[1].Quality + 90);
-				textBox2.Text = results[1].Quality + " dBm";
-				progressBar3.Value = (int)(results[2].Quality + 90);
-				textBox3.Text = results[2].Quality + " dBm";
-			}
-
 			counter++;
-			Text = counter.ToString();
+			DateTime now = DateTime.Now;
+			Text = string.Format("{0:0.0} {1}", 1.0 / (now - time).TotalSeconds, counter.ToString());
+			time = now;
+
+			if (results.Length >= 1)
+			{
+				progressBar1.Value = (int)(results[0].Quality + 93);
+				textBox1.Text = string.Format("{0:0.0} dBm", results[0].Quality);
+			}
+			if (results.Length >= 3)
+			{
+				progressBar2.Value = (int)(results[1].Quality + 93);
+				textBox2.Text = string.Format("{0:0.0} dBm", results[1].Quality);
+				progressBar3.Value = (int)(results[2].Quality + 93);
+				textBox3.Text = string.Format("{0:0.0} dBm", results[2].Quality);
+			}
+			if (results.Length >= 6)
+			{
+				progressBar4.Value = (int)(results[3].Quality + 93);
+				textBox4.Text = string.Format("{0:0.0} dBm", results[3].Quality);
+				progressBar5.Value = (int)(results[4].Quality + 93);
+				textBox5.Text = string.Format("{0:0.0} dBm", results[4].Quality);
+				progressBar6.Value = (int)(results[5].Quality + 93);
+				textBox6.Text = string.Format("{0:0.0} dBm", results[5].Quality);
+			}
 		}
 	}
 }
