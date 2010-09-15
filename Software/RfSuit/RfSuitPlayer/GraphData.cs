@@ -1,4 +1,5 @@
 ﻿using dk.iha;
+using RfSuitLoggerInterfaces;
 
 namespace RfSuitPlayer {
   public class GraphData {
@@ -18,7 +19,7 @@ namespace RfSuitPlayer {
       Timeline = new double[entries.Length];
       for (int i = 0; i < entries.Length; i++) {
         var entry = entries[i];
-        Timeline[i] = entry.timestamp;
+        Timeline[i] = Utils.MillisecondsSinceEpoch(entry.timestamp).ToOADate();
         for (int j = 0; j < ConnectionDatas.Length; j++) {
           ConnectionDatas[j].Quality[i] = entry.results[j].Quality;
         }
