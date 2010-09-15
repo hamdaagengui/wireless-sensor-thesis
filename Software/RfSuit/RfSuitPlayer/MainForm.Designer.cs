@@ -33,6 +33,8 @@
       this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
       this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.showLegendToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.trackBar = new System.Windows.Forms.TrackBar();
       this.nextButton = new System.Windows.Forms.Button();
       this.previousButton = new System.Windows.Forms.Button();
@@ -58,7 +60,8 @@
       // menuStrip
       // 
       this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.optionsToolStripMenuItem});
       this.menuStrip.Location = new System.Drawing.Point(0, 0);
       this.menuStrip.Name = "menuStrip";
       this.menuStrip.Size = new System.Drawing.Size(702, 24);
@@ -77,22 +80,39 @@
       // openToolStripMenuItem
       // 
       this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-      this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+      this.openToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
       this.openToolStripMenuItem.Text = "&Open";
       this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItemClick);
       // 
       // toolStripSeparator1
       // 
       this.toolStripSeparator1.Name = "toolStripSeparator1";
-      this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+      this.toolStripSeparator1.Size = new System.Drawing.Size(131, 6);
       // 
       // exitToolStripMenuItem
       // 
       this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
       this.exitToolStripMenuItem.ShortcutKeyDisplayString = "Alt+F4";
-      this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+      this.exitToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
       this.exitToolStripMenuItem.Text = "E&xit";
       this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItemClick);
+      // 
+      // optionsToolStripMenuItem
+      // 
+      this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showLegendToolStripMenuItem});
+      this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+      this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+      this.optionsToolStripMenuItem.Text = "Options";
+      // 
+      // showLegendToolStripMenuItem
+      // 
+      this.showLegendToolStripMenuItem.Checked = true;
+      this.showLegendToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+      this.showLegendToolStripMenuItem.Name = "showLegendToolStripMenuItem";
+      this.showLegendToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+      this.showLegendToolStripMenuItem.Text = "Show legend";
+      this.showLegendToolStripMenuItem.Click += new System.EventHandler(this.ShowLegendToolStripMenuItemClick);
       // 
       // trackBar
       // 
@@ -155,6 +175,10 @@
       // zedGraphControl1
       // 
       this.zedGraphControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.zedGraphControl1.IsAutoScrollRange = true;
+      this.zedGraphControl1.IsEnableVPan = false;
+      this.zedGraphControl1.IsEnableVZoom = false;
+      this.zedGraphControl1.IsShowHScrollBar = true;
       this.zedGraphControl1.Location = new System.Drawing.Point(0, 0);
       this.zedGraphControl1.Name = "zedGraphControl1";
       this.zedGraphControl1.ScrollGrace = 0D;
@@ -254,6 +278,8 @@
     private System.Windows.Forms.SplitContainer splitContainer2;
     private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
     private System.Windows.Forms.PictureBox pictureBox;
+    private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem showLegendToolStripMenuItem;
 
   }
 }
