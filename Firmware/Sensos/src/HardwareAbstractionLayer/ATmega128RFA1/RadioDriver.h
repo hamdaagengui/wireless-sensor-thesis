@@ -141,27 +141,10 @@ enum
 };
 
 /**
- * Initialize the transceiver and sets the frame receive call back function.
- */
-extern void RadioDriver_Initialize(blockHandlerCallback fh);
-
-/**
  * Set transceiver bit rate.
- * Use on of the RADIODRIVER_BITRATE_X_KBPS constants.
+ * Use on of the RADIODRIVER_BITRATE_<bitrate>_KBPS constants.
  */
 extern void RadioDriver_SetBitRate(uint8_t bitRate);
-
-/**
- * Set the transmit power of the transceiver.
- * Use on of the RADIODRIVER_TX_POWER_X_DBM constants.
- */
-extern void RadioDriver_SetTxPower(uint8_t power);
-
-/**
- * Set the transceiver channel.
- * Use either RADIODRIVER_CHANNEL_X, RADIODRIVER_FREQUENCY_X_MHZ or just an integer between 11 and 26 (both included).
- */
-extern void RadioDriver_SetChannel(uint8_t channel);
 
 /**
  * Set the threshold below which to ignore frames.
@@ -184,23 +167,10 @@ extern uint8_t RadioDriver_GetRandomNumber();
 extern uint8_t RadioDriver_GetRawRssi();
 
 /**
- * Same as GetRawRssi but here the value is converted to dBm.
- */
-extern int8_t RadioDriver_GetRssi();
-
-/**
  * Starts a calibration cycle of the three things that need calibration.
  * See data sheet pages 120 - 122 for details.
  */
 extern void RadioDriver_Calibrate();
-
-/**
- * Send a frame.
- * The transceiver transmission buffer can hold a maximum of 128 bytes including the
- * length specifier and the 16 bit FCS if automatic CRC generation and check is used.
- * This leaves a maximum of either 127 or 125 bytes for user data.
- */
-extern void RadioDriver_Send(void* data, uint8_t length);
 
 /**
  * Waits for a previously initiated send operation to complete.

@@ -5,7 +5,7 @@
  *      Author: coma
  */
 
-#include "Adc.h"
+#include "ADC.h"
 #include <PeripheralSubsystem/PeripheralSubsystem.h>
 
 static bool enable = false;
@@ -16,20 +16,25 @@ static bool activeChannels[8] = { false, false, false, false, false, false, fals
 
 static uint16_t* eventData = NULL;
 
-void Adc_Initialize()
+void ADC_Initialize()
 {
 	// nothing to setup that can't be done at compile time
 }
 
-void Adc_Subscribe(adcConfiguration* configuration)
+void ADC_Subscribe(adcConfiguration* configuration)
 {
 	enable = true;
+
+
+	// save configuration
 }
 
-void Adc_Start()
+void ADC_Start()
 {
 	if (enable)
 	{
+		// calculate timer settings
+
 		eventData = PeripheralDataDistributor_GetBuffer();
 
 
@@ -41,7 +46,7 @@ void Adc_Start()
 	}
 }
 
-ISR(ADC_vect)
+ISR( ADC_vect)
 {
 	*eventData = ADC;
 

@@ -28,8 +28,8 @@ typedef struct
 	void (*handler)(adcEvent* event);
 } adcConfiguration;
 
-extern void Adc_Initialize();
-extern void Adc_Subscribe(adcConfiguration* configuration);
-extern void Adc_Start();
+extern void ADC_Initialize();
+extern void ADC_Subscribe(adcConfiguration* configuration);
+extern void ADC_Start();
 
 #endif /* ADC_H_ */
