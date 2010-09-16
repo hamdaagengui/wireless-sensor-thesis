@@ -1,7 +1,5 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using AForge.Video;
@@ -9,8 +7,6 @@ using AForge.Video.DirectShow;
 using System.IO;
 using RfSuit;
 using RfSuitLoggerInterfaces;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace RfSuitLogger
 {
@@ -20,25 +16,12 @@ namespace RfSuitLogger
     {
       InitializeComponent();
 
-      //ChangeLanguage("da", this);
-
       RefreshButtonClick(this, EventArgs.Empty);
 			_visualSource = new VisualSource(1);
-		//_logger = new Logger(_visualSource, new ConnectionSimulator(10));
+
+      //_logger = new Logger(_visualSource, new ConnectionSimulator(10));
 			_logger = new Logger(_visualSource, new Connection());
     }
-
-    private readonly ComponentResourceManager _resources = new ComponentResourceManager(typeof (MainForm));
-
-    private void ChangeLanguage(string lang, Control control)
-    {
-      _resources.ApplyResources(control, control.Name, new CultureInfo("da"));
-      foreach (Control c in control.Controls.AsParallel())
-      {
-        ChangeLanguage(lang, c);
-      }
-    }
-
 
     //    private Connection connection;
     private FilterInfoCollection _videoDevices;
@@ -149,7 +132,8 @@ namespace RfSuitLogger
         DisplayError("Please select a serial port!", "Missing Serial Port");
         return;
       }
-      _logger.Start(new FileStream(Directory.GetParent(Application.ExecutablePath) + @"\log" + (long)Utils.MillisecondsSinceEpoch() + ".rflog", FileMode.CreateNew), serialPortInfo.Name);
+      var prefixedWriter = EntrySerializer.Instance.OpenWrite(Directory.GetParent(Application.ExecutablePath) + @"\log" + (long) Utils.MillisecondsSinceEpoch(), true);
+      _logger.Start(prefixedWriter, serialPortInfo.Name);
     }
 
     private static void DisplayError(string title, string msg)

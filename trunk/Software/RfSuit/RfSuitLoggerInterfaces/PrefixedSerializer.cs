@@ -9,9 +9,14 @@ namespace RfSuitLoggerInterfaces
   public class PrefixedSerializer<T>
   {
     private readonly string _ext;
+    /// <summary>
+    /// Setup a prefix serializer for a given type, with a given extension.
+    /// The serializer will accept two types of files, one that is plain (filename + "." + extension) and one that is compressed using deflate (filename + "." + extension + "z").
+    /// </summary>
+    /// <param name="extension">without leading dot eg. "mp3"</param>
     public PrefixedSerializer(string extension)
     {
-      _ext = extension;
+      _ext = "." + extension;
     }
 
     public PrefixedReaderEnumerable<T> OpenRead(string path)
@@ -28,14 +33,36 @@ namespace RfSuitLoggerInterfaces
       throw new ArgumentException("Missing file extension!");
     }
 
-    public Stream OpenWrite(string path, bool compressed = true)
+    public PrefixedWriter<T> OpenWrite(string path)
     {
+      if(Path.HasExtension(path))
+      {
+        if (Path.GetExtension(path) == _ext + "z")
+          return OpenWrite(path, true);
+      }
+      return OpenWrite(path, false);
+    }
+
+    public PrefixedWriter<T> OpenWrite(string path, bool compressed)
+    {
+      var realExt = (compressed ? _ext + "z" : _ext);
+      if (Path.HasExtension(path))
+      {
+        var ext = Path.GetExtension(path).ToLower();
+        if (ext != realExt)
+          path += realExt;
+      }
+      else
+      {
+        path += realExt;
+      }
+
       Stream s = File.OpenWrite(path);
-      return compressed ? new DeflateStream(s, CompressionMode.Compress) : s;
+      return new PrefixedWriter<T>(compressed ? new DeflateStream(s, CompressionMode.Compress) : s);
     }
   }
 
-  public class PrefixedWriter<T>
+  public class PrefixedWriter<T> : IDisposable
   {
     private readonly Stream _stream;
 
@@ -54,6 +81,20 @@ namespace RfSuitLoggerInterfaces
       foreach (var item in items)
         Write(item);
     }
+
+    public void Close()
+    {
+      _stream.Close();
+    }
+
+    #region IDisposable Members
+
+    public void Dispose()
+    {
+      _stream.Close();
+    }
+
+    #endregion
   }
 
   public class PrefixedReaderEnumerable<T> : IEnumerable<T>, IEnumerator<T>
@@ -64,6 +105,11 @@ namespace RfSuitLoggerInterfaces
     public PrefixedReaderEnumerable(Stream stream)
     {
       _stream = stream;
+    }
+
+    public void Close()
+    {
+      _stream.Close();
     }
 
     #region IEnumerator<Entry> Members
@@ -77,7 +123,10 @@ namespace RfSuitLoggerInterfaces
 
     #region IDisposable Members
 
-    public void Dispose() { }
+    public void Dispose()
+    {
+      _stream.Close();
+    }
 
     #endregion
 

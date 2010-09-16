@@ -2,10 +2,7 @@
 using System.IO;
 using System.Drawing;
 using dk.iha;
-using System;
 using RfSuit;
-using ProtoBuf;
-using System.Diagnostics;
 using RfSuitLoggerInterfaces;
 
 namespace RfSuitLogger
@@ -13,7 +10,7 @@ namespace RfSuitLogger
   class Logger
   {
     private readonly object _sync = new object();
-    private Stream _stream;
+    private PrefixedWriter<Entry> _prefixedWriter;
     private readonly VisualSource _visualSource;
     private readonly IConnection _connection;
 
@@ -24,16 +21,17 @@ namespace RfSuitLogger
 
     public bool IsLogging() {
       lock (_sync) {
-        return _stream != null;
+        return _prefixedWriter != null;
       }
     }
 
-    public void Start(Stream s, string connectionPort) {
+    public void Start(PrefixedWriter<Entry> prefixedWriter, string connectionPort)
+    {
       lock (_sync)
       {
         if (IsLogging())
           Stop();
-        _stream = s;
+        _prefixedWriter = prefixedWriter;
         _connection.SweepCompleted += ConnectionSweepCompleted;
         _connection.Start(connectionPort);
       }
@@ -43,9 +41,8 @@ namespace RfSuitLogger
     {
       lock (_sync)
       {
-        if (_stream == null)
+        if (_prefixedWriter == null)
           return;
-        var stopwatch = Stopwatch.StartNew();
         var entry = new Entry {timestamp = Utils.MillisecondsSinceEpoch()};
 
         entry.results.AddRange(results);
@@ -57,10 +54,7 @@ namespace RfSuitLogger
           entry.pictures.Add(new Picture {data = memoryStream.ToArray()});
         }
 
-        Serializer.SerializeWithLengthPrefix(_stream, entry, PrefixStyle.Base128);
-        stopwatch.Stop();
-
-        Console.WriteLine("Logged an entry in " + TimeSpan.FromMilliseconds(stopwatch.ElapsedMilliseconds));
+        _prefixedWriter.Write(entry);
       }
     }
 
@@ -68,10 +62,10 @@ namespace RfSuitLogger
       lock (_sync)
       {
         if (IsLogging())
-          _stream.Close();
+          _prefixedWriter.Close();
         _connection.SweepCompleted -= ConnectionSweepCompleted;
         _connection.Stop();
-        _stream = null;
+        _prefixedWriter = null;
       }
     }
   }
