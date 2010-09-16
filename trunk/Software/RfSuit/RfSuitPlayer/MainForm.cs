@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using dk.iha;
-using ProtoBuf;
 using System.Drawing;
-using System.Threading;
 using ZedGraph;
 using RfSuitPlayer.Properties;
+using RfSuitLoggerInterfaces;
 
 namespace RfSuitPlayer
 {
@@ -33,14 +30,7 @@ namespace RfSuitPlayer
     private void OpenToolStripMenuItemClick(object sender, EventArgs e)
     {
       if (openFileDialog.ShowDialog(this) != DialogResult.OK) return;
-      var fileStream = File.OpenRead(openFileDialog.FileName);
-
-      var entries = new List<Entry>(1000);
-      while (fileStream.Position < fileStream.Length)
-      {
-        var entry = Serializer.DeserializeWithLengthPrefix<Entry>(fileStream, PrefixStyle.Base128);
-        entries.Add(entry);
-      }
+      var entries = EntrySerializer.Instance.OpenRead(openFileDialog.FileName);
       _entries = entries.ToArray();
       _position = 0;
       _graphData = new GraphData(_entries);
