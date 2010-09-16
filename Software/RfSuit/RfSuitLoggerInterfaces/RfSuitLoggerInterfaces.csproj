@@ -45,6 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EntrySerializer.cs" />
+    <Compile Include="PrefixedSerializer.cs" />
     <Compile Include="log.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -52,6 +54,7 @@
       <DependentUpon>log.proto</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SerialPortInfo.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +64,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="lib\LZMA.dll" />
     <Content Include="lib\protobuf-net.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
