@@ -7,7 +7,7 @@
 
 #include <Globals.h>
 #include <DefaultConfiguration.h>
-#include <PeripheralSubsystem/Drivers/Adc.h>
+#include <PeripheralSubsystem/Drivers/ADC.h>
 #include <PeripheralSubsystem/PeripheralDataDistributor.h>
 
 extern void Start();
@@ -18,7 +18,7 @@ int main()
 	//	Kernel_Initialize();
 	//	Network_Initialize();
 	PeripheralDataDistributor_Initialize();
-	Adc_Initialize();
+	ADC_Initialize();
 
 
 	// Start user application
@@ -26,7 +26,7 @@ int main()
 
 
 	// Start sub systems
-	Adc_Start();
+	ADC_Start();
 
 
 	// Run system
