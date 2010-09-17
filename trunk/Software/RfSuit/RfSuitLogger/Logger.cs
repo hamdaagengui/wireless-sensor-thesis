@@ -4,6 +4,8 @@ using System.Drawing;
 using dk.iha;
 using RfSuit;
 using RfSuitLoggerInterfaces;
+using System;
+using System.Diagnostics;
 
 namespace RfSuitLogger
 {
@@ -13,6 +15,10 @@ namespace RfSuitLogger
     private PrefixedWriter<Entry> _prefixedWriter;
     private readonly VisualSource _visualSource;
     private readonly IConnection _connection;
+    private Stopwatch _stopwatch;
+    private long _counter;
+    private long _totalCounter;
+    public event EventHandler<UpdateEventArgs> UpdateStatus;
 
     public Logger(VisualSource vs, IConnection connection) {
       _connection = connection;
@@ -32,6 +38,9 @@ namespace RfSuitLogger
         if (IsLogging())
           Stop();
         _prefixedWriter = prefixedWriter;
+        _stopwatch = Stopwatch.StartNew();
+        _counter = 0;
+        _totalCounter = 0;
         _connection.SweepCompleted += ConnectionSweepCompleted;
         _connection.Start(connectionPort);
       }
@@ -55,6 +64,15 @@ namespace RfSuitLogger
         }
 
         _prefixedWriter.Write(entry);
+
+        _counter++;
+
+        if (UpdateStatus != null && _stopwatch.ElapsedMilliseconds > 1000) {
+          _totalCounter += _counter;
+          UpdateStatus(this, new UpdateEventArgs(_counter, _totalCounter));
+          _counter = 0;
+          _stopwatch.Restart();
+        }
       }
     }
 
@@ -64,8 +82,19 @@ namespace RfSuitLogger
         if (IsLogging())
           _prefixedWriter.Close();
         _connection.SweepCompleted -= ConnectionSweepCompleted;
+        if(_stopwatch != null)
+          _stopwatch.Stop();
         _connection.Stop();
         _prefixedWriter = null;
+      }
+    }
+
+    public class UpdateEventArgs : EventArgs {
+      public long Count { get; private set; }
+      public long TotalCount { get; private set; }
+      public UpdateEventArgs(long count, long totalCount) {
+        Count = count;
+        TotalCount = totalCount;
       }
     }
   }

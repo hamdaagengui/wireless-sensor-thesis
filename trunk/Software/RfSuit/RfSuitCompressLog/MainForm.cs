@@ -5,10 +5,10 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 using dk.iha;
-using ProtoBuf;
 using System.IO;
 using System.Threading.Tasks;
 using RfSuitLoggerInterfaces;
+using System.Diagnostics;
 
 namespace RfSuitCompressLog
 {
@@ -44,30 +44,32 @@ namespace RfSuitCompressLog
         return;
       }
 
+      EntrySerializer serializer = EntrySerializer.Instance;
+
       foreach (var filename in files)
       {
         try
         {
-          using (FileStream input = File.OpenRead(filename))
+          using (var input = serializer.OpenRead(filename))
           {
-            string path = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)) + "_compressed.rflog";
-            if (File.Exists(path))
-              File.Delete(path);
-            using (FileStream output = File.OpenWrite(Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)) + "_compressed.rflog"))
+            string path = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename)) + "_compressed";
+
+            using (var output = serializer.OpenWrite(path, true))
             {
               this.BeginInvokeIfRequired(f => f.progressBar1.Maximum = (int)input.Length);
               int logicalProcessorCount = Environment.ProcessorCount * 2;
-              List<Entry> entries = new List<Entry>(logicalProcessorCount);
+              var entries = new List<Entry>(logicalProcessorCount);
               int i = 0;
-              while (input.Position != input.Length)
-              {
+
+              long position = 0;
+              foreach (var entry in input) {
                 i++;
-                entries.Add(Serializer.DeserializeWithLengthPrefix<Entry>(input, PrefixStyle.Base128));
+                entries.Add(entry);
+                position = input.Position;
                 if (entries.Count == logicalProcessorCount)
-                  work(entries, width, height, input, output);
+                  work(entries, width, height, position, output);
               }
-              work(entries, width, height, input, output);
-              Console.WriteLine("Processed " + i + " entries!");
+              work(entries, width, height, position, output);
             }
           }
         }
@@ -75,26 +77,32 @@ namespace RfSuitCompressLog
         {
           this.BeginInvokeIfRequired(f => MessageBox.Show(f, ex.GetType().Name, ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error));
         }
-        this.BeginInvokeIfRequired(f => f.progressBar1.Value = 0);
+        UpdateProgress(0, true);
       }
     }
 
-    private void work(List<Entry> entries, int width, int height, FileStream input, FileStream output)
+    private void UpdateProgress(int value, bool progressBarOnly = false) {
+      this.BeginInvokeIfRequired(f => f.progressBar1.Value = value);
+      if (progressBarOnly == false)
+        this.BeginInvokeIfRequired(f => f.label2.Text = value.ToString());
+    }
+
+    private void work(List<Entry> entries, int width, int height, long position, PrefixedWriter<Entry> output)
     {
-      Entry[] outEntries = new Entry[entries.Count];
+      var outEntries = new Entry[entries.Count];
       Parallel.For(0, outEntries.Length, i => outEntries[i] = work(entries[i], width, height));
       foreach (var entry in entries)
-        Serializer.SerializeWithLengthPrefix(output, entry, PrefixStyle.Base128);
+        output.Write(entry);
+      
       entries.Clear();
-
       GC.Collect();
-      this.BeginInvokeIfRequired(f => f.progressBar1.Value = (int)input.Position);
+      UpdateProgress((int)position);
       Application.DoEvents();
     }
 
     private static Entry work(Entry entry, int width, int height)
     {
-      List<Picture> pictures = new List<Picture>();
+      var pictures = new List<Picture>();
       foreach (var picture in entry.pictures)
       {
         var memoryStream = new MemoryStream(picture.data);

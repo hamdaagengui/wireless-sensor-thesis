@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RfSuitCompressLog</RootNamespace>
     <AssemblyName>RfSuitCompressLog</AssemblyName>

@@ -24,7 +24,7 @@ namespace RfSuitLoggerInterfaces
       var extension = Path.GetExtension(path).ToLower();
       if (extension == _ext + "z")
       {
-        return new PrefixedReaderEnumerable<T>(new DeflateStream(File.OpenRead(path), CompressionMode.Decompress));
+        return new PrefixedReaderEnumerable<T>(new AltDeflateStream(File.OpenRead(path), CompressionMode.Decompress));
       }
       if (extension == _ext)
       {
@@ -58,7 +58,7 @@ namespace RfSuitLoggerInterfaces
       }
 
       Stream s = File.OpenWrite(path);
-      return new PrefixedWriter<T>(compressed ? new DeflateStream(s, CompressionMode.Compress) : s);
+      return new PrefixedWriter<T>(compressed ? new AltDeflateStream(s, CompressionMode.Compress) : s);
     }
   }
 
@@ -169,5 +169,31 @@ namespace RfSuitLoggerInterfaces
     }
 
     #endregion
+
+    public long Length { get { return _stream.Length; } }
+
+    public long Position { get { return _stream.Position; } }
+  }
+
+  class AltDeflateStream : DeflateStream {
+    private readonly Stream _stream;
+    public AltDeflateStream(Stream stream, CompressionMode mode) : base(stream, mode) {
+      _stream = stream;
+    }
+
+    public AltDeflateStream(Stream stream, CompressionMode mode, bool leaveOpen) : base(stream, mode, leaveOpen) {
+      _stream = stream;
+    }
+
+    public override long Position
+    {
+      get { return _stream.Position; }
+      set { base.Position = value; }
+    }
+
+    public override long Length
+    {
+      get { return _stream.Length; }
+    }
   }
 }

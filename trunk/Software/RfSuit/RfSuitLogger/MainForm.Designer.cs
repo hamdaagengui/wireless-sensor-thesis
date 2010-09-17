@@ -74,19 +74,19 @@
       // 
       // groupBox1
       // 
+      resources.ApplyResources(this.groupBox1, "groupBox1");
       this.groupBox1.Controls.Add(this.startLogButton);
       this.groupBox1.Controls.Add(this.stopLogButton);
-      resources.ApplyResources(this.groupBox1, "groupBox1");
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.TabStop = false;
       // 
       // groupBox2
       // 
+      resources.ApplyResources(this.groupBox2, "groupBox2");
       this.groupBox2.Controls.Add(this.propertiesButton);
       this.groupBox2.Controls.Add(this.videoCapabilitiesComboBox);
       this.groupBox2.Controls.Add(this.refreshButton);
       this.groupBox2.Controls.Add(this.captureDevicesComboBox);
-      resources.ApplyResources(this.groupBox2, "groupBox2");
       this.groupBox2.Name = "groupBox2";
       this.groupBox2.TabStop = false;
       // 
@@ -99,9 +99,9 @@
       // 
       // videoCapabilitiesComboBox
       // 
+      resources.ApplyResources(this.videoCapabilitiesComboBox, "videoCapabilitiesComboBox");
       this.videoCapabilitiesComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.videoCapabilitiesComboBox.FormattingEnabled = true;
-      resources.ApplyResources(this.videoCapabilitiesComboBox, "videoCapabilitiesComboBox");
       this.videoCapabilitiesComboBox.Name = "videoCapabilitiesComboBox";
       this.videoCapabilitiesComboBox.SelectedIndexChanged += new System.EventHandler(this.VideoCapabilitiesComboBoxSelectedIndexChanged);
       // 
@@ -114,25 +114,25 @@
       // 
       // captureDevicesComboBox
       // 
+      resources.ApplyResources(this.captureDevicesComboBox, "captureDevicesComboBox");
       this.captureDevicesComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.captureDevicesComboBox.FormattingEnabled = true;
-      resources.ApplyResources(this.captureDevicesComboBox, "captureDevicesComboBox");
       this.captureDevicesComboBox.Name = "captureDevicesComboBox";
       this.captureDevicesComboBox.SelectedIndexChanged += new System.EventHandler(this.CaptureDevicesComboBoxSelectedIndexChanged);
       this.captureDevicesComboBox.Click += new System.EventHandler(this.CaptureDevicesComboBoxSelectedIndexChanged);
       // 
       // groupBox3
       // 
-      this.groupBox3.Controls.Add(this.serialPortsComboBox);
       resources.ApplyResources(this.groupBox3, "groupBox3");
+      this.groupBox3.Controls.Add(this.serialPortsComboBox);
       this.groupBox3.Name = "groupBox3";
       this.groupBox3.TabStop = false;
       // 
       // serialPortsComboBox
       // 
+      resources.ApplyResources(this.serialPortsComboBox, "serialPortsComboBox");
       this.serialPortsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.serialPortsComboBox.FormattingEnabled = true;
-      resources.ApplyResources(this.serialPortsComboBox, "serialPortsComboBox");
       this.serialPortsComboBox.Name = "serialPortsComboBox";
       this.serialPortsComboBox.DropDown += new System.EventHandler(this.SerialPortsComboBoxDropDown);
       // 
