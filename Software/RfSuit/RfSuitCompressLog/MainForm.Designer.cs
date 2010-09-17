@@ -34,6 +34,7 @@
       this.label1 = new System.Windows.Forms.Label();
       this.button1 = new System.Windows.Forms.Button();
       this.progressBar1 = new System.Windows.Forms.ProgressBar();
+      this.label2 = new System.Windows.Forms.Label();
       this.SuspendLayout();
       // 
       // openFileDialog
@@ -45,9 +46,10 @@
       this.maskedTextBox1.Location = new System.Drawing.Point(12, 14);
       this.maskedTextBox1.Mask = "00000";
       this.maskedTextBox1.Name = "maskedTextBox1";
+      this.maskedTextBox1.PromptChar = ' ';
       this.maskedTextBox1.Size = new System.Drawing.Size(59, 20);
       this.maskedTextBox1.TabIndex = 0;
-      this.maskedTextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+      this.maskedTextBox1.Text = "200";
       this.maskedTextBox1.ValidatingType = typeof(int);
       // 
       // maskedTextBox2
@@ -55,9 +57,10 @@
       this.maskedTextBox2.Location = new System.Drawing.Point(95, 14);
       this.maskedTextBox2.Mask = "00000";
       this.maskedTextBox2.Name = "maskedTextBox2";
+      this.maskedTextBox2.PromptChar = ' ';
       this.maskedTextBox2.Size = new System.Drawing.Size(59, 20);
       this.maskedTextBox2.TabIndex = 1;
-      this.maskedTextBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+      this.maskedTextBox2.Text = "200";
       this.maskedTextBox2.ValidatingType = typeof(int);
       // 
       // label1
@@ -74,7 +77,7 @@
       this.button1.Location = new System.Drawing.Point(160, 12);
       this.button1.Name = "button1";
       this.button1.Size = new System.Drawing.Size(75, 23);
-      this.button1.TabIndex = 3;
+      this.button1.TabIndex = 2;
       this.button1.Text = "compress";
       this.button1.UseVisualStyleBackColor = true;
       this.button1.Click += new System.EventHandler(this.button1_Click);
@@ -85,8 +88,16 @@
                   | System.Windows.Forms.AnchorStyles.Right)));
       this.progressBar1.Location = new System.Drawing.Point(12, 40);
       this.progressBar1.Name = "progressBar1";
-      this.progressBar1.Size = new System.Drawing.Size(223, 19);
+      this.progressBar1.Size = new System.Drawing.Size(142, 19);
       this.progressBar1.TabIndex = 4;
+      // 
+      // label2
+      // 
+      this.label2.Location = new System.Drawing.Point(160, 40);
+      this.label2.Name = "label2";
+      this.label2.Size = new System.Drawing.Size(75, 19);
+      this.label2.TabIndex = 5;
+      this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
       // 
       // MainForm
       // 
@@ -94,6 +105,7 @@
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(247, 71);
+      this.Controls.Add(this.label2);
       this.Controls.Add(this.progressBar1);
       this.Controls.Add(this.button1);
       this.Controls.Add(this.label1);
@@ -116,6 +128,7 @@
     private System.Windows.Forms.Label label1;
     private System.Windows.Forms.Button button1;
     private System.Windows.Forms.ProgressBar progressBar1;
+    private System.Windows.Forms.Label label2;
   }
 }
 

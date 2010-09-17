@@ -21,6 +21,12 @@ namespace RfSuitLogger
 
       //_logger = new Logger(_visualSource, new ConnectionSimulator(10));
 			_logger = new Logger(_visualSource, new Connection());
+      _logger.UpdateStatus += LoggerUpdateStatus;
+    }
+
+    void LoggerUpdateStatus(object sender, Logger.UpdateEventArgs e)
+    {
+      logTextBox.BeginInvokeIfRequired(log => log.Text = "fps: " + e.Count.ToString() + ", total: " + e.TotalCount);
     }
 
     //    private Connection connection;
