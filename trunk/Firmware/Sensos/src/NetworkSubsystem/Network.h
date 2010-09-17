@@ -35,6 +35,6 @@ enum
 void Network_Initialize();
 void Network_Run();
 uint8_t Network_CreateChannel(uint8_t classification);
-void Network_SendSensorData(uint8_t sensorId, void* data, uint8_t length);
+void Network_SendData(uint8_t dataId, void* data, uint8_t length);
 
 #endif /* NETWORK_H_ */

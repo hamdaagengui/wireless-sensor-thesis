@@ -16,6 +16,19 @@
 
 #define NETWORK_CAN_ROUTE												1
 
+// Event subsystem
+#define EVENTDISPATCHER_HIGHEST_EVENT_ID														32
+#define EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS								8
+#define EVENTDISPATCHER_QUEUE_SIZE																	8
+#define EVENTDISPATCHER_REPORT_DATA_SIZE														8
+#define EVENTDISPATCHER_REPORT_DATA_POOL_SIZE												16
+
+// Peripherals
+
+//   SPI
+#define SPI_TRANSFER_QUEUE_SIZE																			10
+#define SPI_MAXIMUM_TRANSFER_SIZE																		10
+
 #include <Configuration.h>
 
 #endif /* DEFAULTCONFIGURATION_H_ */

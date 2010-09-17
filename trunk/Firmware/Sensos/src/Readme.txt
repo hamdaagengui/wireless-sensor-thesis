@@ -1,6 +1,9 @@
 Debug
 	Define 'DEBUG' to enable debugging in the framework code.
-	Level 1: 
+	Level 0: Detect but ignore errors.
+	Level 1: Detect errors and send debug messages.
+	Level 2: Detect errors and send debug messages. Freeze program.
+	Level 3: Detect errors and freeze program.
 
 Log
 	Define 'LOG' to enable logging in the framework code.
@@ -11,23 +14,25 @@ Statistics
 	Level 1: 
 
 Processor peripherals
-	Communicating peripheral / Asynchronous communication peripheral
-		UART
-	Transactional peripheral / Synchronous communication peripheral
-		SPI
-		IIC
-	Sampling peripheral
-		ADC
-		Timer
+	Communicating/Asynchronous communication peripheral
+		UART (uint8_t[])
+	Transactional/Synchronous communication peripheral
+		SPI (void)
+		IIC (void)
+	Sampling/Constant rate/Continues/Streaming peripheral
+		ADC (uint16_t)
+		Timer (void)
 	Notifying peripheral
-		Input capture
-		GPIO change
-		Analog comparator
-	Outputing
+		Input capture (uint16_t)
+		GPIO change (uint64_t)
+		Analog comparator (uint8_t)
+	Output peripheral
 		GPIO
 		PWM
-
-
+	Input peripheral
+		GPIO
+		ADC (cached values)
+		Analog comparator
 
 
 
@@ -35,7 +40,6 @@ IIC based sensor example - AccelSensor.c
 
 	iicConfiguration configuration = {IIC_STANDARD_SPEED, Sensor_Completion};
 	uint8_t adrBuf[2] = {2 >> 8, 2};
-	uint8_t dataBuf[3 * 2];
 	int16_t dataBuf[3];
 	
 	#define ACCEL_IIC_ADR  0x94
@@ -56,7 +60,6 @@ IIC based sensor example - AccelSensor.c
 		y = *((int16_t*)&dataBuf[2]);
 		z = *((int16_t*)&dataBuf[4]);
 		PostSensorUpdate(SENSOR_ID, x, y, z);
-		
 	}
 
 

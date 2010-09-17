@@ -28,6 +28,9 @@ extern void SPI_Initialize();
 extern void SPI_Subscribe(spiConfiguration* configuration);
 extern void SPI_Start();
 
+/**
+ * Queues a transfer command. OBS Only a pointer to the output buffer is queued so it is not safe to modify the buffer until the completion handler is called!
+ */
 extern void SPI_Transfer(spiConfiguration* configuration, uint8_t* output, uint8_t* input, uint8_t length);
 
 #endif /* SPI_H_ */

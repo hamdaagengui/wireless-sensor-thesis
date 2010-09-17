@@ -31,7 +31,7 @@ typedef uint8_t bool;
 typedef void (*blockHandlerCallback)(uint8_t* data, uint8_t length);
 typedef void (*notificationHandlerCallback)();
 
-typedef void (*eventHandler)();
+//typedef void (*eventHandler)();
 typedef void (*completionHandler)();
 
 #endif /* GLOBALS_H_ */
