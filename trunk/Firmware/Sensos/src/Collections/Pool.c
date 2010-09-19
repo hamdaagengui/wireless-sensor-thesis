@@ -46,11 +46,10 @@ void* Pool_AllocateBlock(void* p)
 		return NULL;
 	}
 
-	uint8_t blockCount = _p->blockCount;
 	uint8_t size = sizeof(poolBlock) + _p->blockSize;
 	void* buf = &_p->buffer;
 
-	for (uint8_t i = 0; i < blockCount; i++)
+	for (uint8_t i = 0; i < _p->blockCount; i++)
 	{
 		poolBlock* pb = buf;
 		if (pb->used == false)
@@ -64,76 +63,22 @@ void* Pool_AllocateBlock(void* p)
 	return NULL;
 }
 
+// TODO Maybe use 'next' to reverse to specified block faster
 void Pool_ReleaseBlock(void* p, void* block)
 {
-	// TODO Implement
-	// TODO Maybe use 'next' to reverse to specified block faster
-}
+	pool* _p = p;
 
-//
-//void Pool_Initialize(void* q, uint8_t elementSize, uint8_t elementCount)
-//{
-//	queue* _q = q;
-//
-//	_q->head = 0;
-//	_q->tail = 0;
-//	_q->free = elementCount;
-//	_q->size = elementCount;
-//	_q->elementSize = elementSize;
-//}
-//
-//bool Pool_IsFull(void* q)
-//{
-//	queue* _q = q;
-//
-//	return _q->free == 0;
-//}
-//
-//bool Pool_IsEmpty(void* q)
-//{
-//	queue* _q = (queue*) q;
-//
-//	return _q->free == _q->size;
-//}
-//
-//void* Pool_Head(void* q)
-//{
-//	queue* _q = (queue*) q;
-//	uint16_t position = _q->head;
-//	position *= _q->elementSize;
-//
-//	return (void*) &_q->buffer[position];
-//}
-//
-//void* Pool_Tail(void* q)
-//{
-//	queue* _q = (queue*) q;
-//	uint16_t position = _q->tail;
-//	position *= _q->elementSize;
-//
-//	return (void*) &_q->buffer[position];
-//}
-//
-//void Pool_AdvanceHead(void* q)
-//{
-//	queue* _q = (queue*) q;
-//
-//	if (++_q->head >= _q->size)
-//	{
-//		_q->head = 0;
-//	}
-//
-//	atomic(_q->free--);
-//}
-//
-//void Pool_AdvanceTail(void* q)
-//{
-//	queue* _q = (queue*) q;
-//
-//	if (++_q->tail >= _q->size)
-//	{
-//		_q->tail = 0;
-//	}
-//
-//	atomic(_q->free++);
-//}
+	uint8_t size = sizeof(poolBlock) + _p->blockSize;
+	void* buf = &_p->buffer;
+
+	for (uint8_t i = 0; i < _p->blockCount; i++)
+	{
+		poolBlock* pb = buf;
+		if (&pb->data == block)
+		{
+			pb->used = false;
+			return;
+		}
+		buf += size;
+	}
+}

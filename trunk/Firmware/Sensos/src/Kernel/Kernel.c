@@ -18,6 +18,7 @@ int main()
 	// Initialize sub systems
 	//	Kernel_Initialize();
 	//	Network_Initialize();
+	PowerManager_Initialize();
 	EventDispatcher_Initialize();
 	// Initialize peripherals
 	HardwareAbstractionLayer_Initialize();
@@ -42,7 +43,7 @@ int main()
 
 
 		// Sleep
-
+		PowerManager_PowerDown();
 	}
 
 	return 0;

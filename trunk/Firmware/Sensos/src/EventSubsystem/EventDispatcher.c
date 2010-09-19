@@ -123,7 +123,7 @@ void* EventDispatcher_Publish(uint8_t event, void* data)
 	return Pool_AllocateBlock(bufferPool);
 }
 
-void EventDispatcher_Notify(eventHandler handler)
+void EventDispatcher_Notify(completionHandler handler)
 {
 	if (Queue_IsFull(eventQueue)) // queue full ?
 	{
