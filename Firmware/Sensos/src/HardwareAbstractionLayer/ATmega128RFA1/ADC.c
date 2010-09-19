@@ -5,8 +5,11 @@
  *      Author: coma
  */
 
-#include "ADC.h"
-#include <PeripheralSubsystem/PeripheralSubsystem.h>
+#if defined(__AVR_ATmega128RFA1__)
+
+#include "../ADC.h"
+#include "../../Collections/Queue.h"
+#include "../../EventSubsystem/EventDispatcher.h"
 
 static bool enable = false;
 
@@ -35,7 +38,7 @@ void ADC_Start()
 	{
 		// calculate timer settings
 
-		eventData = PeripheralDataDistributor_GetBuffer();
+		eventData = EventDispatcher_RegisterPublisher(0);
 
 
 		// kick off sampling
@@ -50,8 +53,10 @@ ISR( ADC_vect)
 {
 	*eventData = ADC;
 
-	uint8_t event = PERIPHERAL_EVENT_ADC_CHANNEL_0 + currentChannel;
-	eventData = PeripheralDataDistributor_Publish(event, eventData);
+
+	// TODO Wtf to do about event id allocation???
+	uint8_t event = 0;// PERIPHERAL_EVENT_ADC_CHANNEL_0 + currentChannel;
+	eventData = EventDispatcher_Publish(event, eventData);
 
 
 	// set channel = nextChannel
@@ -65,3 +70,5 @@ ISR( ADC_vect)
 		nextChannel &= 0x07;
 	} while (activeChannels[nextChannel] == false);
 }
+
+#endif

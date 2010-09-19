@@ -5,11 +5,12 @@
  *      Author: coma
  */
 
-#include <Globals.h>
-#include <DefaultConfiguration.h>
-#include <PeripheralSubsystem/Drivers/ADC.h>
-#include <PeripheralSubsystem/PeripheralDataDistributor.h>
+#include "../Globals.h"
+#include "../DefaultConfiguration.h"
+#include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
+#include "../EventSubsystem/EventDispatcher.h"
 
+// Entry point to user code.
 extern void Start();
 
 int main()
@@ -17,8 +18,9 @@ int main()
 	// Initialize sub systems
 	//	Kernel_Initialize();
 	//	Network_Initialize();
-	PeripheralDataDistributor_Initialize();
-	ADC_Initialize();
+	EventDispatcher_Initialize();
+	// Initialize peripherals
+	HardwareAbstractionLayer_Initialize();
 
 
 	// Start user application
@@ -26,18 +28,18 @@ int main()
 
 
 	// Start sub systems
-	ADC_Start();
+	EventDispatcher_Start();
+	// Start peripherals
+	HardwareAbstractionLayer_Start();
 
 
 	// Run system
 	sei();
 	while (true)
 	{
-		// Pump PDD sub system
-		PeripheralDataDistributor_ProcessEvents();
+		// Pump the event sub system
+		EventDispatcher_Dispatch();
 
-
-		// Pump SDD sub system
 
 		// Sleep
 
