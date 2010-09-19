@@ -45,27 +45,26 @@
 			this.richTextBox1 = new System.Windows.Forms.RichTextBox();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this.listViewLog = new System.Windows.Forms.ListView();
-			this.tabPage3 = new System.Windows.Forms.TabPage();
-			this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-			this.sdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.comboBoxPorts = new System.Windows.Forms.ToolStripComboBox();
-			this.textBoxBaudrate = new System.Windows.Forms.ToolStripTextBox();
-			this.connectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.disconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripComboBox1 = new System.Windows.Forms.ToolStripComboBox();
 			this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.tabPage3 = new System.Windows.Forms.TabPage();
 			this.listViewErrors = new System.Windows.Forms.ListView();
 			this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+			this.sdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.comboBoxPorts = new System.Windows.Forms.ToolStripComboBox();
+			this.textBoxBaudrate = new System.Windows.Forms.ToolStripTextBox();
 			this.sdfToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.connectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.disconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -214,83 +213,6 @@
 			this.listViewLog.UseCompatibleStateImageBehavior = false;
 			this.listViewLog.View = System.Windows.Forms.View.Details;
 			// 
-			// tabPage3
-			// 
-			this.tabPage3.Controls.Add(this.listViewErrors);
-			resources.ApplyResources(this.tabPage3, "tabPage3");
-			this.tabPage3.Name = "tabPage3";
-			this.tabPage3.UseVisualStyleBackColor = true;
-			// 
-			// statusStrip1
-			// 
-			resources.ApplyResources(this.statusStrip1, "statusStrip1");
-			this.statusStrip1.Name = "statusStrip1";
-			// 
-			// menuStrip1
-			// 
-			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.sdToolStripMenuItem,
-            this.optionsToolStripMenuItem,
-            this.connectToolStripMenuItem,
-            this.disconnectToolStripMenuItem});
-			resources.ApplyResources(this.menuStrip1, "menuStrip1");
-			this.menuStrip1.Name = "menuStrip1";
-			// 
-			// sdToolStripMenuItem
-			// 
-			this.sdToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.clearToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.exitToolStripMenuItem});
-			this.sdToolStripMenuItem.Name = "sdToolStripMenuItem";
-			resources.ApplyResources(this.sdToolStripMenuItem, "sdToolStripMenuItem");
-			// 
-			// exitToolStripMenuItem
-			// 
-			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			resources.ApplyResources(this.exitToolStripMenuItem, "exitToolStripMenuItem");
-			this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-			// 
-			// optionsToolStripMenuItem
-			// 
-			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.comboBoxPorts,
-            this.textBoxBaudrate,
-            this.toolStripComboBox1,
-            this.sdfToolStripMenuItem});
-			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-			resources.ApplyResources(this.optionsToolStripMenuItem, "optionsToolStripMenuItem");
-			this.optionsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.optionsToolStripMenuItem_DropDownOpening);
-			// 
-			// comboBoxPorts
-			// 
-			this.comboBoxPorts.Name = "comboBoxPorts";
-			resources.ApplyResources(this.comboBoxPorts, "comboBoxPorts");
-			// 
-			// textBoxBaudrate
-			// 
-			this.textBoxBaudrate.Name = "textBoxBaudrate";
-			resources.ApplyResources(this.textBoxBaudrate, "textBoxBaudrate");
-			// 
-			// connectToolStripMenuItem
-			// 
-			this.connectToolStripMenuItem.Name = "connectToolStripMenuItem";
-			resources.ApplyResources(this.connectToolStripMenuItem, "connectToolStripMenuItem");
-			// 
-			// disconnectToolStripMenuItem
-			// 
-			resources.ApplyResources(this.disconnectToolStripMenuItem, "disconnectToolStripMenuItem");
-			this.disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
-			// 
-			// toolStripComboBox1
-			// 
-			this.toolStripComboBox1.Items.AddRange(new object[] {
-            resources.GetString("toolStripComboBox1.Items"),
-            resources.GetString("toolStripComboBox1.Items1"),
-            resources.GetString("toolStripComboBox1.Items2")});
-			this.toolStripComboBox1.Name = "toolStripComboBox1";
-			resources.ApplyResources(this.toolStripComboBox1, "toolStripComboBox1");
-			// 
 			// columnHeader6
 			// 
 			resources.ApplyResources(this.columnHeader6, "columnHeader6");
@@ -302,6 +224,13 @@
 			// columnHeader8
 			// 
 			resources.ApplyResources(this.columnHeader8, "columnHeader8");
+			// 
+			// tabPage3
+			// 
+			this.tabPage3.Controls.Add(this.listViewErrors);
+			resources.ApplyResources(this.tabPage3, "tabPage3");
+			this.tabPage3.Name = "tabPage3";
+			this.tabPage3.UseVisualStyleBackColor = true;
 			// 
 			// listViewErrors
 			// 
@@ -327,6 +256,30 @@
 			// 
 			resources.ApplyResources(this.columnHeader11, "columnHeader11");
 			// 
+			// statusStrip1
+			// 
+			resources.ApplyResources(this.statusStrip1, "statusStrip1");
+			this.statusStrip1.Name = "statusStrip1";
+			// 
+			// menuStrip1
+			// 
+			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.sdToolStripMenuItem,
+            this.optionsToolStripMenuItem,
+            this.connectToolStripMenuItem,
+            this.disconnectToolStripMenuItem});
+			resources.ApplyResources(this.menuStrip1, "menuStrip1");
+			this.menuStrip1.Name = "menuStrip1";
+			// 
+			// sdToolStripMenuItem
+			// 
+			this.sdToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.exitToolStripMenuItem});
+			this.sdToolStripMenuItem.Name = "sdToolStripMenuItem";
+			resources.ApplyResources(this.sdToolStripMenuItem, "sdToolStripMenuItem");
+			// 
 			// clearToolStripMenuItem
 			// 
 			this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
@@ -337,13 +290,49 @@
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
 			resources.ApplyResources(this.toolStripSeparator1, "toolStripSeparator1");
 			// 
+			// exitToolStripMenuItem
+			// 
+			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+			resources.ApplyResources(this.exitToolStripMenuItem, "exitToolStripMenuItem");
+			this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+			// 
+			// optionsToolStripMenuItem
+			// 
+			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.comboBoxPorts,
+            this.textBoxBaudrate,
+            this.sdfToolStripMenuItem});
+			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+			resources.ApplyResources(this.optionsToolStripMenuItem, "optionsToolStripMenuItem");
+			this.optionsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.optionsToolStripMenuItem_DropDownOpening);
+			// 
+			// comboBoxPorts
+			// 
+			this.comboBoxPorts.Name = "comboBoxPorts";
+			resources.ApplyResources(this.comboBoxPorts, "comboBoxPorts");
+			// 
+			// textBoxBaudrate
+			// 
+			this.textBoxBaudrate.Name = "textBoxBaudrate";
+			resources.ApplyResources(this.textBoxBaudrate, "textBoxBaudrate");
+			// 
 			// sdfToolStripMenuItem
 			// 
 			this.sdfToolStripMenuItem.CheckOnClick = true;
 			this.sdfToolStripMenuItem.Name = "sdfToolStripMenuItem";
 			resources.ApplyResources(this.sdfToolStripMenuItem, "sdfToolStripMenuItem");
 			// 
-			// Form1
+			// connectToolStripMenuItem
+			// 
+			this.connectToolStripMenuItem.Name = "connectToolStripMenuItem";
+			resources.ApplyResources(this.connectToolStripMenuItem, "connectToolStripMenuItem");
+			// 
+			// disconnectToolStripMenuItem
+			// 
+			resources.ApplyResources(this.disconnectToolStripMenuItem, "disconnectToolStripMenuItem");
+			this.disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
+			// 
+			// MainView
 			// 
 			resources.ApplyResources(this, "$this");
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -351,7 +340,7 @@
 			this.Controls.Add(this.statusStrip1);
 			this.Controls.Add(this.menuStrip1);
 			this.MainMenuStrip = this.menuStrip1;
-			this.Name = "Form1";
+			this.Name = "MainView";
 			this.splitContainer1.Panel1.ResumeLayout(false);
 			this.splitContainer1.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
@@ -403,7 +392,6 @@
 		private System.Windows.Forms.RichTextBox richTextBox1;
 		private System.Windows.Forms.ToolStripMenuItem connectToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem disconnectToolStripMenuItem;
-		private System.Windows.Forms.ToolStripComboBox toolStripComboBox1;
 		private System.Windows.Forms.ColumnHeader columnHeader6;
 		private System.Windows.Forms.ColumnHeader columnHeader7;
 		private System.Windows.Forms.ColumnHeader columnHeader8;
