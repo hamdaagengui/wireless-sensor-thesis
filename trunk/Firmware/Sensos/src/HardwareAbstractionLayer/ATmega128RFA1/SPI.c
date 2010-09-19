@@ -60,17 +60,7 @@ void SPI_Transfer(spiConfiguration* configuration, uint8_t* output, uint8_t* inp
 	}
 
 	bool isIdle;
-	atomic
-	(
-			if(Queue_IsEmpty(transferQueue))
-			{
-				isIdle = true;
-			}
-			else
-			{
-				isIdle = false;
-			}
-	);
+	atomic(isIdle = Queue_IsEmpty(transferQueue));
 
 	transferCommand* cmd = Queue_Head(transferQueue);
 

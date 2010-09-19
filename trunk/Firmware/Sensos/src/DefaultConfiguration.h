@@ -17,7 +17,7 @@
 #define NETWORK_CAN_ROUTE												1
 
 // Event subsystem
-#define EVENTDISPATCHER_HIGHEST_EVENT_ID														32
+#define EVENTDISPATCHER_HIGHEST_EVENT_ID														128
 #define EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS								8
 #define EVENTDISPATCHER_QUEUE_SIZE																	8
 #define EVENTDISPATCHER_REPORT_DATA_SIZE														8

@@ -9,6 +9,8 @@
 #include "../Collections/Pool.h"
 #include "../Collections/Queue.h"
 
+
+// TODO EVENTDISPATCHER_HIGHEST_EVENT_ID should be replaced by EVENT_LAST_ID or something like that so the user shouldn't explicitly define it.
 static eventHandler subscribers[EVENTDISPATCHER_HIGHEST_EVENT_ID][EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS];
 
 typedef struct
@@ -41,7 +43,7 @@ void EventDispatcher_Start()
 {
 }
 
-void EventDispatcher_ProcessEvents()
+void EventDispatcher_Dispatch()
 {
 	while (Queue_IsEmpty(eventQueue) == false)
 	{
