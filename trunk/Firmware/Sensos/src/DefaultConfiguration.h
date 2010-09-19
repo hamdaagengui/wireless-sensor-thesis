@@ -27,7 +27,6 @@
 
 //   SPI
 #define SPI_TRANSFER_QUEUE_SIZE																			10
-#define SPI_MAXIMUM_TRANSFER_SIZE																		10
 
 #include <Configuration.h>
 

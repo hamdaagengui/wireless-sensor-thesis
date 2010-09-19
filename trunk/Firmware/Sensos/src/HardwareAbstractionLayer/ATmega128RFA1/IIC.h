@@ -5,8 +5,3 @@
  *      Author: Coma
  */
 
-#ifndef IIC_H_
-#define IIC_H_
-
-
-#endif /* IIC_H_ */
