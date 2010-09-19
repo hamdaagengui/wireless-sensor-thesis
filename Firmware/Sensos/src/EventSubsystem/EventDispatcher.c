@@ -6,6 +6,8 @@
  */
 
 #include "EventDispatcher.h"
+#include "../Collections/Pool.h"
+#include "../Collections/Queue.h"
 
 static eventHandler subscribers[EVENTDISPATCHER_HIGHEST_EVENT_ID][EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS];
 
@@ -26,26 +28,13 @@ typedef struct
 	};
 } queueElement;
 
-static queueElement eventQueue[EVENTDISPATCHER_QUEUE_SIZE];
-static uint8_t queueIn = 0;
-static uint8_t queueOut = 0;
-static volatile uint8_t queueFree = EVENTDISPATCHER_QUEUE_SIZE;
-
-static void BufferPool_Initialize();
-static void* BufferPool_AllocateBuffer();
-static void BufferPool_ReleaseBuffer(void* buffer);
+static uint8_t eventQueue[Queue_CalculateSize(sizeof(queueElement), EVENTDISPATCHER_QUEUE_SIZE)];
+static uint8_t bufferPool[Pool_CalculateSize(EVENTDISPATCHER_REPORT_DATA_SIZE, EVENTDISPATCHER_REPORT_DATA_POOL_SIZE)];
 
 void EventDispatcher_Initialize()
 {
-	for (uint8_t i = 0; i < EVENTDISPATCHER_HIGHEST_EVENT_ID; i++)
-	{
-		for (uint8_t j = 0; j < EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS; j++)
-		{
-			subscribers[i][j] = NULL;
-		}
-	}
-
-	BufferPool_Initialize();
+	Queue_Initialize(eventQueue, sizeof(queueElement), EVENTDISPATCHER_QUEUE_SIZE);
+	Pool_Initialize(bufferPool, EVENTDISPATCHER_REPORT_DATA_SIZE, EVENTDISPATCHER_REPORT_DATA_POOL_SIZE);
 }
 
 void EventDispatcher_Start()
@@ -54,9 +43,10 @@ void EventDispatcher_Start()
 
 void EventDispatcher_ProcessEvents()
 {
-	while (queueFree < EVENTDISPATCHER_QUEUE_SIZE)
+	while (Queue_IsEmpty(eventQueue) == false)
 	{
-		queueElement* qe = &eventQueue[queueOut];
+		queueElement* qe = Queue_Tail(eventQueue);
+
 		if (qe->isNotification)
 		{
 			qe->notification.handler();
@@ -75,15 +65,10 @@ void EventDispatcher_ProcessEvents()
 				}
 			}
 
-			BufferPool_ReleaseBuffer(qe->publication.data);
+			Pool_ReleaseBlock(bufferPool, qe->publication.data);
 		}
 
-		// Remove element from queue
-		if (++queueOut >= EVENTDISPATCHER_QUEUE_SIZE)
-		{
-			queueOut = 0;
-		}
-		atomic(queueFree++);
+		Queue_AdvanceTail(eventQueue);
 	}
 }
 
@@ -105,12 +90,12 @@ void EventDispatcher_RegisterSubscriber(uint8_t event, eventHandler handler)
 void* EventDispatcher_RegisterPublisher(uint8_t id)
 {
 	// return buffer => error if no buffers are available
-	return BufferPool_AllocateBuffer();
+	return Pool_AllocateBlock(bufferPool);
 }
 
 void* EventDispatcher_Publish(uint8_t event, void* data)
 {
-	if (queueFree == 0) // queue full ?
+	if (Queue_IsFull(eventQueue)) // queue full ?
 	{
 		// error
 		return data; // just return the same buffer since it will not be passed on to event handlers
@@ -123,69 +108,31 @@ void* EventDispatcher_Publish(uint8_t event, void* data)
 	}
 #endif
 
-	eventQueue[queueIn].isNotification = false;
-	eventQueue[queueIn].publication.event = event;
-	eventQueue[queueIn].publication.data = data;
+	queueElement* qe = Queue_Head(eventQueue);
 
-	if (++queueIn >= EVENTDISPATCHER_QUEUE_SIZE)
-	{
-		queueIn = 0;
-	}
-	atomic(queueFree--);
+	qe->isNotification = false;
+	qe->publication.event = event;
+	qe->publication.data = data;
+
+	Queue_AdvanceHead(eventQueue);
 
 
 	// return new buffer => error if no buffers are available
-	return BufferPool_AllocateBuffer();
+	return Pool_AllocateBlock(bufferPool);
 }
 
 void EventDispatcher_Notify(eventHandler handler)
 {
-	if (queueFree == 0) // queue full ?
+	if (Queue_IsFull(eventQueue)) // queue full ?
 	{
 		// error
 		return;
 	}
 
-	eventQueue[queueIn].isNotification = true;
-	eventQueue[queueIn].notification.handler = handler;
+	queueElement* qe = Queue_Head(eventQueue);
 
-	if (++queueIn >= EVENTDISPATCHER_QUEUE_SIZE)
-	{
-		queueIn = 0;
-	}
-	atomic(queueFree--);
-}
+	qe->isNotification = true;
+	qe->notification.handler = handler;
 
-// Internals
-
-typedef struct
-{
-	bool used;
-	uint8_t store[EVENTDISPATCHER_REPORT_DATA_SIZE];
-} eventBuffer;
-static eventBuffer bufferPool[EVENTDISPATCHER_REPORT_DATA_POOL_SIZE];
-static uint8_t lastAllocatedBuffer = 0;
-
-static void BufferPool_Initialize()
-{
-	for (uint8_t i = 0; i < EVENTDISPATCHER_REPORT_DATA_POOL_SIZE; i++)
-	{
-		bufferPool[i].used = false;
-	}
-}
-
-static void* BufferPool_AllocateBuffer()
-{
-	uint8_t count = EVENTDISPATCHER_REPORT_DATA_POOL_SIZE;
-	while (count--)
-	{
-
-	}
-
-	return NULL;
-}
-
-static void BufferPool_ReleaseBuffer(void* buffer)
-{
-
+	Queue_AdvanceHead(eventQueue);
 }

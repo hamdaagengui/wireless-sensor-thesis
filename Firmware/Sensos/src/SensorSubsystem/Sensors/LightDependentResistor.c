@@ -6,25 +6,39 @@
  */
 
 #include <PeripheralSubsystem/PeripheralSubsystem.h>
+#include "../../HardwareAbstractionLayer/SPI.h"
+#include "../../HardwareAbstractionLayer/GPIO.h"
+#include "../../EventSubsystem/EventDispatcher.h"
 
-static void EventHandler(uint8_t event, void* arguments);
+enum
+{
+	CMD_BLA,
+	CMD_BLEH
+};
+
+static void TimerTick();
+static void ComDone();
+
+// static timerConfiguration timerConfig = { };
+static spiConfiguration spiConfig = { 1000000, GPIOA2, ComDone };
 
 void LightDependentResistor_Initialize()
 {
-	adcConfiguration c;
-	//	c.base.peripheralId = PERIPHERAL_ADC;
-	c.interval = 1000;
-	//	Adc_Configure(&c);
+	// Timer_Subscribe(&timerConfig);
+	SPI_Subscribe(&spiConfig);
 }
 
-static void EventHandler(uint8_t event, void* arguments)
+static uint8_t commandBuffer[4] = { CMD_BLA, 2 };
+static uint8_t replyBuffer[4];
+static void TimerTick()
 {
-
+	SPI_Transfer(&spiConfig, commandBuffer, replyBuffer, 4);
 }
 
-/*
+#define EVENT_LDR 123
 
- - Register call back
- - Configure
-
- */
+static void ComDone()
+{
+	uint16_t value = (replyBuffer[3] << 8) + replyBuffer[2];
+	EventDispatcher_Publish(EVENT_LDR, &value);
+}
