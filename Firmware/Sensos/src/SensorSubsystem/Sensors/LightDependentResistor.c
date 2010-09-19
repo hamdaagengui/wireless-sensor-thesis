@@ -5,7 +5,6 @@
  *      Author: coma
  */
 
-#include <PeripheralSubsystem/PeripheralSubsystem.h>
 #include "../../HardwareAbstractionLayer/SPI.h"
 #include "../../HardwareAbstractionLayer/GPIO.h"
 #include "../../EventSubsystem/EventDispatcher.h"
@@ -20,7 +19,7 @@ static void TimerTick();
 static void ComDone();
 
 // static timerConfiguration timerConfig = { };
-static spiConfiguration spiConfig = { 1000000, GPIOA2, ComDone };
+static spiConfiguration spiConfig = { 1000000, GPIOB3, ComDone };
 
 void LightDependentResistor_Initialize()
 {

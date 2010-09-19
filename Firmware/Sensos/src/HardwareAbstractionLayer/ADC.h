@@ -11,6 +11,7 @@
 #define ADC_H_
 
 #include <Globals.h>
+#include "../EventSubsystem/EventDispatcher.h"
 #include "../DefaultConfiguration.h"
 
 // TODO Really belongs to the device specific peripheral  driver
@@ -25,7 +26,7 @@ typedef struct
 } adcConfiguration;
 
 #ifdef __AVR_ATmega128RFA1__
-#include "ATmega128RFA1/SPI.h"
+#include "ATmega128RFA1/ADC.h"
 #else
 #error "No SPI driver found for the selected processor!"
 #endif

@@ -12,6 +12,7 @@
 #include "IIC.h"
 #include "RadioDriver.h"
 #include "SPI.h"
+#include "PowerManager.h"
 
 extern void HardwareAbstractionLayer_Initialize();
 extern void HardwareAbstractionLayer_Start();

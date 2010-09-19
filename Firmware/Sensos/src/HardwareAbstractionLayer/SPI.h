@@ -9,6 +9,7 @@
 #define SPI_H_
 
 #include <Globals.h>
+#include "../EventSubsystem/EventDispatcher.h"
 #include "../DefaultConfiguration.h"
 
 typedef struct

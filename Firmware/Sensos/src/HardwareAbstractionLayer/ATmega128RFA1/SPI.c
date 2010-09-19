@@ -7,6 +7,7 @@
 
 #if defined(__AVR_ATmega128RFA1__)
 
+#include <avr/power.h>
 #include "../SPI.h"
 #include "../../Collections/Queue.h"
 #include "../../EventSubsystem/EventDispatcher.h"
@@ -43,11 +44,12 @@ void SPI_Start()
 {
 	if (enabled)
 	{
+		power_spi_enable();
 		// basic initialization - only that which is not set by each separate transfers configuration.
 	}
 	else
 	{
-		// power down peripheral
+		power_spi_disable();
 	}
 }
 

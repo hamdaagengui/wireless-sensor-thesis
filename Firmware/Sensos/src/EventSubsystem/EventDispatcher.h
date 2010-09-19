@@ -18,6 +18,7 @@ typedef struct
 } eventReport;
 
 typedef void (*eventHandler)(eventReport* report);
+typedef void (*completionHandler)();
 
 extern void EventDispatcher_Initialize();
 extern void EventDispatcher_Start();
@@ -25,6 +26,6 @@ extern void EventDispatcher_Dispatch();
 extern void EventDispatcher_RegisterSubscriber(uint8_t event, eventHandler handler);
 extern void* EventDispatcher_RegisterPublisher(uint8_t id);
 extern void* EventDispatcher_Publish(uint8_t event, void* data);
-extern void EventDispatcher_Notify(eventHandler handler);
+extern void EventDispatcher_Notify(completionHandler handler);
 
 #endif /* EVENTDISPATCHER_H_ */
