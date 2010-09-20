@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
@@ -24,12 +25,23 @@ namespace RfSuitPlayer
     private bool _enableCurveUpdates = true;
     private CheckBox _allCheckBox;
     private int _position;
+    private byte[] _activePicture = null;
 
     private void OpenToolStripMenuItemClick(object sender, EventArgs e)
     {
       if (openFileDialog.ShowDialog(this) != DialogResult.OK) return;
       var entries = EntrySerializer.Instance.OpenRead(openFileDialog.FileName);
       _entries = entries.ToArray();
+
+      var tmp = new List<Picture>();
+      foreach (var entry in _entries)
+      {
+        if(entry.pictures.Count > 0) {
+          tmp = entry.pictures;
+        } else {
+          entry.pictures.AddRange(tmp);
+        }
+      }
       _position = 0;
       _graphData = new GraphData(_entries);
       
@@ -148,7 +160,10 @@ namespace RfSuitPlayer
 
     private void UpdateGraphLine() {
 
-      pictureBox.Image = new Bitmap(new MemoryStream(_entries[_position].pictures[0].data));
+      if (_activePicture != _entries[_position].pictures[0].data) {
+        _activePicture = _entries[_position].pictures[0].data;
+        pictureBox.Image = new Bitmap(new MemoryStream(_activePicture));
+      }
 
       var zgc = zedGraphControl1;
       var myPane = zgc.GraphPane;
