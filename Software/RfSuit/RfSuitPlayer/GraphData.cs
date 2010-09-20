@@ -44,7 +44,8 @@ namespace RfSuitPlayer {
         var entry = entries[i];
         Timeline[i] = Utils.MillisecondsSinceEpoch(entry.timestamp - firstTimestamp).ToOADate();
         for (int j = 0; j < ConnectionDatas.Length; j++) {
-          ConnectionDatas[j].Quality[i] = entry.results[j].Quality;
+          var q = entry.results[j].Quality;
+          ConnectionDatas[j].Quality[i] = (q != 0.0 ? q : double.NaN);
         }
       }
     }
