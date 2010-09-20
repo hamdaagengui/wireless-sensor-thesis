@@ -11,19 +11,24 @@ namespace RfSuitPlayer {
       if(SmoothingFactor == 1)
         return _quality;
 
-      double[] tmp = new double[_quality.Length + (SmoothingFactor - 1)];
-      double[] output = new double[_quality.Length];
-      double[] window = new double[SmoothingFactor];
+      var output = new double[_quality.Length];
+      var window = new double[SmoothingFactor];
 
       int left = SmoothingFactor/2;
-      Array.Copy(_quality, 0, tmp, left, _quality.Length); // Create an array with zero padding on each size to accomodate for the window
+      int right = SmoothingFactor - (left + 1);
 
-      for (int i = 0; i < _quality.Length; i++)
+      for (int i = left; i < _quality.Length - (SmoothingFactor - (left + 1)); i++)
       {
-        Array.Copy(tmp, i-left, window, 0, window.Length);
-        double sum = window.Sum();
-        output[i] = sum / SmoothingFactor;
+        Array.Copy(_quality, i, window, 0, window.Length);
+        output[i] = window.Sum() / SmoothingFactor;
       }
+
+      for (int i = 0; i < left; i++)
+        output[i] = _quality[i];
+
+      for (int i = _quality.Length - right; i < _quality.Length; i++)
+        output[i] = _quality[i];
+
       return output;
     }}
     public int EndPointA { get; private set; }
