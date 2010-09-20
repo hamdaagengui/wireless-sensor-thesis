@@ -46,14 +46,20 @@
 			this.textBox6 = new System.Windows.Forms.TextBox();
 			this.textBox5 = new System.Windows.Forms.TextBox();
 			this.textBox4 = new System.Windows.Forms.TextBox();
+			this.label7 = new System.Windows.Forms.Label();
+			this.label8 = new System.Windows.Forms.Label();
+			this.comboBoxPower = new System.Windows.Forms.ComboBox();
+			this.comboBoxChannel = new System.Windows.Forms.ComboBox();
+			this.comboBoxPort = new System.Windows.Forms.ComboBox();
+			this.label9 = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// progressBar1
 			// 
-			this.progressBar1.Location = new System.Drawing.Point(77, 12);
+			this.progressBar1.Location = new System.Drawing.Point(88, 12);
 			this.progressBar1.Maximum = 93;
 			this.progressBar1.Name = "progressBar1";
-			this.progressBar1.Size = new System.Drawing.Size(310, 23);
+			this.progressBar1.Size = new System.Drawing.Size(299, 23);
 			this.progressBar1.TabIndex = 0;
 			// 
 			// label1
@@ -78,10 +84,10 @@
 			// 
 			// progressBar2
 			// 
-			this.progressBar2.Location = new System.Drawing.Point(77, 41);
+			this.progressBar2.Location = new System.Drawing.Point(88, 41);
 			this.progressBar2.Maximum = 93;
 			this.progressBar2.Name = "progressBar2";
-			this.progressBar2.Size = new System.Drawing.Size(310, 23);
+			this.progressBar2.Size = new System.Drawing.Size(299, 23);
 			this.progressBar2.TabIndex = 3;
 			// 
 			// label3
@@ -96,10 +102,10 @@
 			// 
 			// progressBar3
 			// 
-			this.progressBar3.Location = new System.Drawing.Point(77, 70);
+			this.progressBar3.Location = new System.Drawing.Point(88, 70);
 			this.progressBar3.Maximum = 93;
 			this.progressBar3.Name = "progressBar3";
-			this.progressBar3.Size = new System.Drawing.Size(310, 23);
+			this.progressBar3.Size = new System.Drawing.Size(299, 23);
 			this.progressBar3.TabIndex = 5;
 			// 
 			// label4
@@ -114,10 +120,10 @@
 			// 
 			// progressBar4
 			// 
-			this.progressBar4.Location = new System.Drawing.Point(77, 99);
+			this.progressBar4.Location = new System.Drawing.Point(88, 99);
 			this.progressBar4.Maximum = 93;
 			this.progressBar4.Name = "progressBar4";
-			this.progressBar4.Size = new System.Drawing.Size(310, 23);
+			this.progressBar4.Size = new System.Drawing.Size(299, 23);
 			this.progressBar4.TabIndex = 7;
 			// 
 			// label5
@@ -132,10 +138,10 @@
 			// 
 			// progressBar5
 			// 
-			this.progressBar5.Location = new System.Drawing.Point(77, 128);
+			this.progressBar5.Location = new System.Drawing.Point(88, 128);
 			this.progressBar5.Maximum = 93;
 			this.progressBar5.Name = "progressBar5";
-			this.progressBar5.Size = new System.Drawing.Size(310, 23);
+			this.progressBar5.Size = new System.Drawing.Size(299, 23);
 			this.progressBar5.TabIndex = 9;
 			// 
 			// label6
@@ -150,10 +156,10 @@
 			// 
 			// progressBar6
 			// 
-			this.progressBar6.Location = new System.Drawing.Point(77, 157);
+			this.progressBar6.Location = new System.Drawing.Point(88, 157);
 			this.progressBar6.Maximum = 93;
 			this.progressBar6.Name = "progressBar6";
-			this.progressBar6.Size = new System.Drawing.Size(310, 23);
+			this.progressBar6.Size = new System.Drawing.Size(299, 23);
 			this.progressBar6.TabIndex = 11;
 			// 
 			// textBox1
@@ -216,11 +222,129 @@
 			this.textBox4.TabIndex = 16;
 			this.textBox4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
 			// 
+			// label7
+			// 
+			this.label7.AutoSize = true;
+			this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.label7.Location = new System.Drawing.Point(12, 214);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(57, 17);
+			this.label7.TabIndex = 21;
+			this.label7.Text = "Power:";
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.label8.Location = new System.Drawing.Point(11, 241);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(72, 17);
+			this.label8.TabIndex = 22;
+			this.label8.Text = "Channel:";
+			// 
+			// comboBoxPower
+			// 
+			this.comboBoxPower.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxPower.FormattingEnabled = true;
+			this.comboBoxPower.Items.AddRange(new object[] {
+            "3 dBm",
+            "2.8 dBm",
+            "2.3 dBm",
+            "1.8 dBm",
+            "1.3 dBm",
+            "0.7 dBm",
+            "0 dBm",
+            "-1 dBm",
+            "-2 dBm",
+            "-3 dBm",
+            "-4 dBm",
+            "-5 dBm",
+            "-7 dBm",
+            "-9 dBm",
+            "-12 dBm",
+            "-17 dBm"});
+			this.comboBoxPower.Location = new System.Drawing.Point(88, 213);
+			this.comboBoxPower.Name = "comboBoxPower";
+			this.comboBoxPower.Size = new System.Drawing.Size(299, 21);
+			this.comboBoxPower.TabIndex = 23;
+			this.comboBoxPower.SelectionChangeCommitted += new System.EventHandler(this.comboBoxPower_SelectionChangeCommitted);
+			// 
+			// comboBoxChannel
+			// 
+			this.comboBoxChannel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxChannel.FormattingEnabled = true;
+			this.comboBoxChannel.Items.AddRange(new object[] {
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26"});
+			this.comboBoxChannel.Location = new System.Drawing.Point(88, 240);
+			this.comboBoxChannel.Name = "comboBoxChannel";
+			this.comboBoxChannel.Size = new System.Drawing.Size(299, 21);
+			this.comboBoxChannel.TabIndex = 24;
+			this.comboBoxChannel.SelectionChangeCommitted += new System.EventHandler(this.comboBoxChannel_SelectionChangeCommitted);
+			// 
+			// comboBoxPort
+			// 
+			this.comboBoxPort.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxPort.FormattingEnabled = true;
+			this.comboBoxPort.Items.AddRange(new object[] {
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26"});
+			this.comboBoxPort.Location = new System.Drawing.Point(88, 186);
+			this.comboBoxPort.Name = "comboBoxPort";
+			this.comboBoxPort.Size = new System.Drawing.Size(299, 21);
+			this.comboBoxPort.TabIndex = 28;
+			this.comboBoxPort.DropDown += new System.EventHandler(this.comboBoxPort_DropDown);
+			this.comboBoxPort.SelectionChangeCommitted += new System.EventHandler(this.comboBoxPort_SelectionChangeCommitted);
+			// 
+			// label9
+			// 
+			this.label9.AutoSize = true;
+			this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.label9.Location = new System.Drawing.Point(11, 187);
+			this.label9.Name = "label9";
+			this.label9.Size = new System.Drawing.Size(43, 17);
+			this.label9.TabIndex = 26;
+			this.label9.Text = "Port:";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(506, 189);
+			this.ClientSize = new System.Drawing.Size(506, 273);
+			this.Controls.Add(this.comboBoxPort);
+			this.Controls.Add(this.label9);
+			this.Controls.Add(this.comboBoxChannel);
+			this.Controls.Add(this.comboBoxPower);
+			this.Controls.Add(this.label8);
+			this.Controls.Add(this.label7);
 			this.Controls.Add(this.textBox6);
 			this.Controls.Add(this.textBox5);
 			this.Controls.Add(this.textBox4);
@@ -239,7 +363,10 @@
 			this.Controls.Add(this.progressBar2);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.progressBar1);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+			this.MaximizeBox = false;
 			this.Name = "Form1";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Form1";
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.ResumeLayout(false);
@@ -267,6 +394,12 @@
 		private System.Windows.Forms.TextBox textBox6;
 		private System.Windows.Forms.TextBox textBox5;
 		private System.Windows.Forms.TextBox textBox4;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.Label label8;
+		private System.Windows.Forms.ComboBox comboBoxPower;
+		private System.Windows.Forms.ComboBox comboBoxChannel;
+		private System.Windows.Forms.ComboBox comboBoxPort;
+		private System.Windows.Forms.Label label9;
 	}
 }
 

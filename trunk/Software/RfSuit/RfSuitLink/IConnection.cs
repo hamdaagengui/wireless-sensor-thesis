@@ -7,9 +7,14 @@ namespace RfSuit
 
 	public interface IConnection
 	{
-		bool[] DetectDevices();
+		event SweepCompletedDelegate SweepCompleted;
+
 		bool Start(string portName);
 		void Stop();
-		event SweepCompletedDelegate SweepCompleted;
+
+		bool[] DetectDevices();
+
+		void SetTxPower(byte power);
+		void SetChannel(byte channel);
 	}
 }

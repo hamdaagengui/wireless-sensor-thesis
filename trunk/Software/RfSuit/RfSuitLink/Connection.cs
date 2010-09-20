@@ -78,7 +78,7 @@ namespace RfSuit
 
 			try
 			{
-				var sp = new SerialPort(portName, 115200);
+				var sp = new SerialPort(portName, 500000);
 				var pl = new SerialPortWrapper(sp);
 				dll = new FrameTransceiver(pl);
 				dll.FrameReceived += md.HandleFrame;
@@ -161,6 +161,16 @@ namespace RfSuit
 			return devicePresence;
 		}
 
+		public void SetTxPower(byte power)
+		{
+			Send(SetTxPowerTokenMessage.Create(1, 0, power));
+		}
+
+		public void SetChannel(byte channel)
+		{
+			Send(SetChannelTokenMessage.Create(1, 0, channel));
+		}
+
 		void Send(byte[] message)
 		{
 			txQueue.Enqueue(message);
@@ -173,7 +183,7 @@ namespace RfSuit
 				return;
 			}
 
-		//	Thread.Sleep(100);
+			//	Thread.Sleep(100);
 
 			byte[] msg;
 			if (txQueue.TryDequeue(out msg))
