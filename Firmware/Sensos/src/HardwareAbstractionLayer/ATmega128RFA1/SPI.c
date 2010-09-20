@@ -11,6 +11,7 @@
 #include "../SPI.h"
 #include "../../Collections/Queue.h"
 #include "../../EventSubsystem/EventDispatcher.h"
+#include "../../Diagnostics/Log.h"
 
 static bool enabled = false;
 
@@ -77,9 +78,10 @@ void SPI_Transfer(spiConfiguration* configuration, uint8_t* output, uint8_t* inp
 	{
 		// power up peripheral
 		// enable interrupt
+		StartTransfer();
 	}
 
-	StartTransfer();
+	Log_FrameworkMessage(PSTR(""));
 }
 
 // Internals

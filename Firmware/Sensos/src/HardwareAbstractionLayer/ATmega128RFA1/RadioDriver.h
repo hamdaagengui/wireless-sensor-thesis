@@ -160,13 +160,6 @@ extern void RadioDriver_SetReceiverSensitivityThreshold(uint8_t level);
 extern uint8_t RadioDriver_GetRandomNumber();
 
 /**
- * Return the raw RSSI value from the transceiver.
- * Range is 0 - 28. Higher value means stronger signal.
- * A new value is available when the receiver call back function is called.
- */
-extern uint8_t RadioDriver_GetRawRssi();
-
-/**
  * Starts a calibration cycle of the three things that need calibration.
  * See data sheet pages 120 - 122 for details.
  */
