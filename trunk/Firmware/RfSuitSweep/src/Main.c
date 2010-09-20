@@ -61,7 +61,7 @@ int main()
 
 
 	// Initialize sub systems
-	FrameTransceiver_Initialize(BAUDRATE_115200, CableFrameHandler);
+	FrameTransceiver_Initialize(BAUDRATE_500000, CableFrameHandler);
 
 	RadioDriver_Initialize(RadioFrameHandler);
 	//	RadioDriver_SetBitRate(RADIODRIVER_BITRATE_250_KBPS);
