@@ -50,5 +50,20 @@ namespace RfSuitLogger
     }
 
     public event SweepCompletedDelegate SweepCompleted;
+
+    #region IConnection Members
+
+
+    public void SetTxPower(byte power)
+    {
+      throw new NotImplementedException();
+    }
+
+    public void SetChannel(byte channel)
+    {
+      throw new NotImplementedException();
+    }
+
+    #endregion
   }
 }

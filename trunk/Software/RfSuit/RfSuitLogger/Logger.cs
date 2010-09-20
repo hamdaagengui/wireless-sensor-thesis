@@ -14,14 +14,14 @@ namespace RfSuitLogger
     private readonly object _sync = new object();
     private PrefixedWriter<Entry> _prefixedWriter;
     private readonly VisualSource _visualSource;
-    private readonly IConnection _connection;
+    public IConnection Connection { get; private set; }
     private Stopwatch _stopwatch;
     private long _counter;
     private long _totalCounter;
     public event EventHandler<UpdateEventArgs> UpdateStatus;
 
     public Logger(VisualSource vs, IConnection connection) {
-      _connection = connection;
+      Connection = connection;
       _visualSource = vs;
     }
 
@@ -41,8 +41,8 @@ namespace RfSuitLogger
         _stopwatch = Stopwatch.StartNew();
         _counter = 0;
         _totalCounter = 0;
-        _connection.SweepCompleted += ConnectionSweepCompleted;
-        _connection.Start(connectionPort);
+        Connection.SweepCompleted += ConnectionSweepCompleted;
+        Connection.Start(connectionPort);
       }
     }
 
@@ -81,10 +81,10 @@ namespace RfSuitLogger
       {
         if (IsLogging())
           _prefixedWriter.Close();
-        _connection.SweepCompleted -= ConnectionSweepCompleted;
+        Connection.SweepCompleted -= ConnectionSweepCompleted;
         if(_stopwatch != null)
           _stopwatch.Stop();
-        _connection.Stop();
+        Connection.Stop();
         _prefixedWriter = null;
       }
     }

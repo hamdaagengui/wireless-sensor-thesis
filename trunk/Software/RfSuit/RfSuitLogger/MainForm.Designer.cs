@@ -40,6 +40,8 @@
       this.refreshButton = new System.Windows.Forms.Button();
       this.captureDevicesComboBox = new System.Windows.Forms.ComboBox();
       this.groupBox3 = new System.Windows.Forms.GroupBox();
+      this.channelComboBox = new System.Windows.Forms.ComboBox();
+      this.powerComboBox = new System.Windows.Forms.ComboBox();
       this.serialPortsComboBox = new System.Windows.Forms.ComboBox();
       ((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).BeginInit();
       this.groupBox1.SuspendLayout();
@@ -124,9 +126,61 @@
       // groupBox3
       // 
       resources.ApplyResources(this.groupBox3, "groupBox3");
+      this.groupBox3.Controls.Add(this.channelComboBox);
+      this.groupBox3.Controls.Add(this.powerComboBox);
       this.groupBox3.Controls.Add(this.serialPortsComboBox);
       this.groupBox3.Name = "groupBox3";
       this.groupBox3.TabStop = false;
+      // 
+      // channelComboBox
+      // 
+      resources.ApplyResources(this.channelComboBox, "channelComboBox");
+      this.channelComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.channelComboBox.FormattingEnabled = true;
+      this.channelComboBox.Items.AddRange(new object[] {
+            resources.GetString("channelComboBox.Items"),
+            resources.GetString("channelComboBox.Items1"),
+            resources.GetString("channelComboBox.Items2"),
+            resources.GetString("channelComboBox.Items3"),
+            resources.GetString("channelComboBox.Items4"),
+            resources.GetString("channelComboBox.Items5"),
+            resources.GetString("channelComboBox.Items6"),
+            resources.GetString("channelComboBox.Items7"),
+            resources.GetString("channelComboBox.Items8"),
+            resources.GetString("channelComboBox.Items9"),
+            resources.GetString("channelComboBox.Items10"),
+            resources.GetString("channelComboBox.Items11"),
+            resources.GetString("channelComboBox.Items12"),
+            resources.GetString("channelComboBox.Items13"),
+            resources.GetString("channelComboBox.Items14"),
+            resources.GetString("channelComboBox.Items15")});
+      this.channelComboBox.Name = "channelComboBox";
+      this.channelComboBox.SelectionChangeCommitted += new System.EventHandler(this.ChannelComboBoxSelectionChangeCommitted);
+      // 
+      // powerComboBox
+      // 
+      resources.ApplyResources(this.powerComboBox, "powerComboBox");
+      this.powerComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.powerComboBox.FormattingEnabled = true;
+      this.powerComboBox.Items.AddRange(new object[] {
+            resources.GetString("powerComboBox.Items"),
+            resources.GetString("powerComboBox.Items1"),
+            resources.GetString("powerComboBox.Items2"),
+            resources.GetString("powerComboBox.Items3"),
+            resources.GetString("powerComboBox.Items4"),
+            resources.GetString("powerComboBox.Items5"),
+            resources.GetString("powerComboBox.Items6"),
+            resources.GetString("powerComboBox.Items7"),
+            resources.GetString("powerComboBox.Items8"),
+            resources.GetString("powerComboBox.Items9"),
+            resources.GetString("powerComboBox.Items10"),
+            resources.GetString("powerComboBox.Items11"),
+            resources.GetString("powerComboBox.Items12"),
+            resources.GetString("powerComboBox.Items13"),
+            resources.GetString("powerComboBox.Items14"),
+            resources.GetString("powerComboBox.Items15")});
+      this.powerComboBox.Name = "powerComboBox";
+      this.powerComboBox.SelectionChangeCommitted += new System.EventHandler(this.PowerComboBoxSelectionChangeCommitted);
       // 
       // serialPortsComboBox
       // 
@@ -170,6 +224,8 @@
     private System.Windows.Forms.ComboBox captureDevicesComboBox;
     private System.Windows.Forms.GroupBox groupBox3;
     private System.Windows.Forms.ComboBox serialPortsComboBox;
+    private System.Windows.Forms.ComboBox channelComboBox;
+    private System.Windows.Forms.ComboBox powerComboBox;
   }
 }
 
