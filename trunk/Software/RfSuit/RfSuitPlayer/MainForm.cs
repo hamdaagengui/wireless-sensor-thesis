@@ -25,8 +25,6 @@ namespace RfSuitPlayer
     private CheckBox _allCheckBox;
     private int _position;
 
-    // ZedGraph stuff
-
     private void OpenToolStripMenuItemClick(object sender, EventArgs e)
     {
       if (openFileDialog.ShowDialog(this) != DialogResult.OK) return;
