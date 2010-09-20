@@ -16,6 +16,9 @@ namespace RfSuitLogger
     {
       InitializeComponent();
 
+			powerComboBox.SelectedIndex = 0;
+			channelComboBox.SelectedIndex = 0;
+
       RefreshButtonClick(this, EventArgs.Empty);
 			_visualSource = new VisualSource(1);
 
@@ -138,8 +141,11 @@ namespace RfSuitLogger
         DisplayError("Please select a serial port!", "Missing Serial Port");
         return;
       }
+
       var prefixedWriter = EntrySerializer.Instance.OpenWrite(Directory.GetParent(Application.ExecutablePath) + @"\log" + (long) Utils.MillisecondsSinceEpoch(), true);
       _logger.Start(prefixedWriter, serialPortInfo.Name);
+			_logger.Connection.SetChannel((byte)(powerComboBox.SelectedIndex + 11));
+			_logger.Connection.SetTxPower((byte)powerComboBox.SelectedIndex);
     }
 
     private static void DisplayError(string title, string msg)
@@ -160,12 +166,11 @@ namespace RfSuitLogger
 
     private void PowerComboBoxSelectionChangeCommitted(object sender, EventArgs e)
     {
-      _logger.Connection.SetTxPower((byte)powerComboBox.SelectedIndex);
+      
     }
 
     private void ChannelComboBoxSelectionChangeCommitted(object sender, EventArgs e)
     {
-      _logger.Connection.SetChannel((byte)(powerComboBox.SelectedIndex + 11));
     }
   }
 
