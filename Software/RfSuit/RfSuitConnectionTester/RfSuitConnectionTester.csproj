@@ -34,6 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ComaLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\ComaLib.dll</HintPath>
+    </Reference>
     <Reference Include="protobuf-net, Version=1.0.0.280, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>morelibs\protobuf-net.dll</HintPath>
@@ -91,7 +95,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="morelibs\protobuf-net.dll" />
+    <Content Include="libs\ComaLib.dll" />
+    <Content Include="libs\protobuf-net.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
