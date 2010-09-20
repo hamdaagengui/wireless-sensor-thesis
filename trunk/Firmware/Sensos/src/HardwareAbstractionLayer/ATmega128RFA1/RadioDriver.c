@@ -101,7 +101,7 @@ void RadioDriver_SetTxPower(uint8_t power)
 
 void RadioDriver_SetChannel(uint8_t channel)
 {
-	Modify(PHY_CC_CCA, 0x0f, channel);
+	Modify(PHY_CC_CCA, 0x1f, channel);
 }
 
 void RadioDriver_SetReceiverSensitivityThreshold(uint8_t level)
@@ -114,14 +114,17 @@ uint8_t RadioDriver_GetRandomNumber()
 	return (PHY_RSSI & PHY_RSSI_RANDOM_MASK) >> 5;
 }
 
-uint8_t RadioDriver_GetRawRssi()
-{
-	return rssi & PHY_RSSI_MASK;
-}
-
 int8_t RadioDriver_GetRssi()
 {
-	return -90 + 3 * ((rssi & PHY_RSSI_MASK) - 1);
+	int8_t r = rssi & PHY_RSSI_MASK;
+	if (r == 0)
+	{
+		return 0;
+	}
+	else
+	{
+		return -90 + 3 * (r - 1);
+	}
 }
 
 void RadioDriver_Calibrate()
