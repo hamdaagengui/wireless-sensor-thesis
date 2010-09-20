@@ -135,7 +135,7 @@
             "15"});
       this.smoothingToolStripComboBox.Name = "smoothingToolStripComboBox";
       this.smoothingToolStripComboBox.Size = new System.Drawing.Size(121, 23);
-      this.smoothingToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.smoothingToolStripComboBox_SelectedIndexChanged);
+      this.smoothingToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.SmoothingToolStripComboBoxSelectedIndexChanged);
       // 
       // openFileDialog
       // 

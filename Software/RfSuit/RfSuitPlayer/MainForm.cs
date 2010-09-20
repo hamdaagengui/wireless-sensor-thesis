@@ -9,6 +9,7 @@ using System.Drawing;
 using ZedGraph;
 using RfSuitPlayer.Properties;
 using RfSuitLoggerInterfaces;
+using System.Threading.Tasks;
 
 namespace RfSuitPlayer
 {
@@ -118,11 +119,12 @@ namespace RfSuitPlayer
       var filteredConnections = from cb in flowLayoutPanel1.Controls.OfType<CheckBox>()
                                 where cb.Checked && cb.Tag is ConnectionData
                                 select cb.Tag as ConnectionData;
-      foreach (var connectionData in filteredConnections)
-      {
-        var curve = myPane.AddCurve(connectionData.ToString(), _timeline, connectionData.GetQuality(GetSmoothingFactor()), connectionData.Color);
+      int smoothingFactor = GetSmoothingFactor();
+      Parallel.ForEach(filteredConnections, connectionData => {
+        var data = connectionData.GetQuality(smoothingFactor);
+        var curve = myPane.AddCurve(connectionData.ToString(), _timeline, data, connectionData.Color);
         curve.Symbol.IsVisible = false;
-      }
+      });
 
       // Calculate the Axis Scale Ranges
       zedGraphControl1.AxisChange();
@@ -189,42 +191,6 @@ namespace RfSuitPlayer
       Close();
     }
 
-/*    private void TrackBarValueChanged(object sender, EventArgs e)
-    {
-      if (_entries == null) return;
-      var entry = _entries[trackBar.Value];
-      pictureBox.Image = Image.FromStream(new MemoryStream(entry.pictures[0].data));
-      UpdateGraphLine();
-    }
-
-    private void PreviousButtonClick(object sender, EventArgs e)
-    {
-      if (_player != null)
-        _player.StopPlayer();
-      if (trackBar.Value > trackBar.Minimum)
-        --trackBar.Value;
-    }
-
-    private void NextButtonClick(object sender, EventArgs e)
-    {
-      if (_player != null)
-        _player.StopPlayer();
-      if (trackBar.Value < trackBar.Maximum)
-        ++trackBar.Value;
-    }
-
-    private void PlayButtonClick(object sender, EventArgs e)
-    {
-      if (_player != null)
-        _player.TogglePlayer();
-    }
-
-    private void TrackBarScroll(object sender, EventArgs e)
-    {
-      if (_player != null)
-        _player.StopPlayer();
-    }*/
-
     private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
     {
       Settings.Default.Save();
@@ -249,7 +215,7 @@ namespace RfSuitPlayer
       return default(bool);
     }
 
-    private void smoothingToolStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    private void SmoothingToolStripComboBoxSelectedIndexChanged(object sender, EventArgs e)
     {
       if(smoothingToolStripComboBox.SelectedIndex >= 0) {
         UpdateCurves();
