@@ -1,6 +1,7 @@
 ﻿using System.Drawing.Imaging;
 using System.IO;
 using System.Drawing;
+using System.Linq;
 using dk.iha;
 using RfSuit;
 using RfSuitLoggerInterfaces;
@@ -19,6 +20,7 @@ namespace RfSuitLogger
     private long _counter;
     private long _totalCounter;
     public event EventHandler<UpdateEventArgs> UpdateStatus;
+    private Bitmap[] last = new Bitmap[0];
 
     public Logger(VisualSource vs, IConnection connection) {
       Connection = connection;
@@ -57,10 +59,13 @@ namespace RfSuitLogger
         entry.results.AddRange(results);
 
         Bitmap[] visuals = _visualSource.GetLastVisuals();
-        foreach (var visual in visuals) {
-          var memoryStream = new MemoryStream(10*1024*1024);
-          visual.Save(memoryStream, ImageFormat.Jpeg);
-          entry.pictures.Add(new Picture {data = memoryStream.ToArray()});
+        if (IsUpdated(visuals))
+        {
+          foreach (var visual in visuals) {
+            var memoryStream = new MemoryStream(10*1024*1024);
+            visual.Save(memoryStream, ImageFormat.Jpeg);
+            entry.pictures.Add(new Picture {data = memoryStream.ToArray()});
+          }
         }
 
         _prefixedWriter.Write(entry);
@@ -75,6 +80,13 @@ namespace RfSuitLogger
         }
       }
     }
+
+    private bool IsUpdated(Bitmap[] current) {
+      bool result = last.Length != current.Length || current.Where((t, i) => t != last[i]).Any();
+      last = current;
+      return result;
+    }
+
 
     public void Stop() {
       lock (_sync)
