@@ -94,7 +94,7 @@
       // 
       this.groupBox1.Controls.Add(this.startLogButton);
       this.groupBox1.Controls.Add(this.stopLogButton);
-      this.groupBox1.Location = new System.Drawing.Point(12, 153);
+      this.groupBox1.Location = new System.Drawing.Point(12, 263);
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.Size = new System.Drawing.Size(154, 78);
       this.groupBox1.TabIndex = 9;
@@ -160,9 +160,9 @@
       this.groupBox3.Controls.Add(this.channelComboBox);
       this.groupBox3.Controls.Add(this.powerComboBox);
       this.groupBox3.Controls.Add(this.serialPortsComboBox);
-      this.groupBox3.Location = new System.Drawing.Point(12, 237);
+      this.groupBox3.Location = new System.Drawing.Point(12, 153);
       this.groupBox3.Name = "groupBox3";
-      this.groupBox3.Size = new System.Drawing.Size(154, 90);
+      this.groupBox3.Size = new System.Drawing.Size(154, 104);
       this.groupBox3.TabIndex = 11;
       this.groupBox3.TabStop = false;
       this.groupBox3.Text = "Connection";
@@ -190,7 +190,7 @@
             "26"});
       this.channelComboBox.Location = new System.Drawing.Point(6, 73);
       this.channelComboBox.Name = "channelComboBox";
-      this.channelComboBox.Size = new System.Drawing.Size(121, 21);
+      this.channelComboBox.Size = new System.Drawing.Size(141, 21);
       this.channelComboBox.TabIndex = 2;
       this.channelComboBox.SelectionChangeCommitted += new System.EventHandler(this.ChannelComboBoxSelectionChangeCommitted);
       // 
@@ -217,7 +217,7 @@
             "-17 dBm"});
       this.powerComboBox.Location = new System.Drawing.Point(7, 46);
       this.powerComboBox.Name = "powerComboBox";
-      this.powerComboBox.Size = new System.Drawing.Size(121, 21);
+      this.powerComboBox.Size = new System.Drawing.Size(140, 21);
       this.powerComboBox.TabIndex = 1;
       this.powerComboBox.SelectionChangeCommitted += new System.EventHandler(this.PowerComboBoxSelectionChangeCommitted);
       // 
