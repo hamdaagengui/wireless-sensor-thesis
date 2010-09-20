@@ -39,7 +39,7 @@
       // 
       // openFileDialog
       // 
-      this.openFileDialog.Filter = "RfSuit Log|*.rflog|All files|*.*";
+      this.openFileDialog.Filter = "RfSuit Log|*.rflog;*.rflogz|All files|*.*";
       // 
       // maskedTextBox1
       // 
