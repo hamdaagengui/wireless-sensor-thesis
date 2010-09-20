@@ -28,7 +28,6 @@
     /// </summary>
     private void InitializeComponent()
     {
-      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
       this.previewPictureBox = new System.Windows.Forms.PictureBox();
       this.logTextBox = new System.Windows.Forms.TextBox();
       this.startLogButton = new System.Windows.Forms.Button();
@@ -51,155 +50,199 @@
       // 
       // previewPictureBox
       // 
-      resources.ApplyResources(this.previewPictureBox, "previewPictureBox");
+      this.previewPictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                  | System.Windows.Forms.AnchorStyles.Left)
+                  | System.Windows.Forms.AnchorStyles.Right)));
+      this.previewPictureBox.Location = new System.Drawing.Point(172, 12);
       this.previewPictureBox.Name = "previewPictureBox";
+      this.previewPictureBox.Size = new System.Drawing.Size(606, 411);
+      this.previewPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+      this.previewPictureBox.TabIndex = 1;
       this.previewPictureBox.TabStop = false;
       // 
       // logTextBox
       // 
-      resources.ApplyResources(this.logTextBox, "logTextBox");
+      this.logTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                  | System.Windows.Forms.AnchorStyles.Right)));
+      this.logTextBox.Location = new System.Drawing.Point(12, 347);
+      this.logTextBox.Multiline = true;
       this.logTextBox.Name = "logTextBox";
+      this.logTextBox.Size = new System.Drawing.Size(700, 188);
+      this.logTextBox.TabIndex = 2;
       // 
       // startLogButton
       // 
-      resources.ApplyResources(this.startLogButton, "startLogButton");
+      this.startLogButton.Location = new System.Drawing.Point(6, 19);
       this.startLogButton.Name = "startLogButton";
+      this.startLogButton.Size = new System.Drawing.Size(141, 23);
+      this.startLogButton.TabIndex = 7;
+      this.startLogButton.Text = "Start";
       this.startLogButton.UseVisualStyleBackColor = true;
       this.startLogButton.Click += new System.EventHandler(this.StartLogButtonClick);
       // 
       // stopLogButton
       // 
-      resources.ApplyResources(this.stopLogButton, "stopLogButton");
+      this.stopLogButton.Location = new System.Drawing.Point(6, 48);
       this.stopLogButton.Name = "stopLogButton";
+      this.stopLogButton.Size = new System.Drawing.Size(141, 23);
+      this.stopLogButton.TabIndex = 8;
+      this.stopLogButton.Text = "Stop";
       this.stopLogButton.UseVisualStyleBackColor = true;
       this.stopLogButton.Click += new System.EventHandler(this.StopLogButtonClick);
       // 
       // groupBox1
       // 
-      resources.ApplyResources(this.groupBox1, "groupBox1");
       this.groupBox1.Controls.Add(this.startLogButton);
       this.groupBox1.Controls.Add(this.stopLogButton);
+      this.groupBox1.Location = new System.Drawing.Point(12, 153);
       this.groupBox1.Name = "groupBox1";
+      this.groupBox1.Size = new System.Drawing.Size(154, 78);
+      this.groupBox1.TabIndex = 9;
       this.groupBox1.TabStop = false;
+      this.groupBox1.Text = "Logging";
       // 
       // groupBox2
       // 
-      resources.ApplyResources(this.groupBox2, "groupBox2");
       this.groupBox2.Controls.Add(this.propertiesButton);
       this.groupBox2.Controls.Add(this.videoCapabilitiesComboBox);
       this.groupBox2.Controls.Add(this.refreshButton);
       this.groupBox2.Controls.Add(this.captureDevicesComboBox);
+      this.groupBox2.Location = new System.Drawing.Point(12, 12);
       this.groupBox2.Name = "groupBox2";
+      this.groupBox2.Size = new System.Drawing.Size(154, 135);
+      this.groupBox2.TabIndex = 10;
       this.groupBox2.TabStop = false;
+      this.groupBox2.Text = "Camera";
       // 
       // propertiesButton
       // 
-      resources.ApplyResources(this.propertiesButton, "propertiesButton");
+      this.propertiesButton.Location = new System.Drawing.Point(6, 102);
       this.propertiesButton.Name = "propertiesButton";
+      this.propertiesButton.Size = new System.Drawing.Size(141, 23);
+      this.propertiesButton.TabIndex = 10;
+      this.propertiesButton.Text = "Properties";
       this.propertiesButton.UseVisualStyleBackColor = true;
       this.propertiesButton.Click += new System.EventHandler(this.PropertiesButtonClick);
       // 
       // videoCapabilitiesComboBox
       // 
-      resources.ApplyResources(this.videoCapabilitiesComboBox, "videoCapabilitiesComboBox");
       this.videoCapabilitiesComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.videoCapabilitiesComboBox.FormattingEnabled = true;
+      this.videoCapabilitiesComboBox.Location = new System.Drawing.Point(6, 75);
       this.videoCapabilitiesComboBox.Name = "videoCapabilitiesComboBox";
+      this.videoCapabilitiesComboBox.Size = new System.Drawing.Size(141, 21);
+      this.videoCapabilitiesComboBox.TabIndex = 9;
       this.videoCapabilitiesComboBox.SelectedIndexChanged += new System.EventHandler(this.VideoCapabilitiesComboBoxSelectedIndexChanged);
       // 
       // refreshButton
       // 
-      resources.ApplyResources(this.refreshButton, "refreshButton");
+      this.refreshButton.Location = new System.Drawing.Point(6, 19);
       this.refreshButton.Name = "refreshButton";
+      this.refreshButton.Size = new System.Drawing.Size(141, 23);
+      this.refreshButton.TabIndex = 8;
+      this.refreshButton.Text = "Refresh";
       this.refreshButton.UseVisualStyleBackColor = true;
       this.refreshButton.Click += new System.EventHandler(this.RefreshButtonClick);
       // 
       // captureDevicesComboBox
       // 
-      resources.ApplyResources(this.captureDevicesComboBox, "captureDevicesComboBox");
       this.captureDevicesComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.captureDevicesComboBox.FormattingEnabled = true;
+      this.captureDevicesComboBox.Location = new System.Drawing.Point(6, 48);
       this.captureDevicesComboBox.Name = "captureDevicesComboBox";
+      this.captureDevicesComboBox.Size = new System.Drawing.Size(141, 21);
+      this.captureDevicesComboBox.TabIndex = 7;
       this.captureDevicesComboBox.SelectedIndexChanged += new System.EventHandler(this.CaptureDevicesComboBoxSelectedIndexChanged);
       this.captureDevicesComboBox.Click += new System.EventHandler(this.CaptureDevicesComboBoxSelectedIndexChanged);
       // 
       // groupBox3
       // 
-      resources.ApplyResources(this.groupBox3, "groupBox3");
       this.groupBox3.Controls.Add(this.channelComboBox);
       this.groupBox3.Controls.Add(this.powerComboBox);
       this.groupBox3.Controls.Add(this.serialPortsComboBox);
+      this.groupBox3.Location = new System.Drawing.Point(12, 237);
       this.groupBox3.Name = "groupBox3";
+      this.groupBox3.Size = new System.Drawing.Size(154, 90);
+      this.groupBox3.TabIndex = 11;
       this.groupBox3.TabStop = false;
+      this.groupBox3.Text = "Connection";
       // 
       // channelComboBox
       // 
-      resources.ApplyResources(this.channelComboBox, "channelComboBox");
       this.channelComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.channelComboBox.FormattingEnabled = true;
       this.channelComboBox.Items.AddRange(new object[] {
-            resources.GetString("channelComboBox.Items"),
-            resources.GetString("channelComboBox.Items1"),
-            resources.GetString("channelComboBox.Items2"),
-            resources.GetString("channelComboBox.Items3"),
-            resources.GetString("channelComboBox.Items4"),
-            resources.GetString("channelComboBox.Items5"),
-            resources.GetString("channelComboBox.Items6"),
-            resources.GetString("channelComboBox.Items7"),
-            resources.GetString("channelComboBox.Items8"),
-            resources.GetString("channelComboBox.Items9"),
-            resources.GetString("channelComboBox.Items10"),
-            resources.GetString("channelComboBox.Items11"),
-            resources.GetString("channelComboBox.Items12"),
-            resources.GetString("channelComboBox.Items13"),
-            resources.GetString("channelComboBox.Items14"),
-            resources.GetString("channelComboBox.Items15")});
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26"});
+      this.channelComboBox.Location = new System.Drawing.Point(6, 73);
       this.channelComboBox.Name = "channelComboBox";
+      this.channelComboBox.Size = new System.Drawing.Size(121, 21);
+      this.channelComboBox.TabIndex = 2;
       this.channelComboBox.SelectionChangeCommitted += new System.EventHandler(this.ChannelComboBoxSelectionChangeCommitted);
       // 
       // powerComboBox
       // 
-      resources.ApplyResources(this.powerComboBox, "powerComboBox");
       this.powerComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.powerComboBox.FormattingEnabled = true;
       this.powerComboBox.Items.AddRange(new object[] {
-            resources.GetString("powerComboBox.Items"),
-            resources.GetString("powerComboBox.Items1"),
-            resources.GetString("powerComboBox.Items2"),
-            resources.GetString("powerComboBox.Items3"),
-            resources.GetString("powerComboBox.Items4"),
-            resources.GetString("powerComboBox.Items5"),
-            resources.GetString("powerComboBox.Items6"),
-            resources.GetString("powerComboBox.Items7"),
-            resources.GetString("powerComboBox.Items8"),
-            resources.GetString("powerComboBox.Items9"),
-            resources.GetString("powerComboBox.Items10"),
-            resources.GetString("powerComboBox.Items11"),
-            resources.GetString("powerComboBox.Items12"),
-            resources.GetString("powerComboBox.Items13"),
-            resources.GetString("powerComboBox.Items14"),
-            resources.GetString("powerComboBox.Items15")});
+            "3 dBm",
+            "2.8 dBm",
+            "2.3 dBm",
+            "1.8 dBm",
+            "1.3 dBm",
+            "0.7 dBm",
+            "0 dBm",
+            "-1 dBm",
+            "-2 dBm",
+            "-3 dBm",
+            "-4 dBm",
+            "-5 dBm",
+            "-7 dBm",
+            "-9 dBm",
+            "-12 dBm",
+            "-17 dBm"});
+      this.powerComboBox.Location = new System.Drawing.Point(7, 46);
       this.powerComboBox.Name = "powerComboBox";
+      this.powerComboBox.Size = new System.Drawing.Size(121, 21);
+      this.powerComboBox.TabIndex = 1;
       this.powerComboBox.SelectionChangeCommitted += new System.EventHandler(this.PowerComboBoxSelectionChangeCommitted);
       // 
       // serialPortsComboBox
       // 
-      resources.ApplyResources(this.serialPortsComboBox, "serialPortsComboBox");
       this.serialPortsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.serialPortsComboBox.FormattingEnabled = true;
+      this.serialPortsComboBox.Location = new System.Drawing.Point(6, 19);
       this.serialPortsComboBox.Name = "serialPortsComboBox";
+      this.serialPortsComboBox.Size = new System.Drawing.Size(141, 21);
+      this.serialPortsComboBox.TabIndex = 0;
       this.serialPortsComboBox.DropDown += new System.EventHandler(this.SerialPortsComboBoxDropDown);
       // 
       // MainForm
       // 
-      resources.ApplyResources(this, "$this");
+      this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+      this.ClientSize = new System.Drawing.Size(724, 547);
       this.Controls.Add(this.groupBox3);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.groupBox1);
       this.Controls.Add(this.logTextBox);
       this.Controls.Add(this.previewPictureBox);
       this.Name = "MainForm";
+      this.Text = "RfSuitLogger";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
       ((System.ComponentModel.ISupportInitialize)(this.previewPictureBox)).EndInit();
       this.groupBox1.ResumeLayout(false);
