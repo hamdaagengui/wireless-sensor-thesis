@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace RfSuitPlayer
 {
@@ -22,6 +23,10 @@ namespace RfSuitPlayer
 			int end = smoothingFactor / 2;
 			for (int i = end; i < o.Length - end; i++)
 			{
+        if(double.IsNaN(_quality[i])) {
+          o[i] = double.NaN;
+          continue;
+        }
 				double temp = 0;
 				int left = i - end;
 				int right = i + end;
