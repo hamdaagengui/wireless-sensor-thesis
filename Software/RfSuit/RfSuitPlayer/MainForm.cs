@@ -17,6 +17,7 @@ namespace RfSuitPlayer
     public MainForm()
     {
       InitializeComponent();
+      smoothingToolStripComboBox.SelectedIndex = 0;
     }
 
     private Entry[] _entries;
@@ -119,7 +120,7 @@ namespace RfSuitPlayer
                                 select cb.Tag as ConnectionData;
       foreach (var connectionData in filteredConnections)
       {
-        var curve = myPane.AddCurve(connectionData.ToString(), _timeline, connectionData.Quality, connectionData.Color);
+        var curve = myPane.AddCurve(connectionData.ToString(), _timeline, connectionData.GetQuality(GetSmoothingFactor()), connectionData.Color);
         curve.Symbol.IsVisible = false;
       }
 
@@ -127,6 +128,10 @@ namespace RfSuitPlayer
       zedGraphControl1.AxisChange();
       myPane.XAxis.Title.Text = "Timestamp [" + myPane.XAxis.Scale.Format + "]";
       zedGraphControl1.Invalidate();
+    }
+
+    private int GetSmoothingFactor() {
+      return smoothingToolStripComboBox.SelectedIndex * 2 + 1;
     }
 
     public void CreateChart()
@@ -242,6 +247,13 @@ namespace RfSuitPlayer
         UpdateGraphLine();
       }
       return default(bool);
+    }
+
+    private void smoothingToolStripComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      if(smoothingToolStripComboBox.SelectedIndex >= 0) {
+        UpdateCurves();
+      }
     }
   }
 }
