@@ -129,7 +129,10 @@ namespace RfSuit
 
 		public void Stop()
 		{
-			dll.Stop();
+			if (dll != null)
+			{
+				dll.Stop();
+			}
 		}
 
 		DateTime pingTimer;
