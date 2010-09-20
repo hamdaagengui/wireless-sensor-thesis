@@ -13,6 +13,8 @@ namespace RfSuitPlayer
     [STAThread]
     static void Main()
     {
+      Console.WriteLine(0.1 + 0.1 + 0.1 + Double.NaN + 0.1);
+      
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
       Application.Run(new MainForm());
