@@ -157,6 +157,16 @@ namespace RfSuitLogger
       serialPortsComboBox.Items.Clear();
       serialPortsComboBox.Items.AddRange(SerialPortInfo.GetSerialPorts());
     }
+
+    private void PowerComboBoxSelectionChangeCommitted(object sender, EventArgs e)
+    {
+      _logger.Connection.SetTxPower((byte)powerComboBox.SelectedIndex);
+    }
+
+    private void ChannelComboBoxSelectionChangeCommitted(object sender, EventArgs e)
+    {
+      _logger.Connection.SetChannel((byte)(powerComboBox.SelectedIndex + 11));
+    }
   }
 
   class DisplayableFilterInfo

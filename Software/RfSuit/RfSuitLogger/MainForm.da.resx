@@ -119,7 +119,7 @@
   </resheader>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="groupBox1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 209</value>
+    <value>12, 263</value>
   </data>
   <data name="groupBox1.Text" xml:space="preserve">
     <value>Logger</value>
@@ -133,11 +133,17 @@
   <data name="groupBox2.Text" xml:space="preserve">
     <value>Kamera</value>
   </data>
+  <data name="channelComboBox.Size" type="System.Drawing.Size, System.Drawing">
+    <value>141, 21</value>
+  </data>
+  <data name="powerComboBox.Size" type="System.Drawing.Size, System.Drawing">
+    <value>141, 21</value>
+  </data>
   <data name="groupBox3.Location" type="System.Drawing.Point, System.Drawing">
     <value>12, 153</value>
   </data>
   <data name="groupBox3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>154, 50</value>
+    <value>154, 104</value>
   </data>
   <data name="groupBox3.Text" xml:space="preserve">
     <value>Forbindelse</value>
