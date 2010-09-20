@@ -65,7 +65,14 @@ namespace RfSuit
 						{
 							int a = lqi.EndPointA;
 							int b = lqi.EndPointB;
-							lqi.Quality = (qualityMatrix[a, b] + qualityMatrix[b, a]) / 2.0;
+							if (qualityMatrix[a, b] > -5 || qualityMatrix[b, a] > -5)
+							{
+								lqi.Quality = 0;
+							}
+							else
+							{
+								lqi.Quality = (qualityMatrix[a, b] + qualityMatrix[b, a]) / 2.0;
+							}
 						}
 
 						if (SweepCompleted != null)
@@ -122,7 +129,6 @@ namespace RfSuit
 
 		public void Stop()
 		{
-			md = null;
 			dll.Stop();
 		}
 

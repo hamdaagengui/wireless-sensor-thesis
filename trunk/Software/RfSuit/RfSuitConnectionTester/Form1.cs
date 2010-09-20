@@ -21,10 +21,6 @@ namespace RfSuitConnectionTester
 			InitializeComponent();
 		}
 
-		private void Form1_Load(object sender, EventArgs e)
-		{
-		}
-
 		Int64 counter = 0;
 		DateTime time = DateTime.Now;
 		void con_SweepCompleted(LinkQualityIndicator[] results)
@@ -42,23 +38,23 @@ namespace RfSuitConnectionTester
 
 			if (results.Length >= 1)
 			{
-				progressBar1.Value = (int)(results[0].Quality + 93);
+				progressBar1.Value = (int)(results[0].Quality + 90);
 				textBox1.Text = string.Format("{0:0.0} dBm", results[0].Quality);
 			}
 			if (results.Length >= 3)
 			{
-				progressBar2.Value = (int)(results[1].Quality + 93);
+				progressBar2.Value = (int)(results[1].Quality + 90);
 				textBox2.Text = string.Format("{0:0.0} dBm", results[1].Quality);
-				progressBar3.Value = (int)(results[2].Quality + 93);
+				progressBar3.Value = (int)(results[2].Quality + 90);
 				textBox3.Text = string.Format("{0:0.0} dBm", results[2].Quality);
 			}
 			if (results.Length >= 6)
 			{
-				progressBar4.Value = (int)(results[3].Quality + 93);
+				progressBar4.Value = (int)(results[3].Quality + 90);
 				textBox4.Text = string.Format("{0:0.0} dBm", results[3].Quality);
-				progressBar5.Value = (int)(results[4].Quality + 93);
+				progressBar5.Value = (int)(results[4].Quality + 90);
 				textBox5.Text = string.Format("{0:0.0} dBm", results[4].Quality);
-				progressBar6.Value = (int)(results[5].Quality + 93);
+				progressBar6.Value = (int)(results[5].Quality + 90);
 				textBox6.Text = string.Format("{0:0.0} dBm", results[5].Quality);
 			}
 		}

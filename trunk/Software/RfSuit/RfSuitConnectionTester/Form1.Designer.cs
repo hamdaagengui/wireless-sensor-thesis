@@ -57,7 +57,7 @@
 			// progressBar1
 			// 
 			this.progressBar1.Location = new System.Drawing.Point(88, 12);
-			this.progressBar1.Maximum = 93;
+			this.progressBar1.Maximum = 90;
 			this.progressBar1.Name = "progressBar1";
 			this.progressBar1.Size = new System.Drawing.Size(299, 23);
 			this.progressBar1.TabIndex = 0;
@@ -85,7 +85,7 @@
 			// progressBar2
 			// 
 			this.progressBar2.Location = new System.Drawing.Point(88, 41);
-			this.progressBar2.Maximum = 93;
+			this.progressBar2.Maximum = 90;
 			this.progressBar2.Name = "progressBar2";
 			this.progressBar2.Size = new System.Drawing.Size(299, 23);
 			this.progressBar2.TabIndex = 3;
@@ -103,7 +103,7 @@
 			// progressBar3
 			// 
 			this.progressBar3.Location = new System.Drawing.Point(88, 70);
-			this.progressBar3.Maximum = 93;
+			this.progressBar3.Maximum = 90;
 			this.progressBar3.Name = "progressBar3";
 			this.progressBar3.Size = new System.Drawing.Size(299, 23);
 			this.progressBar3.TabIndex = 5;
@@ -121,7 +121,7 @@
 			// progressBar4
 			// 
 			this.progressBar4.Location = new System.Drawing.Point(88, 99);
-			this.progressBar4.Maximum = 93;
+			this.progressBar4.Maximum = 90;
 			this.progressBar4.Name = "progressBar4";
 			this.progressBar4.Size = new System.Drawing.Size(299, 23);
 			this.progressBar4.TabIndex = 7;
@@ -139,7 +139,7 @@
 			// progressBar5
 			// 
 			this.progressBar5.Location = new System.Drawing.Point(88, 128);
-			this.progressBar5.Maximum = 93;
+			this.progressBar5.Maximum = 90;
 			this.progressBar5.Name = "progressBar5";
 			this.progressBar5.Size = new System.Drawing.Size(299, 23);
 			this.progressBar5.TabIndex = 9;
@@ -157,7 +157,7 @@
 			// progressBar6
 			// 
 			this.progressBar6.Location = new System.Drawing.Point(88, 157);
-			this.progressBar6.Maximum = 93;
+			this.progressBar6.Maximum = 90;
 			this.progressBar6.Name = "progressBar6";
 			this.progressBar6.Size = new System.Drawing.Size(299, 23);
 			this.progressBar6.TabIndex = 11;
@@ -368,7 +368,6 @@
 			this.Name = "Form1";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Form1";
-			this.Load += new System.EventHandler(this.Form1_Load);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
