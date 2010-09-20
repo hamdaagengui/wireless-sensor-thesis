@@ -122,6 +122,7 @@ namespace RfSuit
 
 		public void Stop()
 		{
+			md = null;
 			dll.Stop();
 		}
 
