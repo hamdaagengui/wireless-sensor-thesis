@@ -51,15 +51,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Communicator.cs" />
-    <Compile Include="ErrorMessage.cs" />
+    <Compile Include="ListViewNoFlicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MainView.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainView.Designer.cs">
       <DependentUpon>MainView.cs</DependentUpon>
     </Compile>
-    <Compile Include="FrameMessage.cs" />
-    <Compile Include="MessageMessage.cs" />
+    <Compile Include="FrameEntry.cs" />
+    <Compile Include="LogEntry.cs" />
     <Compile Include="Messages.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,6 +76,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

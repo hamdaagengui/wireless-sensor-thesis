@@ -19,9 +19,11 @@ namespace NodeInspector
 		public event DeviceFoundDelegate DeviceFound;
 		public event DeviceLostDelegate DeviceLost;
 
-		public List<FrameMessage> receivedFrames;
-		public List<MessageMessage> receivedMessages;
-		public List<ErrorMessage> receivedErrors;
+		public List<FrameEntry> receivedFrames;
+		public List<LogEntry> receivedLogs;
+
+		const byte BROADCAST_ID = 255;
+		const byte LOCAL_ID = 250;
 
 		FrameTransceiver dll;
 		MessageDispatcher md;
@@ -30,6 +32,9 @@ namespace NodeInspector
 		int deviceBeingPinged;
 		DateTime pingStartTime;
 
+		UInt32 nextFrameEntryNumber;
+		UInt32 nextLogEntryNumber;
+
 		public Communicator()
 		{
 
@@ -37,22 +42,85 @@ namespace NodeInspector
 
 		public bool Start(string portName, int baudrate)
 		{
+			nextFrameEntryNumber = 1;
+			nextLogEntryNumber = 1;
+
 			try
 			{
-				receivedFrames = new List<FrameMessage>();
-				receivedMessages = new List<MessageMessage>();
-				receivedErrors = new List<ErrorMessage>();
+				receivedFrames = new List<FrameEntry>();
+				receivedLogs = new List<LogEntry>();
 
 				md = new MessageDispatcher();
-				md.MessagePredicate += (d, s) => { return d == 0 || d == 255; };
+				md.MessagePredicate += (d, s) => { return d == LOCAL_ID || d == BROADCAST_ID; };
 				md.AddHandler<PingReplyMessage>(m => { });
 				md.AddHandler<ReportFrameMessage>(m =>
 				{
 					lock (receivedFrames)
 					{
-						receivedFrames.Add(new FrameMessage { Destination = m.To, Source = m.From, Number = m.Number, Time = DateTime.Now, Payload = m.Payload });
+						receivedFrames.Add(new FrameEntry { Number = nextFrameEntryNumber++, Destination = m.To, Source = m.From, Time = DateTime.Now, Payload = m.Payload });
 					}
 				});
+				md.AddHandler<ReportApplicationMessageMessage>(m =>
+				{
+					lock (receivedLogs)
+					{
+						receivedLogs.Add(new LogEntry { Type = LogEntry.TYPE_MESSAGE, Level = LogEntry.LEVEL_APPLICATION, Number = nextLogEntryNumber++, Source = m.Source, Time = DateTime.Now, Text = ASCIIEncoding.ASCII.GetString(m.Message) });
+					}
+				});
+				md.AddHandler<ReportApplicationWarningMessage>(m =>
+				{
+					lock (receivedLogs)
+					{
+						receivedLogs.Add(new LogEntry { Type = LogEntry.TYPE_WARNING, Level = LogEntry.LEVEL_APPLICATION, Number = nextLogEntryNumber++, Source = m.Source, Time = DateTime.Now, Text = ASCIIEncoding.ASCII.GetString(m.Message) });
+					}
+				});
+				md.AddHandler<ReportApplicationErrorMessage>(m =>
+				{
+					lock (receivedLogs)
+					{
+						receivedLogs.Add(new LogEntry { Type = LogEntry.TYPE_ERROR, Level = LogEntry.LEVEL_APPLICATION, Number = nextLogEntryNumber++, Source = m.Source, Time = DateTime.Now, Text = ASCIIEncoding.ASCII.GetString(m.Message) });
+					}
+				});
+				md.AddHandler<ReportFrameworkMessageMessage>(m =>
+				{
+					lock (receivedLogs)
+					{
+						receivedLogs.Add(new LogEntry { Type = LogEntry.TYPE_MESSAGE, Level = LogEntry.LEVEL_FRAMEWORK, Number = nextLogEntryNumber++, Source = m.Source, Time = DateTime.Now, Text = ASCIIEncoding.ASCII.GetString(m.Message) });
+					}
+				});
+				md.AddHandler<ReportFrameworkWarningMessage>(m =>
+				{
+					lock (receivedLogs)
+					{
+						receivedLogs.Add(new LogEntry { Type = LogEntry.TYPE_WARNING, Level = LogEntry.LEVEL_FRAMEWORK, Number = nextLogEntryNumber++, Source = m.Source, Time = DateTime.Now, Text = ASCIIEncoding.ASCII.GetString(m.Message) });
+					}
+				});
+				md.AddHandler<ReportFrameworkErrorMessage>(m =>
+				{
+					lock (receivedLogs)
+					{
+						receivedLogs.Add(new LogEntry { Type = LogEntry.TYPE_ERROR, Level = LogEntry.LEVEL_FRAMEWORK, Number = nextLogEntryNumber++, Source = m.Source, Time = DateTime.Now, Text = ASCIIEncoding.ASCII.GetString(m.Message) });
+					}
+				});
+				md.AddHandler<ReportMessagesDroppedMessage>(m =>
+				{
+					nextFrameEntryNumber += m.FramesDropped;
+					nextLogEntryNumber += m.LogsDropped;
+				});
+
+				Task.Factory.StartNew(() =>
+				{
+					while (true)
+					{
+						md.HandleFrame(ReportApplicationMessageMessage.Create(LOCAL_ID, 123, new byte[30] { 65, 66, 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
+
+						md.HandleFrame(ReportFrameMessage.Create(LOCAL_ID, 123, 1, 2, new byte[32] { 65, 0, 66, 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
+
+						Thread.Sleep(200);
+					}
+				});
+
+				return true;
 
 				var sp = new SerialPort(portName, baudrate);
 				var pl = new SerialPortWrapper(sp);
@@ -76,46 +144,31 @@ namespace NodeInspector
 			}
 		}
 
-		public FrameMessage[] GetReceivedFrames()
+		public FrameEntry[] GetReceivedFrames()
 		{
-			FrameMessage[] msgs;
+			FrameEntry[] frames;
 
 			lock (receivedFrames)
 			{
-				msgs = receivedFrames.ToArray();
+				frames = receivedFrames.ToArray();
 				receivedFrames.Clear();
 			}
 
-			return msgs;
+			return frames;
 		}
 
-		public MessageMessage[] GetReceivedMessages()
+		public LogEntry[] GetReceivedLogs()
 		{
-			MessageMessage[] msgs;
+			LogEntry[] logs;
 
-			lock (receivedMessages)
+			lock (receivedLogs)
 			{
-				msgs = receivedMessages.ToArray();
-				receivedMessages.Clear();
+				logs = receivedLogs.ToArray();
+				receivedLogs.Clear();
 			}
 
-			return msgs;
+			return logs;
 		}
-
-		public ErrorMessage[] GetReceivedErrors()
-		{
-			ErrorMessage[] msgs;
-
-			lock (receivedErrors)
-			{
-				msgs = receivedErrors.ToArray();
-				receivedErrors.Clear();
-			}
-
-			return msgs;
-		}
-
-
 
 		public TimeSpan Ping(int deviceId)
 		{
@@ -123,34 +176,23 @@ namespace NodeInspector
 			return new TimeSpan();
 		}
 
-		public void EnableFrameReplaying(int deviceId)
+		public void ConfigureReporting(int deviceId, bool enableFrames, bool enableMessages, bool enableWarnings, bool enableErrors, bool enableApplicationLevel, bool enableFrameworkLevel)
 		{
-
+			dll.Send(ConfigureReportingMessage.Create((byte)deviceId, LOCAL_ID, ToByte(enableFrames), ToByte(enableMessages), ToByte(enableWarnings), ToByte(enableErrors), ToByte(enableApplicationLevel), ToByte(enableFrameworkLevel)));
 		}
 
-		public void DisableFrameReplaying(int deviceId)
+		// Helpers
+
+		byte ToByte(bool value)
 		{
-
-		}
-
-		public void EnableLogReports(int deviceId)
-		{
-
-		}
-
-		public void DisableLogReports(int deviceId)
-		{
-
-		}
-
-		public void EnableErrorReports(int deviceId)
-		{
-
-		}
-
-		public void DisableErrorReports(int deviceId)
-		{
-
+			if (value)
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
 		}
 	}
 }

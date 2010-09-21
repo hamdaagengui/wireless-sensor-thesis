@@ -5,9 +5,9 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Coma.Ports;
-using System.Threading.Tasks;
 
 namespace NodeInspector
 {
@@ -15,10 +15,28 @@ namespace NodeInspector
 	{
 		Communicator com;
 		DateTime startTime = DateTime.Now;
+		List<FrameEntry> receivedFrames = new List<FrameEntry>();
+		List<LogEntry> receivedLogs = new List<LogEntry>();
+		UInt32 lostCounter;
 
 		public MainView()
 		{
 			InitializeComponent();
+		}
+
+		private void MainView_Load(object sender, EventArgs e)
+		{
+			imageList1.Images.Add(SystemIcons.Information);
+			imageList1.Images.Add(SystemIcons.Warning);
+			imageList1.Images.Add(SystemIcons.Error);
+			imageList1.Images.Add(SystemIcons.Application);
+			imageList1.Images.Add(SystemIcons.Shield);
+
+			checkBoxShowMessages.ImageIndex = 0;
+			checkBoxShowWarnings.ImageIndex = 1;
+			checkBoxShowErrors.ImageIndex = 2;
+			checkBoxShowApplication.ImageIndex = 3;
+			checkBoxShowFramework.ImageIndex = 4;
 		}
 
 		private void optionsToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
@@ -38,7 +56,12 @@ namespace NodeInspector
 
 		private void connectToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			com = new Communicator();
+			if (comboBoxPorts.SelectedItem == null)
+			{
+				MessageBox.Show("Invalid port!");
+				return;
+			}
+
 			string portName = ((SerialPortInfo)comboBoxPorts.SelectedItem).Name;
 			int baudrate;
 			if (int.TryParse(textBoxBaudrate.Text, out baudrate) == false)
@@ -46,11 +69,18 @@ namespace NodeInspector
 				MessageBox.Show("Invalid baudrate!");
 				return;
 			}
+
+			com = new Communicator();
 			if (com.Start(portName, baudrate))
 			{
 				connectToolStripMenuItem.Enabled = false;
 				disconnectToolStripMenuItem.Enabled = true;
 				startTime = DateTime.Now;
+				timerRefreshLists.Enabled = true;
+				receivedFrames.Clear();
+				receivedLogs.Clear();
+				lostCounter = 0;
+				UpdateCounters();
 			}
 			else
 			{
@@ -60,138 +90,175 @@ namespace NodeInspector
 
 		private void disconnectToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+			timerRefreshLists.Enabled = false;
+
 			com.Stop();
 			connectToolStripMenuItem.Enabled = true;
 			disconnectToolStripMenuItem.Enabled = false;
 		}
 
-		private void timerRefreshLists_Tick(object sender, EventArgs e)
+		#region Presentation
+		void timerRefreshLists_Tick(object sender, EventArgs e)
+		{
+			#region Update frames list
+
+			var frames = com.GetReceivedFrames();
+			if (frames.Length > 0)
+			{
+				int oldFrameCount = receivedFrames.Count;
+
+				receivedFrames.AddRange(frames);
+
+				var lvis = new List<ListViewItem>(frames.Length);
+				for (int i = 0; i < frames.Length; i++)
+				{
+					var lvi = CreateFrameListViewItem(oldFrameCount + i);
+					if (lvi != null)
+					{
+						lvis.Add(lvi);
+					}
+				}
+
+				listViewFrames.Items.AddRange(lvis.ToArray());
+			}
+
+			#endregion
+
+			#region Update log list
+
+			var logs = com.GetReceivedLogs();
+			if (logs.Length > 0)
+			{
+				int oldLogCount = receivedLogs.Count;
+
+				receivedLogs.AddRange(logs);
+
+				var lvis = new List<ListViewItem>(logs.Length);
+				for (int i = 0; i < logs.Length; i++)
+				{
+					if (receivedLogs[oldLogCount + i].Type == 0 && checkBoxShowMessages.Checked == false ||
+							receivedLogs[oldLogCount + i].Type == 1 && checkBoxShowWarnings.Checked == false ||
+							receivedLogs[oldLogCount + i].Type == 2 && checkBoxShowErrors.Checked == false ||
+							receivedLogs[oldLogCount + i].Level == 0 && checkBoxShowApplication.Checked == false ||
+							receivedLogs[oldLogCount + i].Level == 1 && checkBoxShowFramework.Checked == false)
+					{
+						continue;
+					}
+
+					var lvi = CreateLogListViewItem(oldLogCount + i);
+					if (lvi != null)
+					{
+						lvis.Add(lvi);
+					}
+				}
+
+				listViewLog.Items.AddRange(lvis.ToArray());
+
+				UpdateCounters();
+			}
+
+			#endregion
+		}
+
+		ListViewItem CreateFrameListViewItem(int frameId)
 		{
 			bool delta = toolStripMenuItemShowDeltaTimes.Checked;
 
-			#region Update frames list
-			var frames = com.GetReceivedFrames();
+			var frame = receivedFrames[frameId];
 
-			ListViewItem[] lvis = new ListViewItem[frames.Length];
-			Parallel.For(0, frames.Length, i =>
+			var subItems = new string[5];
+
+			subItems[0] = frame.Number.ToString();
+
+			TimeSpan ts;
+			if (delta && frameId > 0)
 			{
-				var f = frames[i];
-				var lvi = new ListViewItem(f.Number.ToString());
-				if (delta)
-				{
-					if (i > 0)
-					{
-						lvi.SubItems.Add((f.Time - frames[i - 1].Time).ToString());
-					}
-					else
-					{
-						lvi.SubItems.Add(new TimeSpan(0, 0, 0, 0, 0).ToString());
-					}
-				}
-				else
-				{
-					lvi.SubItems.Add((f.Time - startTime).ToString());
-				}
-				lvi.SubItems.Add(f.Source.ToString());
-				lvi.SubItems.Add(f.Destination.ToString());
-				lvi.SubItems.Add(string.Join<byte>(" ", f.Payload));
-				lvi.Tag = f;
-				lvis[i] = lvi;
-			});
-
-			listViewFrames.Items.AddRange(lvis);
-			#endregion
-
-			#region Update messages list
-			var msgs = com.GetReceivedMessages();
-
-			lvis = new ListViewItem[msgs.Length];
-			Parallel.For(0, msgs.Length, i =>
+				ts = frame.Time - receivedLogs[frameId - 1].Time;
+			}
+			else
 			{
-				var m = msgs[i];
-				var lvi = new ListViewItem(m.Number.ToString());
-				if (delta)
-				{
-					if (i > 0)
-					{
-						lvi.SubItems.Add((m.Time - msgs[i - 1].Time).ToString());
-					}
-					else
-					{
-						lvi.SubItems.Add(new TimeSpan(0, 0, 0, 0, 0).ToString());
-					}
-				}
-				else
-				{
-					lvi.SubItems.Add((m.Time - startTime).ToString());
-				}
-				lvi.SubItems.Add(m.Level.ToString());
-				lvi.SubItems.Add(m.Message);
-				lvi.Tag = m;
-				lvis[i] = lvi;
-			});
+				ts = frame.Time - startTime;
+			}
+			subItems[1] = ts.ToString("mm\\:ss\\.FFFFFFF");
 
-			listViewFrames.Items.AddRange(lvis);
-			#endregion
+			subItems[2] = frame.Source.ToString();
 
-			#region Update errors list
-			var errors = com.GetReceivedErrors();
+			subItems[3] = frame.Destination.ToString();
 
-			lvis = new ListViewItem[errors.Length];
-			Parallel.For(0, errors.Length, i =>
-			{
-				var er = errors[i];
-				var lvi = new ListViewItem(er.Number.ToString());
-				if (delta)
-				{
-					if (i > 0)
-					{
-						lvi.SubItems.Add((er.Time - errors[i - 1].Time).ToString());
-					}
-					else
-					{
-						lvi.SubItems.Add(new TimeSpan(0, 0, 0, 0, 0).ToString());
-					}
-				}
-				else
-				{
-					lvi.SubItems.Add((er.Time - startTime).ToString());
-				}
-				lvi.SubItems.Add(er.Level.ToString());
-				lvi.SubItems.Add(er.Message);
-				lvi.Tag = er;
-				lvis[i] = lvi;
-			});
+			subItems[4] = string.Join<byte>(" ", frame.Payload);
 
-			listViewFrames.Items.AddRange(lvis);
-			#endregion
+			var lvi = new ListViewItem(subItems);
+
+			lvi.Tag = frame;
+
+			return lvi;
 		}
+		ListViewItem CreateLogListViewItem(int messageId)
+		{
+			bool delta = toolStripMenuItemShowDeltaTimes.Checked;
+
+			var msg = receivedLogs[messageId];
+
+			if (msg == null)
+			{
+				return null;
+			}
+
+			var subItems = new string[6];
+
+			subItems[1] = msg.Number.ToString();
+
+			TimeSpan ts;
+			if (delta && messageId > 0)
+			{
+				ts = msg.Time - receivedLogs[messageId - 1].Time;
+			}
+			else
+			{
+				ts = msg.Time - startTime;
+			}
+			subItems[2] = ts.ToString("mm\\:ss\\.FFFFFFF");
+
+			subItems[3] = msg.Level == 0 ? "App" : "Frmwk";
+
+			subItems[4] = msg.Source.ToString();
+
+			subItems[5] = msg.Text;
+
+			var lvi = new ListViewItem(subItems, msg.Type);
+
+			lvi.Tag = msg;
+
+			return lvi;
+		}
+
+		void UpdateCounters()
+		{
+			toolStripStatusLabelFrames.Text = string.Format("Frames: {0} ({1})", listViewFrames.Items.Count, receivedFrames.Count);
+			toolStripStatusLabelMessages.Text = string.Format("Logs: {0} ({1})", listViewLog.Items.Count, receivedLogs.Count);
+			toolStripStatusLabelLost.Text = string.Format("Lost: {0}", lostCounter);
+		}
+		#endregion
 
 		private void listViewFrames_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			if (listViewFrames.SelectedItems.Count == 1)
 			{
-				var msg = (FrameMessage)listViewFrames.SelectedItems[0].Tag;
+				var msg = (FrameEntry)listViewFrames.SelectedItems[0].Tag;
 				richTextBoxFrameInfo.Text = string.Join<byte>(" ", msg.Payload);
 			}
 		}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 		private void testToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+			timerRefreshLists_Tick(null, null);
+			return;
+			listViewLog.Items.Add(new ListViewItem("KO!", 0));
+			listViewLog.Items.Add(new ListViewItem("HeST!", 1));
+			listViewLog.Items.Add(new ListViewItem("PINDSVIN!", 2));
 
+			checkBoxShowMessages.ImageIndex++;
 		}
 	}
 }
