@@ -19,7 +19,6 @@ typedef struct
 
 typedef void (*eventHandler)(eventReport* report);
 typedef void (*completionHandler)();
-#define Handler(code) (__extension__({	void __f(){}; &__f;}));
 
 extern void EventDispatcher_Initialize();
 extern void EventDispatcher_Start();
