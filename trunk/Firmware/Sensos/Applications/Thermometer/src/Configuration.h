@@ -9,7 +9,7 @@
 #define CONFIGURATION_H_
 
 #define STATISTICS															1
-#define LOG_LEVEL																2
+#define MESSAGE_LEVEL														2
 
 #define FRAMETRANSCEIVER_TX_BUFFER_SIZE					500
 #define FRAMETRANSCEIVER_RX_BUFFER_SIZE					500
