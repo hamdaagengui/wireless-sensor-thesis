@@ -2,7 +2,7 @@
 
 namespace NodeInspector
 {
-	class FrameMessage
+	class FrameEntry
 	{
 		public UInt32 Number;
 		public DateTime Time;

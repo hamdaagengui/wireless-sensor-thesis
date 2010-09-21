@@ -125,189 +125,76 @@ namespace NodeInspector
 		}
 	}
 
-	class SetLogMessage
+	class ConfigureReportingMessage
 	{
 		public Byte Destination;
 		public Byte Source;
 		static readonly Byte MessageId = 2;
-		public Byte Enable;
+		public Byte EnableFrames;
+		public Byte EnableMessages;
+		public Byte EnableWarnings;
+		public Byte EnableErrors;
+		public Byte EnableApplicationLevel;
+		public Byte EnableFrameworkLevel;
 
-		public SetLogMessage()
+		public ConfigureReportingMessage()
 		{ }
 
-		public SetLogMessage(Byte[] frame)
+		public ConfigureReportingMessage(Byte[] frame)
 		{
 			Destination = frame[0];
 			Source = frame[1];
-			Enable = (Byte)(frame[3] & 0x1);
+			EnableFrames = (Byte)(frame[3] & 0x1);
+			EnableMessages = (Byte)((frame[3] >> 1) & 0x1);
+			EnableWarnings = (Byte)((frame[3] >> 2) & 0x1);
+			EnableErrors = (Byte)((frame[3] >> 3) & 0x1);
+			EnableApplicationLevel = (Byte)((frame[3] >> 4) & 0x1);
+			EnableFrameworkLevel = (Byte)((frame[3] >> 5) & 0x1);
 		}
 
-		static public Byte[] Create(Byte destination, Byte source, Byte enable)
+		static public Byte[] Create(Byte destination, Byte source, Byte enableFrames, Byte enableMessages, Byte enableWarnings, Byte enableErrors, Byte enableApplicationLevel, Byte enableFrameworkLevel)
 		{
-			if ((enable & 0x1) != enable)
+			if ((enableFrames & 0x1) != enableFrames)
 			{
-				throw new ArgumentOutOfRangeException("Argument enable is out of range.");
+				throw new ArgumentOutOfRangeException("Argument enableFrames is out of range.");
+			}
+			
+			if ((enableMessages & 0x1) != enableMessages)
+			{
+				throw new ArgumentOutOfRangeException("Argument enableMessages is out of range.");
+			}
+			
+			if ((enableWarnings & 0x1) != enableWarnings)
+			{
+				throw new ArgumentOutOfRangeException("Argument enableWarnings is out of range.");
+			}
+			
+			if ((enableErrors & 0x1) != enableErrors)
+			{
+				throw new ArgumentOutOfRangeException("Argument enableErrors is out of range.");
+			}
+			
+			if ((enableApplicationLevel & 0x1) != enableApplicationLevel)
+			{
+				throw new ArgumentOutOfRangeException("Argument enableApplicationLevel is out of range.");
+			}
+			
+			if ((enableFrameworkLevel & 0x1) != enableFrameworkLevel)
+			{
+				throw new ArgumentOutOfRangeException("Argument enableFrameworkLevel is out of range.");
 			}
 			
 			Byte[] buffer = new Byte[4];
 			buffer[0] = destination;
 			buffer[1] = source;
 			buffer[2] = MessageId;
-			buffer[3] = (Byte)((enable << 0));
+			buffer[3] = (Byte)((enableFrameworkLevel << 5) | (enableApplicationLevel << 4) | (enableErrors << 3) | (enableWarnings << 2) | (enableMessages << 1) | (enableFrames << 0));
 			return buffer;
 		}
 
 		public Byte[] Create()
 		{
-			return Create(Destination, Source, Enable);
-		}
-	}
-
-	class ReportLogMessage
-	{
-		public Byte Destination;
-		public Byte Source;
-		static readonly Byte MessageId = 3;
-		public Byte Level;
-		public Byte[] Message = new Byte[30];
-
-		public ReportLogMessage()
-		{ }
-
-		public ReportLogMessage(Byte[] frame)
-		{
-			Destination = frame[0];
-			Source = frame[1];
-			Level = frame[3];
-			Array.Copy(frame, 4, Message, 0, 30);
-		}
-
-		static public Byte[] Create(Byte destination, Byte source, Byte level, Byte[] message)
-		{
-			Byte[] buffer = new Byte[34];
-			buffer[0] = destination;
-			buffer[1] = source;
-			buffer[2] = MessageId;
-			buffer[3] = level;
-			Array.Copy(message, 0, buffer, 4, 30);
-			return buffer;
-		}
-
-		public Byte[] Create()
-		{
-			return Create(Destination, Source, Level, Message);
-		}
-	}
-
-	class SetErrorMessage
-	{
-		public Byte Destination;
-		public Byte Source;
-		static readonly Byte MessageId = 4;
-		public Byte Enable;
-
-		public SetErrorMessage()
-		{ }
-
-		public SetErrorMessage(Byte[] frame)
-		{
-			Destination = frame[0];
-			Source = frame[1];
-			Enable = (Byte)(frame[3] & 0x1);
-		}
-
-		static public Byte[] Create(Byte destination, Byte source, Byte enable)
-		{
-			if ((enable & 0x1) != enable)
-			{
-				throw new ArgumentOutOfRangeException("Argument enable is out of range.");
-			}
-			
-			Byte[] buffer = new Byte[4];
-			buffer[0] = destination;
-			buffer[1] = source;
-			buffer[2] = MessageId;
-			buffer[3] = (Byte)((enable << 0));
-			return buffer;
-		}
-
-		public Byte[] Create()
-		{
-			return Create(Destination, Source, Enable);
-		}
-	}
-
-	class ReportErrorMessage
-	{
-		public Byte Destination;
-		public Byte Source;
-		static readonly Byte MessageId = 5;
-		public Byte Level;
-		public Byte[] Message = new Byte[30];
-
-		public ReportErrorMessage()
-		{ }
-
-		public ReportErrorMessage(Byte[] frame)
-		{
-			Destination = frame[0];
-			Source = frame[1];
-			Level = frame[3];
-			Array.Copy(frame, 4, Message, 0, 30);
-		}
-
-		static public Byte[] Create(Byte destination, Byte source, Byte level, Byte[] message)
-		{
-			Byte[] buffer = new Byte[34];
-			buffer[0] = destination;
-			buffer[1] = source;
-			buffer[2] = MessageId;
-			buffer[3] = level;
-			Array.Copy(message, 0, buffer, 4, 30);
-			return buffer;
-		}
-
-		public Byte[] Create()
-		{
-			return Create(Destination, Source, Level, Message);
-		}
-	}
-
-	class SetFrameMessage
-	{
-		public Byte Destination;
-		public Byte Source;
-		static readonly Byte MessageId = 6;
-		public Byte Enable;
-
-		public SetFrameMessage()
-		{ }
-
-		public SetFrameMessage(Byte[] frame)
-		{
-			Destination = frame[0];
-			Source = frame[1];
-			Enable = (Byte)(frame[3] & 0x1);
-		}
-
-		static public Byte[] Create(Byte destination, Byte source, Byte enable)
-		{
-			if ((enable & 0x1) != enable)
-			{
-				throw new ArgumentOutOfRangeException("Argument enable is out of range.");
-			}
-			
-			Byte[] buffer = new Byte[4];
-			buffer[0] = destination;
-			buffer[1] = source;
-			buffer[2] = MessageId;
-			buffer[3] = (Byte)((enable << 0));
-			return buffer;
-		}
-
-		public Byte[] Create()
-		{
-			return Create(Destination, Source, Enable);
+			return Create(Destination, Source, EnableFrames, EnableMessages, EnableWarnings, EnableErrors, EnableApplicationLevel, EnableFrameworkLevel);
 		}
 	}
 
@@ -315,9 +202,7 @@ namespace NodeInspector
 	{
 		public Byte Destination;
 		public Byte Source;
-		static readonly Byte MessageId = 7;
-		public UInt32 Number;
-		public UInt32 Time;
+		static readonly Byte MessageId = 3;
 		public Byte From;
 		public Byte To;
 		public Byte[] Payload = new Byte[32];
@@ -329,38 +214,260 @@ namespace NodeInspector
 		{
 			Destination = frame[0];
 			Source = frame[1];
-			UInt32 _t0 = (UInt32)((UInt32)frame[6] << 24 | (UInt32)frame[5] << 16 | (UInt32)frame[4] << 8 | (UInt32)frame[3]);
-			Number = _t0;
-			UInt32 _t1 = (UInt32)((UInt32)frame[10] << 24 | (UInt32)frame[9] << 16 | (UInt32)frame[8] << 8 | (UInt32)frame[7]);
-			Time = _t1;
-			From = frame[11];
-			To = frame[12];
-			Array.Copy(frame, 13, Payload, 0, 32);
+			From = frame[3];
+			To = frame[4];
+			Array.Copy(frame, 5, Payload, 0, 32);
 		}
 
-		static public Byte[] Create(Byte destination, Byte source, UInt32 number, UInt32 time, Byte from, Byte to, Byte[] payload)
+		static public Byte[] Create(Byte destination, Byte source, Byte from, Byte to, Byte[] payload)
 		{
-			Byte[] buffer = new Byte[45];
+			Byte[] buffer = new Byte[37];
 			buffer[0] = destination;
 			buffer[1] = source;
 			buffer[2] = MessageId;
-			buffer[3] = (Byte)number;
-			buffer[4] = (Byte)(number >> 8);
-			buffer[5] = (Byte)(number >> 16);
-			buffer[6] = (Byte)(number >> 24);
-			buffer[7] = (Byte)time;
-			buffer[8] = (Byte)(time >> 8);
-			buffer[9] = (Byte)(time >> 16);
-			buffer[10] = (Byte)(time >> 24);
-			buffer[11] = from;
-			buffer[12] = to;
-			Array.Copy(payload, 0, buffer, 13, 32);
+			buffer[3] = from;
+			buffer[4] = to;
+			Array.Copy(payload, 0, buffer, 5, 32);
 			return buffer;
 		}
 
 		public Byte[] Create()
 		{
-			return Create(Destination, Source, Number, Time, From, To, Payload);
+			return Create(Destination, Source, From, To, Payload);
+		}
+	}
+
+	class ReportApplicationMessageMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 4;
+		public Byte[] Message = new Byte[30];
+
+		public ReportApplicationMessageMessage()
+		{ }
+
+		public ReportApplicationMessageMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+			Array.Copy(frame, 3, Message, 0, 30);
+		}
+
+		static public Byte[] Create(Byte destination, Byte source, Byte[] message)
+		{
+			Byte[] buffer = new Byte[33];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			Array.Copy(message, 0, buffer, 3, 30);
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source, Message);
+		}
+	}
+
+	class ReportApplicationWarningMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 5;
+		public Byte[] Message = new Byte[30];
+
+		public ReportApplicationWarningMessage()
+		{ }
+
+		public ReportApplicationWarningMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+			Array.Copy(frame, 3, Message, 0, 30);
+		}
+
+		static public Byte[] Create(Byte destination, Byte source, Byte[] message)
+		{
+			Byte[] buffer = new Byte[33];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			Array.Copy(message, 0, buffer, 3, 30);
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source, Message);
+		}
+	}
+
+	class ReportApplicationErrorMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 6;
+		public Byte[] Message = new Byte[30];
+
+		public ReportApplicationErrorMessage()
+		{ }
+
+		public ReportApplicationErrorMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+			Array.Copy(frame, 3, Message, 0, 30);
+		}
+
+		static public Byte[] Create(Byte destination, Byte source, Byte[] message)
+		{
+			Byte[] buffer = new Byte[33];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			Array.Copy(message, 0, buffer, 3, 30);
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source, Message);
+		}
+	}
+
+	class ReportFrameworkMessageMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 7;
+		public Byte[] Message = new Byte[30];
+
+		public ReportFrameworkMessageMessage()
+		{ }
+
+		public ReportFrameworkMessageMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+			Array.Copy(frame, 3, Message, 0, 30);
+		}
+
+		static public Byte[] Create(Byte destination, Byte source, Byte[] message)
+		{
+			Byte[] buffer = new Byte[33];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			Array.Copy(message, 0, buffer, 3, 30);
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source, Message);
+		}
+	}
+
+	class ReportFrameworkWarningMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 8;
+		public Byte[] Message = new Byte[30];
+
+		public ReportFrameworkWarningMessage()
+		{ }
+
+		public ReportFrameworkWarningMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+			Array.Copy(frame, 3, Message, 0, 30);
+		}
+
+		static public Byte[] Create(Byte destination, Byte source, Byte[] message)
+		{
+			Byte[] buffer = new Byte[33];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			Array.Copy(message, 0, buffer, 3, 30);
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source, Message);
+		}
+	}
+
+	class ReportFrameworkErrorMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 9;
+		public Byte[] Message = new Byte[30];
+
+		public ReportFrameworkErrorMessage()
+		{ }
+
+		public ReportFrameworkErrorMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+			Array.Copy(frame, 3, Message, 0, 30);
+		}
+
+		static public Byte[] Create(Byte destination, Byte source, Byte[] message)
+		{
+			Byte[] buffer = new Byte[33];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			Array.Copy(message, 0, buffer, 3, 30);
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source, Message);
+		}
+	}
+
+	class ReportMessagesDroppedMessage
+	{
+		public Byte Destination;
+		public Byte Source;
+		static readonly Byte MessageId = 10;
+		public Byte FramesDropped;
+		public Byte LogsDropped;
+
+		public ReportMessagesDroppedMessage()
+		{ }
+
+		public ReportMessagesDroppedMessage(Byte[] frame)
+		{
+			Destination = frame[0];
+			Source = frame[1];
+			FramesDropped = frame[3];
+			LogsDropped = frame[4];
+		}
+
+		static public Byte[] Create(Byte destination, Byte source, Byte framesDropped, Byte logsDropped)
+		{
+			Byte[] buffer = new Byte[5];
+			buffer[0] = destination;
+			buffer[1] = source;
+			buffer[2] = MessageId;
+			buffer[3] = framesDropped;
+			buffer[4] = logsDropped;
+			return buffer;
+		}
+
+		public Byte[] Create()
+		{
+			return Create(Destination, Source, FramesDropped, LogsDropped);
 		}
 	}
 
