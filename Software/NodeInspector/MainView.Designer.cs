@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainView));
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -42,29 +43,40 @@
 			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+			this.richTextBoxFrameInfo = new System.Windows.Forms.RichTextBox();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
-			this.listViewLog = new System.Windows.Forms.ListView();
+			this.listViewMessages = new System.Windows.Forms.ListView();
 			this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader12 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.tabPage3 = new System.Windows.Forms.TabPage();
 			this.listViewErrors = new System.Windows.Forms.ListView();
 			this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader13 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+			this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
+			this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+			this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+			this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.sdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.viewsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.clearAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.clearframesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.clearlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.clearerrorsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.comboBoxPorts = new System.Windows.Forms.ToolStripComboBox();
 			this.textBoxBaudrate = new System.Windows.Forms.ToolStripTextBox();
-			this.sdfToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItemShowDeltaTimes = new System.Windows.Forms.ToolStripMenuItem();
 			this.connectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.disconnectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.timerRefreshLists = new System.Windows.Forms.Timer(this.components);
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -81,6 +93,7 @@
 			this.splitContainer3.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.tabPage3.SuspendLayout();
+			this.statusStrip1.SuspendLayout();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -152,7 +165,7 @@
 			// 
 			// splitContainer3.Panel2
 			// 
-			this.splitContainer3.Panel2.Controls.Add(this.richTextBox1);
+			this.splitContainer3.Panel2.Controls.Add(this.richTextBoxFrameInfo);
 			// 
 			// listViewFrames
 			// 
@@ -164,9 +177,11 @@
             this.columnHeader5});
 			resources.ApplyResources(this.listViewFrames, "listViewFrames");
 			this.listViewFrames.FullRowSelect = true;
+			this.listViewFrames.MultiSelect = false;
 			this.listViewFrames.Name = "listViewFrames";
 			this.listViewFrames.UseCompatibleStateImageBehavior = false;
 			this.listViewFrames.View = System.Windows.Forms.View.Details;
+			this.listViewFrames.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewFrames_ItemSelectionChanged);
 			// 
 			// columnHeader1
 			// 
@@ -188,30 +203,31 @@
 			// 
 			resources.ApplyResources(this.columnHeader5, "columnHeader5");
 			// 
-			// richTextBox1
+			// richTextBoxFrameInfo
 			// 
-			resources.ApplyResources(this.richTextBox1, "richTextBox1");
-			this.richTextBox1.Name = "richTextBox1";
-			this.richTextBox1.ReadOnly = true;
+			resources.ApplyResources(this.richTextBoxFrameInfo, "richTextBoxFrameInfo");
+			this.richTextBoxFrameInfo.Name = "richTextBoxFrameInfo";
+			this.richTextBoxFrameInfo.ReadOnly = true;
 			// 
 			// tabPage2
 			// 
-			this.tabPage2.Controls.Add(this.listViewLog);
+			this.tabPage2.Controls.Add(this.listViewMessages);
 			resources.ApplyResources(this.tabPage2, "tabPage2");
 			this.tabPage2.Name = "tabPage2";
 			this.tabPage2.UseVisualStyleBackColor = true;
 			// 
-			// listViewLog
+			// listViewMessages
 			// 
-			this.listViewLog.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+			this.listViewMessages.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader6,
             this.columnHeader7,
+            this.columnHeader12,
             this.columnHeader8});
-			resources.ApplyResources(this.listViewLog, "listViewLog");
-			this.listViewLog.FullRowSelect = true;
-			this.listViewLog.Name = "listViewLog";
-			this.listViewLog.UseCompatibleStateImageBehavior = false;
-			this.listViewLog.View = System.Windows.Forms.View.Details;
+			resources.ApplyResources(this.listViewMessages, "listViewMessages");
+			this.listViewMessages.FullRowSelect = true;
+			this.listViewMessages.Name = "listViewMessages";
+			this.listViewMessages.UseCompatibleStateImageBehavior = false;
+			this.listViewMessages.View = System.Windows.Forms.View.Details;
 			// 
 			// columnHeader6
 			// 
@@ -220,6 +236,10 @@
 			// columnHeader7
 			// 
 			resources.ApplyResources(this.columnHeader7, "columnHeader7");
+			// 
+			// columnHeader12
+			// 
+			resources.ApplyResources(this.columnHeader12, "columnHeader12");
 			// 
 			// columnHeader8
 			// 
@@ -237,6 +257,7 @@
 			this.listViewErrors.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader9,
             this.columnHeader10,
+            this.columnHeader13,
             this.columnHeader11});
 			resources.ApplyResources(this.listViewErrors, "listViewErrors");
 			this.listViewErrors.FullRowSelect = true;
@@ -252,43 +273,63 @@
 			// 
 			resources.ApplyResources(this.columnHeader10, "columnHeader10");
 			// 
+			// columnHeader13
+			// 
+			resources.ApplyResources(this.columnHeader13, "columnHeader13");
+			// 
 			// columnHeader11
 			// 
 			resources.ApplyResources(this.columnHeader11, "columnHeader11");
 			// 
 			// statusStrip1
 			// 
+			this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel4,
+            this.toolStripStatusLabel1,
+            this.toolStripStatusLabel2,
+            this.toolStripStatusLabel3});
 			resources.ApplyResources(this.statusStrip1, "statusStrip1");
 			this.statusStrip1.Name = "statusStrip1";
+			// 
+			// toolStripStatusLabel4
+			// 
+			this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
+			resources.ApplyResources(this.toolStripStatusLabel4, "toolStripStatusLabel4");
+			this.toolStripStatusLabel4.Spring = true;
+			// 
+			// toolStripStatusLabel1
+			// 
+			resources.ApplyResources(this.toolStripStatusLabel1, "toolStripStatusLabel1");
+			this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+			// 
+			// toolStripStatusLabel2
+			// 
+			resources.ApplyResources(this.toolStripStatusLabel2, "toolStripStatusLabel2");
+			this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+			// 
+			// toolStripStatusLabel3
+			// 
+			resources.ApplyResources(this.toolStripStatusLabel3, "toolStripStatusLabel3");
+			this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
 			// 
 			// menuStrip1
 			// 
 			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.sdToolStripMenuItem,
+            this.viewsToolStripMenuItem,
             this.optionsToolStripMenuItem,
             this.connectToolStripMenuItem,
-            this.disconnectToolStripMenuItem});
+            this.disconnectToolStripMenuItem,
+            this.testToolStripMenuItem});
 			resources.ApplyResources(this.menuStrip1, "menuStrip1");
 			this.menuStrip1.Name = "menuStrip1";
 			// 
 			// sdToolStripMenuItem
 			// 
 			this.sdToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.clearToolStripMenuItem,
-            this.toolStripSeparator1,
             this.exitToolStripMenuItem});
 			this.sdToolStripMenuItem.Name = "sdToolStripMenuItem";
 			resources.ApplyResources(this.sdToolStripMenuItem, "sdToolStripMenuItem");
-			// 
-			// clearToolStripMenuItem
-			// 
-			this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
-			resources.ApplyResources(this.clearToolStripMenuItem, "clearToolStripMenuItem");
-			// 
-			// toolStripSeparator1
-			// 
-			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			resources.ApplyResources(this.toolStripSeparator1, "toolStripSeparator1");
 			// 
 			// exitToolStripMenuItem
 			// 
@@ -296,12 +337,42 @@
 			resources.ApplyResources(this.exitToolStripMenuItem, "exitToolStripMenuItem");
 			this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
 			// 
+			// viewsToolStripMenuItem
+			// 
+			this.viewsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearAllToolStripMenuItem,
+            this.clearframesToolStripMenuItem,
+            this.clearlogToolStripMenuItem,
+            this.clearerrorsToolStripMenuItem});
+			this.viewsToolStripMenuItem.Name = "viewsToolStripMenuItem";
+			resources.ApplyResources(this.viewsToolStripMenuItem, "viewsToolStripMenuItem");
+			// 
+			// clearAllToolStripMenuItem
+			// 
+			this.clearAllToolStripMenuItem.Name = "clearAllToolStripMenuItem";
+			resources.ApplyResources(this.clearAllToolStripMenuItem, "clearAllToolStripMenuItem");
+			// 
+			// clearframesToolStripMenuItem
+			// 
+			this.clearframesToolStripMenuItem.Name = "clearframesToolStripMenuItem";
+			resources.ApplyResources(this.clearframesToolStripMenuItem, "clearframesToolStripMenuItem");
+			// 
+			// clearlogToolStripMenuItem
+			// 
+			this.clearlogToolStripMenuItem.Name = "clearlogToolStripMenuItem";
+			resources.ApplyResources(this.clearlogToolStripMenuItem, "clearlogToolStripMenuItem");
+			// 
+			// clearerrorsToolStripMenuItem
+			// 
+			this.clearerrorsToolStripMenuItem.Name = "clearerrorsToolStripMenuItem";
+			resources.ApplyResources(this.clearerrorsToolStripMenuItem, "clearerrorsToolStripMenuItem");
+			// 
 			// optionsToolStripMenuItem
 			// 
 			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.comboBoxPorts,
             this.textBoxBaudrate,
-            this.sdfToolStripMenuItem});
+            this.toolStripMenuItemShowDeltaTimes});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
 			resources.ApplyResources(this.optionsToolStripMenuItem, "optionsToolStripMenuItem");
 			this.optionsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.optionsToolStripMenuItem_DropDownOpening);
@@ -316,21 +387,34 @@
 			this.textBoxBaudrate.Name = "textBoxBaudrate";
 			resources.ApplyResources(this.textBoxBaudrate, "textBoxBaudrate");
 			// 
-			// sdfToolStripMenuItem
+			// toolStripMenuItemShowDeltaTimes
 			// 
-			this.sdfToolStripMenuItem.CheckOnClick = true;
-			this.sdfToolStripMenuItem.Name = "sdfToolStripMenuItem";
-			resources.ApplyResources(this.sdfToolStripMenuItem, "sdfToolStripMenuItem");
+			this.toolStripMenuItemShowDeltaTimes.CheckOnClick = true;
+			this.toolStripMenuItemShowDeltaTimes.Name = "toolStripMenuItemShowDeltaTimes";
+			resources.ApplyResources(this.toolStripMenuItemShowDeltaTimes, "toolStripMenuItemShowDeltaTimes");
 			// 
 			// connectToolStripMenuItem
 			// 
 			this.connectToolStripMenuItem.Name = "connectToolStripMenuItem";
 			resources.ApplyResources(this.connectToolStripMenuItem, "connectToolStripMenuItem");
+			this.connectToolStripMenuItem.Click += new System.EventHandler(this.connectToolStripMenuItem_Click);
 			// 
 			// disconnectToolStripMenuItem
 			// 
 			resources.ApplyResources(this.disconnectToolStripMenuItem, "disconnectToolStripMenuItem");
 			this.disconnectToolStripMenuItem.Name = "disconnectToolStripMenuItem";
+			this.disconnectToolStripMenuItem.Click += new System.EventHandler(this.disconnectToolStripMenuItem_Click);
+			// 
+			// testToolStripMenuItem
+			// 
+			this.testToolStripMenuItem.Name = "testToolStripMenuItem";
+			resources.ApplyResources(this.testToolStripMenuItem, "testToolStripMenuItem");
+			this.testToolStripMenuItem.Click += new System.EventHandler(this.testToolStripMenuItem_Click);
+			// 
+			// timerRefreshLists
+			// 
+			this.timerRefreshLists.Interval = 250;
+			this.timerRefreshLists.Tick += new System.EventHandler(this.timerRefreshLists_Tick);
 			// 
 			// MainView
 			// 
@@ -357,6 +441,8 @@
 			this.splitContainer3.ResumeLayout(false);
 			this.tabPage2.ResumeLayout(false);
 			this.tabPage3.ResumeLayout(false);
+			this.statusStrip1.ResumeLayout(false);
+			this.statusStrip1.PerformLayout();
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();
 			this.ResumeLayout(false);
@@ -376,7 +462,7 @@
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage tabPage1;
 		private System.Windows.Forms.TabPage tabPage2;
-		private System.Windows.Forms.ListView listViewLog;
+		private System.Windows.Forms.ListView listViewMessages;
 		private System.Windows.Forms.TabPage tabPage3;
 		private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
@@ -389,7 +475,7 @@
 		private System.Windows.Forms.ColumnHeader columnHeader3;
 		private System.Windows.Forms.ColumnHeader columnHeader4;
 		private System.Windows.Forms.ColumnHeader columnHeader5;
-		private System.Windows.Forms.RichTextBox richTextBox1;
+		private System.Windows.Forms.RichTextBox richTextBoxFrameInfo;
 		private System.Windows.Forms.ToolStripMenuItem connectToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem disconnectToolStripMenuItem;
 		private System.Windows.Forms.ColumnHeader columnHeader6;
@@ -399,9 +485,20 @@
 		private System.Windows.Forms.ColumnHeader columnHeader9;
 		private System.Windows.Forms.ColumnHeader columnHeader10;
 		private System.Windows.Forms.ColumnHeader columnHeader11;
-		private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
-		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-		private System.Windows.Forms.ToolStripMenuItem sdfToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemShowDeltaTimes;
+		private System.Windows.Forms.Timer timerRefreshLists;
+		private System.Windows.Forms.ToolStripMenuItem viewsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem clearAllToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem clearframesToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem clearlogToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem clearerrorsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
+		private System.Windows.Forms.ColumnHeader columnHeader12;
+		private System.Windows.Forms.ColumnHeader columnHeader13;
+		private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
+		private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+		private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+		private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
 	}
 }
 
