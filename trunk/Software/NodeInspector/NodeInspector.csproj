@@ -34,8 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ComaLib">
-      <HintPath>..\..\..\ComaLib\software\ComaLib\bin\Debug\ComaLib.dll</HintPath>
+    <Reference Include="ComaLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\ComaLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -50,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Communicator.cs" />
+    <Compile Include="ErrorMessage.cs" />
     <Compile Include="MainView.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -57,6 +59,8 @@
       <DependentUpon>MainView.cs</DependentUpon>
     </Compile>
     <Compile Include="FrameMessage.cs" />
+    <Compile Include="MessageMessage.cs" />
+    <Compile Include="Messages.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainView.resx">
@@ -80,6 +84,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="libs\ComaLib.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
