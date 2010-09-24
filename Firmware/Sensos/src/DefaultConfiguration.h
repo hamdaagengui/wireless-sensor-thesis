@@ -8,12 +8,6 @@
 #ifndef DEFAULTCONFIGURATION_H_
 #define DEFAULTCONFIGURATION_H_
 
-#define PDD_MAX_EVENTS													32
-#define PDD_MAX_SUBSCRIBERS											8
-#define PDD_QUEUE_SIZE                          8
-#define PDD_DETAILS_OBJECT_COUNT								16
-#define PDD_DETAILS_OBJECT_SIZE									8
-
 #define NETWORK_CAN_ROUTE												1
 
 // Event subsystem
@@ -22,6 +16,11 @@
 #define EVENTDISPATCHER_QUEUE_SIZE																	8
 #define EVENTDISPATCHER_REPORT_DATA_SIZE														8
 #define EVENTDISPATCHER_REPORT_DATA_POOL_SIZE												16
+
+// Diagnostics
+#define DIAGNOSTICSLINK_TRANSMISSION_BUFFER_SIZE										200
+#define DIAGNOSTICSLINK_RECEPTION_BUFFER_SIZE												200
+#define DIAGNOSTICSLINK_MAXIMUM_FRAME_SIZE													50
 
 // Peripherals
 
