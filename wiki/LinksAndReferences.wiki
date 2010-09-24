@@ -25,6 +25,6 @@
   # Wireless sensor networks: a survey 2002
   # Versatile Low Power Media Access for Wireless Sensor Networks 2004
   # Dr. Emil Jovanov - http://www.ece.uah.edu/~jovanov
-
+  # [http://ing.dk/artikel/107191-softwareudviklere-skal-laere-at-spare-paa-stroemmen Softwareudviklere skal lære at spare på strømmen] kilde Ingeniøren
 The following links look promising but have not yet been read through. Go ahead :)
   ...
