@@ -9,6 +9,7 @@
 #define NETWORK_H_
 
 #include <Globals.h>
+#include "../EventSubsystem/EventDispatcher.h"
 
 enum
 {
@@ -16,6 +17,20 @@ enum
 	FLOW_CONSTANT,
 	FLOW_BURSTY
 };
+
+enum
+{
+	CLASSIFICATION_BULK,
+	CLASSIFICATION_STREAM,
+	CLASSIFICATION_NOTIFICATION
+};
+
+typedef struct
+{
+	uint8_t flowType;
+	uint32_t bandwidth; // in units of bytes per second
+	completionHandler completed;
+} networkConfiguration;
 
 typedef struct
 {
@@ -25,16 +40,10 @@ typedef struct
 	uint8_t maxLoss;
 } sensor;
 
-enum
-{
-	CLASSIFICATION_BULK,
-	CLASSIFICATION_STREAM,
-	CLASSIFICATION_NOTIFICATION
-};
+extern void Network_Initialize();
+extern void Network_Subscribe(networkConfiguration* configuration);
+extern void Network_Start();
 
-void Network_Initialize();
-void Network_Run();
-uint8_t Network_CreateChannel(uint8_t classification);
-void Network_SendData(uint8_t dataId, void* data, uint8_t length);
+extern void Network_SendData(uint8_t dataId, void* data, uint8_t length);
 
 #endif /* NETWORK_H_ */
