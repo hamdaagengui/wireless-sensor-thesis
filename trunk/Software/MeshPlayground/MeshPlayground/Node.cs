@@ -14,5 +14,10 @@ namespace MeshPlayground
 		{
 			Neighbours = new List<int>();
 		}
+
+		public void HandleFrame(Frame frame)
+		{
+
+		}
 	}
 }
