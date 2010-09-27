@@ -70,7 +70,6 @@ routeDescriptor* preferedRoutes[16] = { &routesTo[4][2] };
 
 void Bla()
 {
-
 	uint8_t from = 5;
 	uint8_t to = 0;
 
@@ -85,6 +84,8 @@ void Bla()
 	}
 }
 
+uint8_t costTo[16];
+
 uint8_t GetRoute(uint8_t from, uint8_t to, uint8_t route[])
 {
 	if (hops[from][to] == 1)
@@ -97,6 +98,14 @@ uint8_t GetRoute(uint8_t from, uint8_t to, uint8_t route[])
 
 	}
 }
+
+typedef struct
+{
+	uint8_t txPower;
+} presenceMessage;
+
+
+uint8_t costVia[16];
 
 // Frames
 enum
