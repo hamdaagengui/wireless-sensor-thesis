@@ -83,3 +83,19 @@ SPI based sensor example - LightSensor.c
 		value = *((uint16_t*)&inbuf[2]);
 		PostSensorUpdate(SENSOR_ID, value);
 	}
+	
+	
+	
+	
+	
+Routing
+
+	On FrameReceive:
+		On EnergyLevelCommand => routeInfo[frame.source].energyLevel = value
+		On QueueLevelCommand => routeInfo[frame.source].queueLevel = value
+		On BusyLevelCommand => routeInfo[frame.source].busyLevel = value
+		On StaticInfoCommand => routeInfo[frame.source].? = values
+
+	1. Find the desired route in the routing table
+	2. Determine the tx power needed to reach the first node in the route
+	3. Send frame

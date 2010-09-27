@@ -9,6 +9,8 @@
 #error "No radio driver found for the selected processor!"
 #endif
 
+extern const uint8_t radioDriver_TxPower[];
+
 /**
  * Initialize the transceiver and sets the frame receive call back function.
  */
