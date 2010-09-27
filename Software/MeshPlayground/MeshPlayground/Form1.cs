@@ -70,5 +70,14 @@ namespace MeshPlayground
 
 			UpdateNodeList();
 		}
+
+		private void button1_Click(object sender, EventArgs e)
+		{
+			var lvi = new ListViewItem("0");
+			var si = new ListViewItem.ListViewSubItem(lvi, "-");
+			si. Checked = true;
+
+			listView1.Items.Add(lvi);
+		}
 	}
 }
