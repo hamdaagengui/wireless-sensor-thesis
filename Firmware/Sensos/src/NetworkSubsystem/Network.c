@@ -26,16 +26,6 @@ void GetSerialNumber(uint8_t buffer[])
 	}
 }
 
-static uint8_t assignedId;
-
-enum
-{
-	STATE_UNCONNECTED,
-	STATE_SYNCHRONIZING,
-	STATE_CONNECTED
-};
-static uint8_t state = STATE_UNCONNECTED;
-
 // Device statistics
 //typedef struct
 //{
@@ -116,6 +106,18 @@ typedef struct
 	uint8_t acknowledge :1;
 	uint8_t :4;
 } acknowledgeMessage;
+
+static uint8_t assignedId;
+
+enum
+{
+	STATE_UNCONNECTED,
+	STATE_SYNCHRONIZING,
+	STATE_CONNECTED
+};
+static uint8_t state = STATE_UNCONNECTED;
+
+static uint8_t queues[2][QUEUE_SIZE];
 
 static void FrameReceived(uint8_t* data, uint8_t length);
 
