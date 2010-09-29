@@ -96,6 +96,10 @@
       <Project>{CBB3583C-7031-4BAB-8401-525C6711B309}</Project>
       <Name>RfSuitLoggerInterfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WinFormPlusPlus\WinFormPlusPlus.csproj">
+      <Project>{65DC00FD-7E17-45EA-87DA-A1C65E62B098}</Project>
+      <Name>WinFormPlusPlus</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

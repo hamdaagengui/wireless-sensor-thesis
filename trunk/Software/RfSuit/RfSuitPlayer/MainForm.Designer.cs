@@ -28,6 +28,7 @@
     /// </summary>
     private void InitializeComponent()
     {
+      this.components = new System.ComponentModel.Container();
       this.menuStrip = new System.Windows.Forms.MenuStrip();
       this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,6 +44,7 @@
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
       this.pictureBox = new System.Windows.Forms.PictureBox();
+      this.timer = new System.Windows.Forms.Timer(this.components);
       this.menuStrip.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
       this.splitContainer1.Panel1.SuspendLayout();
@@ -223,6 +225,11 @@
       this.pictureBox.TabIndex = 2;
       this.pictureBox.TabStop = false;
       // 
+      // timer
+      // 
+      this.timer.Enabled = true;
+      this.timer.Tick += new System.EventHandler(this.TimerTick);
+      // 
       // MainForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -269,6 +276,7 @@
     private System.Windows.Forms.ToolStripMenuItem showLegendToolStripMenuItem;
     private System.Windows.Forms.ToolStripComboBox smoothingToolStripComboBox;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+    private System.Windows.Forms.Timer timer;
 
   }
 }
