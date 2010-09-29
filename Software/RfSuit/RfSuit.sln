@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfSuitPlayer", "RfSuitPlaye
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfSuitCompressLog", "RfSuitCompressLog\RfSuitCompressLog.csproj", "{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFormPlusPlus", "WinFormPlusPlus\WinFormPlusPlus.csproj", "{65DC00FD-7E17-45EA-87DA-A1C65E62B098}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -87,6 +89,16 @@ Global
 		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Release|Mixed Platforms.Build.0 = Release|x86
 		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Release|x86.ActiveCfg = Release|x86
 		{BE46DA29-16AF-4112-AFBE-9D8463D0B3CE}.Release|x86.Build.0 = Release|x86
+		{65DC00FD-7E17-45EA-87DA-A1C65E62B098}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65DC00FD-7E17-45EA-87DA-A1C65E62B098}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65DC00FD-7E17-45EA-87DA-A1C65E62B098}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{65DC00FD-7E17-45EA-87DA-A1C65E62B098}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{65DC00FD-7E17-45EA-87DA-A1C65E62B098}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{65DC00FD-7E17-45EA-87DA-A1C65E62B098}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65DC00FD-7E17-45EA-87DA-A1C65E62B098}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65DC00FD-7E17-45EA-87DA-A1C65E62B098}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{65DC00FD-7E17-45EA-87DA-A1C65E62B098}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{65DC00FD-7E17-45EA-87DA-A1C65E62B098}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

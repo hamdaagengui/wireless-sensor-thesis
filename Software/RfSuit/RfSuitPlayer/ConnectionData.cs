@@ -51,15 +51,16 @@ namespace RfSuitPlayer
 
 			return o;
     }
-		public int EndPointA { get; private set; }
-		public int EndPointB { get; private set; }
+    public readonly int[] EndPoints = new int[2];
+    public int EndPointA { get { return EndPoints[0]; } }
+    public int EndPointB { get { return EndPoints[1]; } }
 		public Color Color { get; private set; }
 
 		public ConnectionData(int endPointA, int endPointB, double[] data, Color color)
 		{
 			_quality = data;
-			EndPointA = endPointA;
-			EndPointB = endPointB;
+      EndPoints[0] = endPointA;
+      EndPoints[1] = endPointB;
 			Color = color;
 		}
 

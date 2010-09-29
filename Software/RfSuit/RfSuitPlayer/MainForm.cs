@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using dk.iha;
 using System.Drawing;
+using WinFormPlusPlus;
 using ZedGraph;
 using RfSuitPlayer.Properties;
 using RfSuitLoggerInterfaces;
@@ -25,7 +26,6 @@ namespace RfSuitPlayer
     private double[] _timeline;
     private GraphData _graphData;
     private bool _enableCurveUpdates = true;
-    private CheckBox _allCheckBox;
     private int _position;
     private byte[] _activePicture = null;
 
@@ -48,71 +48,53 @@ namespace RfSuitPlayer
       _graphData = new GraphData(_entries);
       
       flowLayoutPanel1.Controls.Clear();
+      var parents = new Dictionary<int, CheckBoxParent>();
+      var parentAll = new CheckBoxParent {Text = "All", ForeColor = Color.White};
       foreach (var connectionData in _graphData.ConnectionDatas)
       {
         var checkBox = new CheckBox {
           Tag = connectionData,
           Text = connectionData.ToString(),
-          Checked = true,
           ForeColor = connectionData.Color
         };
+        parentAll.AddChildCheckBox(checkBox);
         checkBox.CheckedChanged += CheckBoxClick;
         flowLayoutPanel1.Controls.Add(checkBox);
+        foreach (var endPoint in connectionData.EndPoints)
+        {
+          CheckBoxParent parent;
+          if (!parents.TryGetValue(endPoint, out parent))
+          {
+            parent = new CheckBoxParent {Text = "EP " + endPoint, ForeColor = Color.White };
+            parents.Add(endPoint, parent);
+          }
+          parent.AddChildCheckBox(checkBox);
+        }
       }
-      _allCheckBox = new CheckBox
+
+      foreach (var checkBoxParent in parents)
       {
-        Text = "All",
-        Checked = true,
-        ForeColor = Color.White,
-      };
-      _allCheckBox.CheckedChanged += CheckAllCheckedChanged;
-      flowLayoutPanel1.Controls.Add(_allCheckBox);
+        flowLayoutPanel1.Controls.Add(checkBoxParent.Value);
+      }
+
+      flowLayoutPanel1.Controls.Add(parentAll);
+
+      parentAll.Checked = true;
 
       CreateChart();
     }
 
-    void CheckAllCheckedChanged(object sender, EventArgs e)
-    {
-      if (_enableCurveUpdates == false) return;
-      var checkAllCheckBox = sender as CheckBox;
-      if (checkAllCheckBox == null) return;
-      _enableCurveUpdates = false;
-      foreach (var checkBox in flowLayoutPanel1.Controls.OfType<CheckBox>())
-        checkBox.Checked = checkAllCheckBox.Checked;
-      _enableCurveUpdates = true;
-      UpdateCurves();
-    }
-
+    private bool _updateAwaits = false;
     void CheckBoxClick(object sender, EventArgs e)
     {
-      UpdateCurves();
-
-      if(_enableCurveUpdates) {
-        _enableCurveUpdates = false;
-        var cbs = from cb in flowLayoutPanel1.Controls.OfType<CheckBox>()
-                where cb.Tag is ConnectionData
-                select cb;
-        bool isAllSelected = true;
-        bool isNoneSelected = true;
-        foreach (var checkBox in cbs) {
-          if (checkBox.Checked) {
-            isNoneSelected = false;
-          } else {
-            isAllSelected = false;
-          }
-        }
-        if (isAllSelected)
-          _allCheckBox.Checked = true;
-        else if (isNoneSelected)
-          _allCheckBox.Checked = false;
-        else
-          _allCheckBox.CheckState = CheckState.Indeterminate;
-        _enableCurveUpdates = true;
-      }
+      _updateAwaits = true;
     }
+
+    private int updates = 0;
 
     public void UpdateCurves() {
       if (_enableCurveUpdates == false) return;
+      Console.WriteLine("Update: " + updates++);
       var myPane = zedGraphControl1.GraphPane;
       myPane.CurveList.Clear();
 
@@ -220,6 +202,13 @@ namespace RfSuitPlayer
       if(smoothingToolStripComboBox.SelectedIndex >= 0) {
         UpdateCurves();
       }
+    }
+
+    private void TimerTick(object sender, EventArgs e)
+    {
+      if (!_updateAwaits) return;
+      UpdateCurves();
+      _updateAwaits = false;
     }
   }
 }
