@@ -141,11 +141,13 @@ namespace RfSuitLogger
         DisplayError("Please select a serial port!", "Missing Serial Port");
         return;
       }
-
-      var prefixedWriter = EntrySerializer.Instance.OpenWrite(Directory.GetParent(Application.ExecutablePath) + @"\log" + (long) Utils.MillisecondsSinceEpoch(), true);
+			
+			byte channel = (byte)(channelComboBox.SelectedIndex + 11);
+			byte power = (byte)powerComboBox.SelectedIndex;
+			var prefixedWriter = EntrySerializer.Instance.OpenWrite(Directory.GetParent(Application.ExecutablePath) + @"\log" + (long)Utils.MillisecondsSinceEpoch() + "[ch " + channelComboBox.SelectedItem.ToString() + ", " + powerComboBox.SelectedItem.ToString() + "]", true);
       _logger.Start(prefixedWriter, serialPortInfo.Name);
-			_logger.Connection.SetChannel((byte)(powerComboBox.SelectedIndex + 11));
-			_logger.Connection.SetTxPower((byte)powerComboBox.SelectedIndex);
+			_logger.Connection.SetChannel(channel);
+			_logger.Connection.SetTxPower(power);
     }
 
     private static void DisplayError(string title, string msg)
