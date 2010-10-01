@@ -37,24 +37,28 @@ Processor peripherals
 
 
 Messages
+
 	Configuration (CF)
 		msg:3
 		:1
 		id:4
 		time:16
 		serialNumber:8 [16]
+		
 	Data (DA)
 		msg:3
 		sensor:5
 		nextNode:4
 		sequenceNumber:4
 		data:8 [32]
+		
 	Acknowledge (AC)
 		msg:3
 		:1
 		destination:4
 		nextNode:4
 		sequence:4
+		
 	Route Information (RI)
 		msg:3
 		:1
@@ -64,12 +68,15 @@ Messages
 	Tx Level (TL)
 		msg:3
 		value:5
+		
 	Energy Level (EL)
 		msg:3
 		value:5
+		
 	Queue Level (QL)
 		msg:3
 		value:5
+		
 	Busy Level (BL)
 		msg:3
 		value:5
