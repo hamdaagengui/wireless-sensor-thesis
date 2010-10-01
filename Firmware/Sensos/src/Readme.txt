@@ -36,58 +36,65 @@ Processor peripherals
 
 
 
-IIC based sensor example - AccelSensor.c
+Messages
+	Configuration (CF)
+		msg:3
+		:1
+		id:4
+		time:16
+		serialNumber:8 [16]
+	Data (DA)
+		msg:3
+		sensor:5
+		nextNode:4
+		sequenceNumber:4
+		data:8 [32]
+	Acknowledge (AC)
+		msg:3
+		:1
+		destination:4
+		nextNode:4
+		sequence:4
+	Route Information (RI)
+		msg:3
+		:1
+		source:4
+		node0:4
+		
+	Tx Level (TL)
+		msg:3
+		value:5
+	Energy Level (EL)
+		msg:3
+		value:5
+	Queue Level (QL)
+		msg:3
+		value:5
+	Busy Level (BL)
+		msg:3
+		value:5
+	
+	
+Data framing
+	SOF = 255
+	
+Message example
+	uint8 uint8 uint8
+	SOF <byte> <byte> <byte>
 
-	iicConfiguration configuration = {IIC_STANDARD_SPEED, Sensor_Completion};
-	uint8_t adrBuf[2] = {2 >> 8, 2};
-	int16_t dataBuf[3];
-	
-	#define ACCEL_IIC_ADR  0x94
-	
-	int16_t x, y, z;
-
-	Sensor_Update()
-	{
-		Iic_BeginTransaction(configuration);
-		Iic_StartWrite(ACCEL_IIC_ADR, adrBuf, 2);
-		Iic_Read(ACCEL_IIC_ADR, dataBuf, 6);
-	 	Iic_EndTransaction();
-	}
-	
-	Sensor_Completion()
-	{
-		x = *((int16_t*)&dataBuf[0]);
-		y = *((int16_t*)&dataBuf[2]);
-		z = *((int16_t*)&dataBuf[4]);
-		PostSensorUpdate(SENSOR_ID, x, y, z);
-	}
 
 
 
+Super cycle -> enable slot sharing
 
-SPI based sensor example - LightSensor.c
 
-	const spiConfiguration configuration = {GPIOA2, SPI_BITRATE_1000000, Sensor_Completion};
-	const uint8_t outbuf[4] = {CMD_READ_REG, 1};
-	uint8_t inbuf[4];
-	
-	uint16_t value;
 
-	Sensor_Update()
-	{
-		Spi_Transfer(&configuration, outbuf, inbuf, 4);
-	}
 	
-	Sensor_Completion()
-	{
-		value = *((uint16_t*)&inbuf[2]);
-		PostSensorUpdate(SENSOR_ID, value);
-	}
-	
-	
-	
-	
-	
+Connecting
+
+	1. Register QR on GW
+	2. 
+
 Routing
 
 	On FrameReceive:

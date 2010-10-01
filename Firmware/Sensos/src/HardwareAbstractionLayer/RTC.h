@@ -33,5 +33,4 @@ extern void RTC_Start();
  */
 extern void RTC_Request(spiConfiguration* configuration, uint8_t* output, uint8_t* input, uint8_t length);
 
-
-#endif /* RTC_H_ */
+#endif /* RTC_H_ */jeg
