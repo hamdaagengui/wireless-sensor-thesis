@@ -173,7 +173,7 @@ static uint8_t queues[2][QUEUE_SIZE];
 static void* poolObject;
 
 static void FrameReceived(uint8_t* data, uint8_t length);
-static uint8_t GetNextNode();
+static uint8_t GetNextNodeTowardsZero();
 
 typedef void (*routeCalculatorProtoype)();
 typedef uint8_t (*routeFindingProtoype)();
@@ -296,9 +296,11 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 					}
 					else
 					{
-						if (m->nextNode == assignedSlot)
+						if (m->nextNode == assignedSlot) // this node was selected as a hop
 						{
 							// forward towards node 0
+							m->nextNode = GetNextNodeTowardsZero();
+							// add to application layer queue
 						}
 					}
 
@@ -309,6 +311,15 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 			case MESSAGE_SENSOR_DATA_ACKNOWLEDGE:
 				{
 					sensorDataAcknowledgeMessage* m = currentMsg;
+
+					if (m->destination == assignedSlot)
+					{
+
+					}
+					else if (m->nextNode == assignedSlot)
+					{
+
+					}
 
 					i += sizeof(sensorDataAcknowledgeMessage);
 				}
@@ -348,7 +359,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 						r->age = 0;
 
 
-						// broadcast message
+						// broadcast message -> add to network layer queue
 					}
 
 					i += sizeof(neighborReportMessage);
@@ -374,7 +385,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 						ns->age = 0;
 
 
-						// broadcast message
+						// broadcast message -> add to network layer queue
 					}
 
 					i += sizeof(nodeStateMessage);
@@ -391,4 +402,9 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 static void UpdateRouteTable()
 {
 
+}
+
+static uint8_t GetNextNodeTowardsZero()
+{
+	return 0;
 }
