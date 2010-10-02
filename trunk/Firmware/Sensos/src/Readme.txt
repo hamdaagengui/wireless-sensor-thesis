@@ -38,49 +38,60 @@ Processor peripherals
 
 Messages
 
-	Configuration (CF)
-		msg:3
-		:1
+	Configuration (CFG)
+		msg:4
 		id:4
-		time:16
+		timeSlot:16
 		serialNumber:8 [16]
 		
-	Data (DA)
-		msg:3
-		sensor:5
+	Sensor Data (SED)
+		msg:4
 		nextNode:4
 		sequenceNumber:4
-		data:8 [32]
-		
-	Acknowledge (AC)
-		msg:3
-		:1
-		destination:4
+		length:4
+		sensor:8
+		data:8 [16]
+
+	Sensor Data Acknowledge (SDA)
+		msg:4
 		nextNode:4
-		sequence:4
+		destination:4
+		sequenceNumber:4
+
+	Route Information (RIN)
+		msg:4
+		node:4
+		rssi0:5
+		...
+		rssi15:5
 		
-	Route Information (RI)
-		msg:3
-		:1
-		source:4
-		node0:4
+	Tx Level (TXL)
+		msg:4
+		node:4
+		value:8
 		
-	Tx Level (TL)
-		msg:3
-		value:5
+	Energy Level (ENL)
+		msg:4
+		node:4
+		value:8
 		
-	Energy Level (EL)
-		msg:3
-		value:5
+	Queue Level (QUL)
+		msg:4
+		node:4
+		value:8
 		
-	Queue Level (QL)
-		msg:3
-		value:5
-		
-	Busy Level (BL)
-		msg:3
-		value:5
+	Busy Level (BUL)
+		msg:4
+		node:4
+		value:8
 	
+	Status Report (STA)
+		msg:4
+		node:4
+		txLevel:8
+		energyLevel:8
+		queueLevel:8
+		busyLevel:8
 	
 Data framing
 	SOF = 255
@@ -88,13 +99,6 @@ Data framing
 Message example
 	uint8 uint8 uint8
 	SOF <byte> <byte> <byte>
-
-
-
-
-Super cycle -> enable slot sharing
-
-
 
 	
 Connecting

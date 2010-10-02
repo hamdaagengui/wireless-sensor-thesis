@@ -120,6 +120,7 @@ static uint8_t state = STATE_UNCONNECTED;
 static uint8_t queues[2][QUEUE_SIZE];
 
 static void FrameReceived(uint8_t* data, uint8_t length);
+static uint8_t GetNextNode();
 
 void Network_Initialize()
 {
@@ -212,3 +213,4 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 		}
 	}
 }
+
