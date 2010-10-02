@@ -4,7 +4,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdint.h>
-#include <DefaultConfiguration.h>
+#include "DefaultConfiguration.h"
 
 #define ReadBit(var, bit)												(((var) & (1 << (bit))) != 0)
 #define SetBit(var, bit)												((var) |= (1 << (bit)))

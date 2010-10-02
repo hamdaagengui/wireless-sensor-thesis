@@ -5,7 +5,7 @@
  *      Author: Coma
  */
 #include "Network.h"
-#include "HardwareAbstractionLayer/RadioDriver.h"
+#include "../HardwareAbstractionLayer/RadioDriver.h"
 #include <avr/eeprom.h>
 
 #define ROUTE_ENTRY_TIMEOUT					100
