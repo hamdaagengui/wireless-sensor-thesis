@@ -11,6 +11,11 @@
 #include "../Globals.h"
 #include "../DefaultConfiguration.h"
 
+enum
+{
+	EVENT_SENSOR_DATA
+};
+
 typedef struct
 {
 	uint8_t id;

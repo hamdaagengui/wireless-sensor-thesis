@@ -6,13 +6,16 @@
  */
 #include "Network.h"
 #include "../HardwareAbstractionLayer/RadioDriver.h"
+#include "../EventSubsystem/EventDispatcher.h"
 #include <avr/eeprom.h>
+#include <string.h>
 
 #define ROUTE_ENTRY_TIMEOUT					100
 #define MAX_FRAME_SIZE							64
 
 #define QUEUE_APPLICATION						0
 #define QUEUE_NETWORK								1
+#define QUEUE_SIZE									50
 
 //EEMEM const uint8_t serialNumber[16];
 
@@ -167,6 +170,8 @@ static uint8_t state = STATE_UNCONFIGURED;
 
 static uint8_t queues[2][QUEUE_SIZE];
 
+static void* poolObject;
+
 static void FrameReceived(uint8_t* data, uint8_t length);
 static uint8_t GetNextNode();
 
@@ -182,6 +187,8 @@ static routeFindingProtoype routeFinders[2] = { };
 
 void Network_Initialize()
 {
+	poolObject = EventDispatcher_RegisterPublisher(0);
+
 	RadioDriver_Initialize(FrameReceived);
 }
 
@@ -283,7 +290,9 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 					if (isMasterNode)
 					{
-						// event (m)
+						((uint8_t*) poolObject)[0] = m->sensor;
+						memcpy(poolObject + 1, m->data, m->length);
+						poolObject = EventDispatcher_Publish(EVENT_SENSOR_DATA, poolObject);
 					}
 					else
 					{
@@ -315,6 +324,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 					rssi* r = &rssis[m->node];
 
 					if (m->sequenceNumber > r->sequenceNumber) // skip if message is obsolete
+
 					{
 						r->rssi[0] = m->rssi0;
 						r->rssi[1] = m->rssi1;
@@ -352,6 +362,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 					nodeState* ns = &nodeStates[m->node];
 
 					if (m->sequenceNumber > ns->sequenceNumber) // skip if message is obsolete
+
 					{
 						ns->txLevel = m->txLevel;
 						ns->energyLevel = m->energyLevel;

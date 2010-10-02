@@ -32,6 +32,10 @@
 							<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1449901988" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug">
 								<option id="de.innot.avreclipse.compiler.option.debug.level.1835020701" name="Generate Debugging Info" superClass="de.innot.avreclipse.compiler.option.debug.level"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.1742620402" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize"/>
+								<option id="de.innot.avreclipse.compiler.option.incpath.1733024417" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/sensos}&quot;"/>
+								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.1182823655" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.1484324949" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug">
@@ -369,6 +373,8 @@
 				</scannerConfigBuildInfo>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 		</cconfiguration>
 		<cconfiguration id="de.innot.avreclipse.configuration.app.release.1744040207">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="de.innot.avreclipse.configuration.app.release.1744040207" moduleId="org.eclipse.cdt.core.settings" name="Release">
@@ -736,6 +742,8 @@
 				</scannerConfigBuildInfo>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
