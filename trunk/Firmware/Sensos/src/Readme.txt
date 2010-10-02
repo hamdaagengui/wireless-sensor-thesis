@@ -39,60 +39,52 @@ Processor peripherals
 Messages
 
 	Configuration (CFG)
-		msg:4
 		id:4
-		timeSlot:16
+		slot:4
 		serialNumber:8 [16]
-		
-	Sensor Data (SED)
-		msg:4
+	
+	Configuration Acknowledge (CAC)
+		id:4
+		slot:4
+
+	Slot Allocations (SLO)
+		id:4
+		sequenceNumber:4
+		slots:8 [15]
+
+	Sensor Data (SDA)
+		id:4
 		nextNode:4
 		sequenceNumber:4
 		length:4
 		sensor:8
-		data:8 [16]
+		data:8 [1..16]
 
-	Sensor Data Acknowledge (SDA)
-		msg:4
+	Sensor Data Acknowledge (SAC)
+		id:4
 		nextNode:4
 		destination:4
 		sequenceNumber:4
 
-	Route Information (RIN)
-		msg:4
+	Neighbor Report (NER)
+		id:4
 		node:4
+		sequenceNumber:4
+		:4
 		rssi0:5
 		...
 		rssi15:5
-		
-	Tx Level (TXL)
-		msg:4
+
+	Node State (NOS)
+		id:4
 		node:4
-		value:8
-		
-	Energy Level (ENL)
-		msg:4
-		node:4
-		value:8
-		
-	Queue Level (QUL)
-		msg:4
-		node:4
-		value:8
-		
-	Busy Level (BUL)
-		msg:4
-		node:4
-		value:8
-	
-	Status Report (STA)
-		msg:4
-		node:4
+		sequenceNumber:4
+		:4
 		txLevel:8
 		energyLevel:8
 		queueLevel:8
 		busyLevel:8
-	
+
 Data framing
 	SOF = 255
 	
