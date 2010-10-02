@@ -168,22 +168,22 @@ enum
 };
 static uint8_t state = STATE_UNCONFIGURED;
 
-static uint8_t queues[2][QUEUE_SIZE];
+//static uint8_t queues[2][QUEUE_SIZE];
 
 static void* poolObject;
 
 static void FrameReceived(uint8_t* data, uint8_t length);
 static uint8_t GetNextNodeTowardsZero();
 
-typedef void (*routeCalculatorProtoype)();
-typedef uint8_t (*routeFindingProtoype)();
-
-#define ROUTING_STRATEGY_CALCULATE_AT_UPDATE			0
-#define ROUTING_STRATEGY_CALCULATE_AT_REQUEST			1
-
-static uint8_t currentRoutingStrategy = ROUTING_STRATEGY_CALCULATE_AT_UPDATE;
-static routeCalculatorProtoype routeCalculators[2] = { };
-static routeFindingProtoype routeFinders[2] = { };
+//typedef void (*routeCalculatorProtoype)();
+//typedef uint8_t (*routeFindingProtoype)();
+//
+//#define ROUTING_STRATEGY_CALCULATE_AT_UPDATE			0
+//#define ROUTING_STRATEGY_CALCULATE_AT_REQUEST			1
+//
+//static uint8_t currentRoutingStrategy = ROUTING_STRATEGY_CALCULATE_AT_UPDATE;
+//static routeCalculatorProtoype routeCalculators[2] = { };
+//static routeFindingProtoype routeFinders[2] = { };
 
 void Network_Initialize()
 {
