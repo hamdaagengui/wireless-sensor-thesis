@@ -8,14 +8,16 @@
 #ifndef CONFIGURATION_H_
 #define CONFIGURATION_H_
 
-#define STATISTICS															1
-#define MESSAGE_LEVEL														2
+#define MASTER_NODE																									1
+
+#define STATISTICS																									1
+#define MESSAGE_LEVEL																								2
 
 // Configuration of RadioDriver
 #define RADIODRIVER_AUTO_RX
 #define RADIODRIVER_USE_CRC
 
 #undef NETWORK_CAN_ROUTE
-#define NETWORK_CAN_ROUTE												0
+#define NETWORK_CAN_ROUTE																						0
 
 #endif /* CONFIGURATION_H_ */
