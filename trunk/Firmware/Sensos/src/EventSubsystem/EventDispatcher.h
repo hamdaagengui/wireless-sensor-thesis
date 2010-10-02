@@ -8,8 +8,8 @@
 #ifndef EVENTDISPATCHER_H_
 #define EVENTDISPATCHER_H_
 
-#include <Globals.h>
-#include <DefaultConfiguration.h>
+#include "../Globals.h"
+#include "../DefaultConfiguration.h"
 
 typedef struct
 {

@@ -8,7 +8,7 @@
 #ifndef NETWORK_H_
 #define NETWORK_H_
 
-#include <Globals.h>
+#include "../Globals.h"
 #include "../EventSubsystem/EventDispatcher.h"
 
 enum

@@ -44,7 +44,7 @@
  *
  */
 
-#include "Globals.h"
+#include "../../Globals.h"
 
 enum
 {
