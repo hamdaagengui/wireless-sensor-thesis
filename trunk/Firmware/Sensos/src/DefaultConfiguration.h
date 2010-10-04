@@ -8,7 +8,9 @@
 #ifndef DEFAULTCONFIGURATION_H_
 #define DEFAULTCONFIGURATION_H_
 
-#define NETWORK_CAN_ROUTE												1
+// Network subssystem
+#define NETWORK_CAN_ROUTE																						1
+#define MESSAGE_QUEUE_SIZE																					200
 
 // Event subsystem
 #define EVENTDISPATCHER_HIGHEST_EVENT_ID														128

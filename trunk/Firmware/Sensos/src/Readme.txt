@@ -38,6 +38,9 @@ Processor peripherals
 
 Messages
 
+	source:4
+	:4
+
 	Configuration (CFG)
 		id:4
 		slot:4

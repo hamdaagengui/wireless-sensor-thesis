@@ -44,6 +44,9 @@ extern void Network_Initialize();
 extern void Network_Subscribe(networkConfiguration* configuration);
 extern void Network_Start();
 
-extern void Network_SendData(uint8_t dataId, void* data, uint8_t length);
+#if !defined(MASTER_NODE)
+extern void Network_ConfigureNode(uint8_t serialNumber[], uint8_t sensorCount);
+#endif
+extern void Network_SendSensorData(uint8_t sensorId, void* data, uint8_t length);
 
 #endif /* NETWORK_H_ */
