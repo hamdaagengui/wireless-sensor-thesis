@@ -25,7 +25,7 @@ typedef uint8_t bool;
 #define NonCritical()														sei()
 #define Nop()																		__asm__ volatile("nop")
 #define lengthof(x)															( sizeof(x) / sizeof(x[0]) )
-#define offsetof(type, member)									__builtin_offsetof (type, member)
+//#define offsetof(type, member)									__builtin_offsetof (type, member)
 
 #define MemoryBarrier()													__asm__ volatile ("" : : : "memory")
 

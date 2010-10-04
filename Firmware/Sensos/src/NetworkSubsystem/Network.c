@@ -7,6 +7,7 @@
 #include "Network.h"
 #include "../HardwareAbstractionLayer/RadioDriver.h"
 #include "../EventSubsystem/EventDispatcher.h"
+#include "../Collections/FIFO.h"
 #include <avr/eeprom.h>
 #include <string.h>
 
@@ -57,12 +58,16 @@ static uint8_t routeTable[16];
 static uint8_t currentSlotAllocationMessageSequenceNumber = 0;
 static uint16_t delayValues[16];
 
-// Frames
+// Network layer transmission queue
+uint8_t messageQueue[FIFO_CalculateSize(MESSAGE_QUEUE_SIZE)];
+
+// The raw network frame as sent over the air
 typedef struct
 {
-	uint8_t length;
-	uint8_t payload[];
-} bufferFrame;
+	uint8_t source :4;
+	uint8_t :4;
+	uint8_t messages[];
+} networkFrame;
 
 // Messages
 enum
@@ -162,11 +167,11 @@ static uint8_t assignedSlot;
 
 enum
 {
-	STATE_UNCONFIGURED,
-	STATE_CONFIGURED,
-	STATE_SYNCHRONIZING
+	STATE_UNINITIALIZED,
+	STATE_INACTIVE,
+	STATE_ACTIVE
 };
-static uint8_t state = STATE_UNCONFIGURED;
+static uint8_t state = STATE_UNINITIALIZED;
 
 //static uint8_t queues[2][QUEUE_SIZE];
 
@@ -187,24 +192,81 @@ static uint8_t GetNextNodeTowardsZero();
 
 void Network_Initialize()
 {
+	FIFO_Initialize(messageQueue, MESSAGE_QUEUE_SIZE);
+
 	poolObject = EventDispatcher_RegisterPublisher(0);
 
 	RadioDriver_Initialize(FrameReceived);
 }
 
-void Network_Send(uint8_t channel, void* data, uint8_t length)
+void Network_SendSensorData(uint8_t sensorId, void* data, uint8_t length)
 {
-
+	// add to transport layer queue
 }
 
 static void DoSend()
 {
+	uint8_t frame[MAX_FRAME_SIZE];
 
+	networkFrame* nf = (networkFrame*) frame;
+	nf->source = assignedSlot;
+
+	uint8_t length = sizeof(networkFrame);
+
+	bool doSend = false;
+
+	while (FIFO_IsEmpty(messageQueue) == false)
+	{
+		uint8_t l = FIFO_PeekFirst(messageQueue);
+		if ((length + l) <= MAX_FRAME_SIZE)
+		{
+			if (FIFO_Read(messageQueue, &frame[length], l) == false)
+			{
+				// buffer error!?!?
+				break;
+			}
+
+			length += l;
+
+			doSend = true;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	if (doSend)
+	{
+		RadioDriver_Send(frame, length);
+	}
 }
+
+bool syncing = true; // always false for master node
 
 static void FrameReceived(uint8_t* data, uint8_t length)
 {
-	for (uint8_t i = 0; i < length;) // process all messages in the frame
+	uint8_t source = ((networkFrame*) data)->source;
+
+	if (syncing) // waiting for sync to send queued messages?
+	{
+		if (source < assignedSlot) // a node we can sync to?
+		{
+			if (source == (assignedSlot - 1)) // our turn to send?
+			{
+				DoSend();
+			}
+			else // no => wait before sending
+			{
+				uint16_t timeToWait = delayValues[source];
+				// set timer
+			}
+
+			syncing = false;
+		}
+	}
+
+	for (uint8_t i = sizeof(networkFrame); i < length;) // process all messages in the frame
 	{
 		void* currentMsg = &data[i];
 		baseMessage* baseMsg = currentMsg;
@@ -234,10 +296,13 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 					if (match) // for this node?
 					{
 						assignedSlot = m->slot;
-						state = STATE_CONFIGURED;
+						state = STATE_INACTIVE;
 
-
-						// send back ack
+						configurationAcknowledgeMessage ack;
+						ack.id = MESSAGE_CONFIGURATION_ACKNOWLEDGE;
+						ack.slot = assignedSlot;
+						FIFO_WriteByte(messageQueue, sizeof(configurationAcknowledgeMessage));
+						FIFO_Write(messageQueue, &ack, sizeof(configurationAcknowledgeMessage));
 					}
 
 					i += sizeof(configurationMessage);
@@ -246,7 +311,11 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 			case MESSAGE_CONFIGURATION_ACKNOWLEDGE:
 				{
-					// unused for now but should be implemented
+					if (isMasterNode)
+					{
+						// unused for now but should be implemented
+					}
+
 					i += sizeof(configurationAcknowledgeMessage);
 				}
 				break;
@@ -256,6 +325,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 					slotAllocationsMessage* m = currentMsg;
 
 					if (m->sequenceNumber > currentSlotAllocationMessageSequenceNumber) // skip if message is obsolete
+
 					{
 						uint16_t delay = 0;
 						for (int8_t i = 15; i >= 0; i--)
@@ -266,15 +336,15 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 							}
 							else
 							{
-								delay += m->slots[i + 1];
+								delay += m->slots[i + 1]; // safe because of if statement
 								delayValues[i] = delay;
 							}
 						}
 
 						currentSlotAllocationMessageSequenceNumber = m->sequenceNumber;
 
-
-						// broadcast message
+						FIFO_WriteByte(messageQueue, sizeof(slotAllocationsMessage));
+						FIFO_Write(messageQueue, m, sizeof(slotAllocationsMessage));
 					}
 
 					i += sizeof(slotAllocationsMessage);
@@ -290,13 +360,15 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 					if (isMasterNode)
 					{
-						((uint8_t*) poolObject)[0] = m->sensor;
-						memcpy(poolObject + 1, m->data, m->length);
+						((uint8_t*) poolObject)[0] = m->length;
+						((uint8_t*) poolObject)[1] = m->sensor;
+						memcpy(poolObject + 2, m->data, m->length);
 						poolObject = EventDispatcher_Publish(EVENT_SENSOR_DATA, poolObject);
 					}
 					else
 					{
 						if (m->nextNode == assignedSlot) // this node was selected as a hop
+
 						{
 							// forward towards node 0
 							m->nextNode = GetNextNodeTowardsZero();
@@ -304,7 +376,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 						}
 					}
 
-					i += sizeof(sensorDataMessage);
+					i += sizeof(sensorDataMessage) + m->length;
 				}
 				break;
 
@@ -358,8 +430,8 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 						r->age = 0;
 
-
-						// broadcast message -> add to network layer queue
+						FIFO_WriteByte(messageQueue, sizeof(neighborReportMessage));
+						FIFO_Write(messageQueue, m, sizeof(neighborReportMessage));
 					}
 
 					i += sizeof(neighborReportMessage);
@@ -384,8 +456,8 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 						ns->age = 0;
 
-
-						// broadcast message -> add to network layer queue
+						FIFO_WriteByte(messageQueue, sizeof(nodeStateMessage));
+						FIFO_Write(messageQueue, m, sizeof(nodeStateMessage));
 					}
 
 					i += sizeof(nodeStateMessage);
