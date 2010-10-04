@@ -213,22 +213,13 @@ static void DoSend()
 
 	uint8_t length = sizeof(networkFrame);
 
-	bool doSend = false;
-
 	while (FIFO_IsEmpty(messageQueue) == false)
 	{
 		uint8_t l = FIFO_PeekFirst(messageQueue);
 		if ((length + l) <= MAX_FRAME_SIZE)
 		{
-			if (FIFO_Read(messageQueue, &frame[length], l) == false)
-			{
-				// buffer error!?!?
-				break;
-			}
-
+			FIFO_Read(messageQueue, &frame[length], l);
 			length += l;
-
-			doSend = true;
 		}
 		else
 		{
@@ -236,7 +227,7 @@ static void DoSend()
 		}
 	}
 
-	if (doSend)
+	if (length > sizeof(networkFrame)) // more than just the header?
 	{
 		RadioDriver_Send(frame, length);
 	}
@@ -250,7 +241,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 	if (syncing) // waiting for sync to send queued messages?
 	{
-		if (source < assignedSlot) // a node we can sync to?
+		if (source < assignedSlot) // a node before us?
 		{
 			if (source == (assignedSlot - 1)) // our turn to send?
 			{
@@ -263,6 +254,10 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 			}
 
 			syncing = false;
+		}
+		else // a node after us
+		{
+
 		}
 	}
 
