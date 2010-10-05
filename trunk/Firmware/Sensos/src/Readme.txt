@@ -39,7 +39,7 @@ Processor peripherals
 Messages
 
 	source:4
-	:4
+	messageCount:4
 
 	Configuration (CFG)
 		id:4
@@ -48,7 +48,7 @@ Messages
 	
 	Configuration Acknowledge (CAC)
 		id:4
-		slot:4
+		:4
 
 	Slot Allocations (SLO)
 		id:4
@@ -87,13 +87,6 @@ Messages
 		energyLevel:8
 		queueLevel:8
 		busyLevel:8
-
-Data framing
-	SOF = 255
-	
-Message example
-	uint8 uint8 uint8
-	SOF <byte> <byte> <byte>
 
 	
 Connecting
