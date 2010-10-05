@@ -33,6 +33,7 @@ namespace RfSuitPlayer
     {
       if (openFileDialog.ShowDialog(this) != DialogResult.OK) return;
       var entries = EntrySerializer.Instance.OpenRead(openFileDialog.FileName);
+      Text = Path.GetFileName(openFileDialog.FileName);
       _entries = entries.ToArray();
 
       var tmp = new List<Picture>();
@@ -186,12 +187,27 @@ namespace RfSuitPlayer
 
     private bool ZedGraphControlMouseEvent(ZedGraphControl sender, MouseEventArgs e)
     {
-      if((ModifierKeys & Keys.Alt) != 0 && e.Button == MouseButtons.Left) {
-        var mousePt = new PointF(e.X, e.Y);
-        double x;
-        double y;
-        sender.GraphPane.ReverseTransform(mousePt, out x, out y);
+      var mousePt = new PointF(e.X, e.Y);
+      double x;
+      double y;
+      sender.GraphPane.ReverseTransform(mousePt, out x, out y);
+
+      statusToolStripStatusLabel.Text = String.Format("Point: {0}, {1}.", x, y);
+
+      if ((ModifierKeys & (Keys.Control | Keys.Alt)) != 0)
+      {
+        // Horizontal bar
+        CurveItem curve;
+        int nearest;
+        if (sender.GraphPane.FindNearestPoint(mousePt, out curve, out nearest) == false) return default(bool);
+        statusToolStripStatusLabel.Text += String.Format(" Nearest curve: {0}.", curve.Label.Text);
+
+      } else if ((ModifierKeys & Keys.Alt) != 0 && e.Button == MouseButtons.Left)
+      {
+        // Vertical bar
         _position = _graphData.GetNearestIndex(x);
+
+
         UpdateGraphLine();
       }
       return default(bool);
@@ -209,6 +225,11 @@ namespace RfSuitPlayer
       if (!_updateAwaits) return;
       UpdateCurves();
       _updateAwaits = false;
+    }
+
+    private void toolStripStatusLabel1_Click(object sender, EventArgs e)
+    {
+
     }
   }
 }

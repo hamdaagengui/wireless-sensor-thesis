@@ -45,6 +45,8 @@
       this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
       this.pictureBox = new System.Windows.Forms.PictureBox();
       this.timer = new System.Windows.Forms.Timer(this.components);
+      this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+      this.statusToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
       this.menuStrip.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
       this.splitContainer1.Panel1.SuspendLayout();
@@ -55,6 +57,7 @@
       this.splitContainer2.Panel2.SuspendLayout();
       this.splitContainer2.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
+      this.statusStrip1.SuspendLayout();
       this.SuspendLayout();
       // 
       // menuStrip
@@ -64,7 +67,7 @@
             this.optionsToolStripMenuItem});
       this.menuStrip.Location = new System.Drawing.Point(0, 0);
       this.menuStrip.Name = "menuStrip";
-      this.menuStrip.Size = new System.Drawing.Size(702, 24);
+      this.menuStrip.Size = new System.Drawing.Size(970, 24);
       this.menuStrip.TabIndex = 0;
       // 
       // fileToolStripMenuItem
@@ -110,8 +113,6 @@
       // 
       // showLegendToolStripMenuItem
       // 
-      this.showLegendToolStripMenuItem.Checked = true;
-      this.showLegendToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
       this.showLegendToolStripMenuItem.Name = "showLegendToolStripMenuItem";
       this.showLegendToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
       this.showLegendToolStripMenuItem.Text = "Show legend";
@@ -161,8 +162,8 @@
       // splitContainer1.Panel2
       // 
       this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-      this.splitContainer1.Size = new System.Drawing.Size(678, 469);
-      this.splitContainer1.SplitterDistance = 311;
+      this.splitContainer1.Size = new System.Drawing.Size(946, 469);
+      this.splitContainer1.SplitterDistance = 110;
       this.splitContainer1.TabIndex = 11;
       // 
       // zedGraphControl1
@@ -181,7 +182,7 @@
       this.zedGraphControl1.ScrollMinX = 0D;
       this.zedGraphControl1.ScrollMinY = 0D;
       this.zedGraphControl1.ScrollMinY2 = 0D;
-      this.zedGraphControl1.Size = new System.Drawing.Size(678, 311);
+      this.zedGraphControl1.Size = new System.Drawing.Size(946, 110);
       this.zedGraphControl1.TabIndex = 0;
       this.zedGraphControl1.MouseDownEvent += new ZedGraph.ZedGraphControl.ZedMouseEventHandler(this.ZedGraphControlMouseEvent);
       this.zedGraphControl1.MouseMoveEvent += new ZedGraph.ZedGraphControl.ZedMouseEventHandler(this.ZedGraphControlMouseEvent);
@@ -190,7 +191,7 @@
       // 
       this.splitContainer2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+      this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
       this.splitContainer2.Location = new System.Drawing.Point(0, 0);
       this.splitContainer2.Name = "splitContainer2";
       // 
@@ -201,8 +202,8 @@
       // splitContainer2.Panel2
       // 
       this.splitContainer2.Panel2.Controls.Add(this.pictureBox);
-      this.splitContainer2.Size = new System.Drawing.Size(678, 154);
-      this.splitContainer2.SplitterDistance = 226;
+      this.splitContainer2.Size = new System.Drawing.Size(946, 355);
+      this.splitContainer2.SplitterDistance = 553;
       this.splitContainer2.TabIndex = 0;
       // 
       // flowLayoutPanel1
@@ -212,7 +213,7 @@
       this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
       this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(224, 152);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(551, 353);
       this.flowLayoutPanel1.TabIndex = 0;
       // 
       // pictureBox
@@ -220,7 +221,7 @@
       this.pictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
       this.pictureBox.Location = new System.Drawing.Point(0, 0);
       this.pictureBox.Name = "pictureBox";
-      this.pictureBox.Size = new System.Drawing.Size(446, 152);
+      this.pictureBox.Size = new System.Drawing.Size(387, 353);
       this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
       this.pictureBox.TabIndex = 2;
       this.pictureBox.TabStop = false;
@@ -230,11 +231,28 @@
       this.timer.Enabled = true;
       this.timer.Tick += new System.EventHandler(this.TimerTick);
       // 
+      // statusStrip1
+      // 
+      this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusToolStripStatusLabel});
+      this.statusStrip1.Location = new System.Drawing.Point(0, 486);
+      this.statusStrip1.Name = "statusStrip1";
+      this.statusStrip1.Size = new System.Drawing.Size(970, 22);
+      this.statusStrip1.TabIndex = 12;
+      this.statusStrip1.Text = "statusStrip1";
+      // 
+      // statusToolStripStatusLabel
+      // 
+      this.statusToolStripStatusLabel.Name = "statusToolStripStatusLabel";
+      this.statusToolStripStatusLabel.Size = new System.Drawing.Size(0, 17);
+      this.statusToolStripStatusLabel.Click += new System.EventHandler(this.toolStripStatusLabel1_Click);
+      // 
       // MainForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(702, 508);
+      this.ClientSize = new System.Drawing.Size(970, 508);
+      this.Controls.Add(this.statusStrip1);
       this.Controls.Add(this.splitContainer1);
       this.Controls.Add(this.menuStrip);
       this.DataBindings.Add(new System.Windows.Forms.Binding("Location", global::RfSuitPlayer.Properties.Settings.Default, "FormLocation", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
@@ -254,6 +272,8 @@
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
       this.splitContainer2.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
+      this.statusStrip1.ResumeLayout(false);
+      this.statusStrip1.PerformLayout();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -277,6 +297,8 @@
     private System.Windows.Forms.ToolStripComboBox smoothingToolStripComboBox;
     private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     private System.Windows.Forms.Timer timer;
+    private System.Windows.Forms.StatusStrip statusStrip1;
+    private System.Windows.Forms.ToolStripStatusLabel statusToolStripStatusLabel;
 
   }
 }
