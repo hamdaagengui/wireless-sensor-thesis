@@ -19,6 +19,7 @@ namespace RfSuitPlayer
     public MainForm()
     {
       InitializeComponent();
+
       smoothingToolStripComboBox.SelectedIndex = 0;
     }
 
@@ -29,31 +30,34 @@ namespace RfSuitPlayer
     private int _position;
     private byte[] _activePicture = null;
 
-    private void OpenToolStripMenuItemClick(object sender, EventArgs e)
+    private void OpenFile(string filename)
     {
-      if (openFileDialog.ShowDialog(this) != DialogResult.OK) return;
-      var entries = EntrySerializer.Instance.OpenRead(openFileDialog.FileName);
-      Text = Path.GetFileName(openFileDialog.FileName);
+      var entries = EntrySerializer.Instance.OpenRead(filename);
+      Text = Path.GetFileName(filename);
       _entries = entries.ToArray();
 
       var tmp = new List<Picture>();
       foreach (var entry in _entries)
       {
-        if(entry.pictures.Count > 0) {
+        if (entry.pictures.Count > 0)
+        {
           tmp = entry.pictures;
-        } else {
+        }
+        else
+        {
           entry.pictures.AddRange(tmp);
         }
       }
       _position = 0;
       _graphData = new GraphData(_entries);
-      
+
       flowLayoutPanel1.Controls.Clear();
       var parents = new Dictionary<int, CheckBoxParent>();
-      var parentAll = new CheckBoxParent {Text = "All", ForeColor = Color.White};
+      var parentAll = new CheckBoxParent { Text = "All", ForeColor = Color.White };
       foreach (var connectionData in _graphData.ConnectionDatas)
       {
-        var checkBox = new CheckBox {
+        var checkBox = new CheckBox
+        {
           Tag = connectionData,
           Text = connectionData.ToString(),
           ForeColor = connectionData.Color
@@ -66,12 +70,13 @@ namespace RfSuitPlayer
           CheckBoxParent parent;
           if (!parents.TryGetValue(endPoint, out parent))
           {
-            parent = new CheckBoxParent {Text = "EP " + endPoint, ForeColor = Color.White };
+            parent = new CheckBoxParent { Text = "EP " + endPoint, ForeColor = Color.White };
             parents.Add(endPoint, parent);
           }
           parent.AddChildCheckBox(checkBox);
         }
       }
+
 
       foreach (var checkBoxParent in parents)
       {
@@ -83,6 +88,13 @@ namespace RfSuitPlayer
       parentAll.Checked = true;
 
       CreateChart();
+    }
+
+
+    private void OpenToolStripMenuItemClick(object sender, EventArgs e)
+    {
+      if (openFileDialog.ShowDialog(this) != DialogResult.OK) return;
+      OpenFile(openFileDialog.FileName);
     }
 
     private bool _updateAwaits = false;
@@ -229,6 +241,18 @@ namespace RfSuitPlayer
     private void toolStripStatusLabel1_Click(object sender, EventArgs e)
     {
 
+    }
+
+    private void MainForm_Load(object sender, EventArgs e)
+    {
+      Cursor.Current = Cursors.AppStarting;
+      var args = AppDomain.CurrentDomain.SetupInformation.ActivationArguments.ActivationData;
+      if (args != null)
+      {
+        if (args.Length > 0 && File.Exists(args[0]))
+          OpenFile(args[0]);
+      }
+      Cursor.Current = Cursors.Default;
     }
   }
 }
