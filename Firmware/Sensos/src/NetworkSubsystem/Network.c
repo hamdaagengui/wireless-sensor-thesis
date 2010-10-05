@@ -64,14 +64,15 @@ uint8_t messageQueue[FIFO_CalculateSize(MESSAGE_QUEUE_SIZE)];
 // The raw network frame as sent over the air
 typedef struct
 {
-	uint8_t source :4;
-	uint8_t :4;
+	uint8_t source :4; // source node of this frame
+	uint8_t nodeCount :4; // number of sensor nodes that this device thinks exist in the network
 	uint8_t messages[];
 } networkFrame;
 
 // Messages
 enum
 {
+	MESSAGE_NULL,
 	MESSAGE_CONFIGURATION,
 	MESSAGE_CONFIGURATION_ACKNOWLEDGE,
 	MESSAGE_SLOT_ALLOCATIONS,
@@ -97,15 +98,23 @@ typedef struct
 typedef struct
 {
 	uint8_t id :4;
-	uint8_t slot :4;
+	uint8_t :4;
 } configurationAcknowledgeMessage;
 
 typedef struct
 {
 	uint8_t id :4;
 	uint8_t sequenceNumber :4;
-	uint8_t slots[15];
+	uint8_t slots[16];
 } slotAllocationsMessage;
+
+typedef struct
+{
+	uint8_t id :4;
+	uint8_t sequenceNumber :4;
+	uint8_t slot :4;
+	uint8_t :4;
+} slotAllocationsAcknowledgeMessage;
 
 // Sensor messages
 typedef struct
