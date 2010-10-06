@@ -20,8 +20,8 @@ namespace RfSuitGraphCreator
     private readonly Control _fileStatus;
     private readonly Control _queueStatus;
 
-    private readonly Fill _redFill = new Fill(Color.FromArgb(100, Color.Red), Color.FromArgb(200, Color.Red), -90f);
-    private readonly Fill _greenFill = new Fill(Color.FromArgb(100, Color.Green), Color.FromArgb(200, Color.Green), 90f);
+    private static Fill RedFill { get { return new Fill(Color.FromArgb(100, Color.Red), Color.FromArgb(200, Color.Red), -90f); } }
+    private static Fill GreenFill { get { return new Fill(Color.FromArgb(100, Color.Green), Color.FromArgb(200, Color.Green), -90f); } }
 
     public FileToGraph(Control fileStatus, Control queueStatus)
     {
@@ -56,22 +56,22 @@ namespace RfSuitGraphCreator
               var cleanQualities = CleanQuality(data.Quality);
               var tuple = CreateCumulativeDistribution(cleanQualities, true);
               var createGraphWorkItem = new CreateGraphWorkItem
-                                        {
-                                          Title = String.Format("{0:00}-{1:00}", data.EndPointA, data.EndPointB),
-                                          XAxis = tuple.Item1,
-                                          YAxis = tuple.Item2,
-                                          XTitle = "[dBm]",
-                                          YTitle = "",
-                                          Filename = filename,
-                                          Reverse = true,
-                                        };
+              {
+                Title = String.Format("{0:00}-{1:00}", data.EndPointA, data.EndPointB),
+                XAxis = tuple.Item1,
+                YAxis = tuple.Item2,
+                XTitle = "[dBm]",
+                YTitle = "",
+                Filename = filename,
+                Reverse = true,
+              };
 
               var lastIndex = tuple.Item1.Length - 1;
 
               var q = 0.25;
               foreach (var dBm in FindQuartiles(tuple))
               {
-                var textObj = new TextObj(string.Format("{0:0.0} [dBm]", dBm), dBm, q) {Location = {AlignH = AlignH.Right, AlignV = AlignV.Bottom}};
+                var textObj = new TextObj(string.Format("{0:0.0} [dBm]", dBm), dBm, q) { Location = { AlignH = AlignH.Right, AlignV = AlignV.Bottom } };
                 createGraphWorkItem.TextObjs.Add(textObj);
                 q += 0.25;
               }
@@ -79,31 +79,31 @@ namespace RfSuitGraphCreator
               if (tuple.Item1[lastIndex] == -100)
               {
                 var boxData = new CreateGraphWorkItem.BoxData
-                              {
-                                Top = tuple.Item2[lastIndex],
-                                Bottom = tuple.Item1.Length > 1 ? tuple.Item2[lastIndex - 1] : 0,
-                                Fill = _redFill
-                              };
+                {
+                  Top = tuple.Item2[lastIndex],
+                  Bottom = tuple.Item1.Length > 1 ? tuple.Item2[lastIndex - 1] : 0,
+                  Fill = RedFill
+                };
                 createGraphWorkItem.Boxes.Add(boxData);
                 createGraphWorkItem.DroppedPackages = true;
                 if (boxData.Bottom != 0)
                 {
                   createGraphWorkItem.Boxes.Add(new CreateGraphWorkItem.BoxData
-                                                {
-                                                  Top = boxData.Bottom,
-                                                  Bottom = 0,
-                                                  Fill = _greenFill
-                                                });
+                  {
+                    Top = boxData.Bottom,
+                    Bottom = 0,
+                    Fill = GreenFill
+                  });
                 }
               }
               else
               {
                 createGraphWorkItem.Boxes.Add(new CreateGraphWorkItem.BoxData
-                                              {
-                                                Top = 1,
-                                                Bottom = 0,
-                                                Fill = _greenFill
-                                              });
+                {
+                  Top = 1,
+                  Bottom = 0,
+                  Fill = GreenFill
+                });
               }
               _graphCollection.Add(createGraphWorkItem);
             });
