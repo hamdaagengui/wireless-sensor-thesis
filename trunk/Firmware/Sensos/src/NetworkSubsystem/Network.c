@@ -54,7 +54,7 @@ typedef struct
 static rssi rssis[16];
 
 static uint8_t routeTable[16];
-
+static uint8_t nodesConnected = 0;
 static uint8_t currentSlotAllocationMessageSequenceNumber = 0;
 static uint16_t delayValues[16];
 
@@ -93,6 +93,9 @@ typedef struct
 	uint8_t id :4;
 	uint8_t slot :4;
 	uint8_t serialNumber[16];
+	uint8_t sequenceNumber :4;
+	uint8_t :4;
+	uint8_t slots[16];
 } configurationMessage;
 
 typedef struct
@@ -178,7 +181,8 @@ enum
 {
 	STATE_UNINITIALIZED,
 	STATE_INACTIVE,
-	STATE_ACTIVE
+	STATE_ACTIVE,
+	STATE_SYNCHRONIZING
 };
 static uint8_t state = STATE_UNINITIALIZED;
 
@@ -219,6 +223,7 @@ static void DoSend()
 
 	networkFrame* nf = (networkFrame*) frame;
 	nf->source = assignedSlot;
+	nf->nodeCount = nodesConnected;
 
 	uint8_t length = sizeof(networkFrame);
 
@@ -242,235 +247,287 @@ static void DoSend()
 	}
 }
 
-bool syncing = true; // always false for master node
-
 static void FrameReceived(uint8_t* data, uint8_t length)
 {
 	uint8_t source = ((networkFrame*) data)->source;
+	uint8_t nodeCount = ((networkFrame*) data)->nodeCount;
 
-	if (syncing) // waiting for sync to send queued messages?
-	{
-		if (source < assignedSlot) // a node before us?
-		{
-			if (source == (assignedSlot - 1)) // our turn to send?
-			{
-				DoSend();
-			}
-			else // no => wait before sending
-			{
-				uint16_t timeToWait = delayValues[source];
-				// set timer
-			}
-
-			syncing = false;
-		}
-		else // a node after us
-		{
-
-		}
-	}
-
-	for (uint8_t i = sizeof(networkFrame); i < length;) // process all messages in the frame
+	if (nodeCount == 0)
 	{
 		void* currentMsg = &data[i];
 		baseMessage* baseMsg = currentMsg;
 
-		switch (baseMsg->id)
+		if (baseMsg->id == MESSAGE_CONFIGURATION)
 		{
-			// Configuration
+			configurationMessage* m = currentMsg;
 
-			case MESSAGE_CONFIGURATION:
+			uint8_t sn[16];
+			GetSerialNumber(sn);
+
+			bool match = true;
+			for (uint8_t i = 0; i < 16; i++)
+			{
+				//if (m->serialNumber[i] != eeprom_read_byte((void*) i))
+				if (m->serialNumber[i] != sn[i])
 				{
-					configurationMessage* m = currentMsg;
-
-					uint8_t sn[16];
-					GetSerialNumber(sn);
-
-					bool match = true;
-					for (uint8_t i = 0; i < 16; i++)
-					{
-						//if (m->serialNumber[i] != eeprom_read_byte((void*) i))
-						if (m->serialNumber[i] != sn[i])
-						{
-							match = false;
-							break;
-						}
-					}
-
-					if (match) // for this node?
-					{
-						assignedSlot = m->slot;
-						state = STATE_INACTIVE;
-
-						configurationAcknowledgeMessage ack;
-						ack.id = MESSAGE_CONFIGURATION_ACKNOWLEDGE;
-						ack.slot = assignedSlot;
-						FIFO_WriteByte(messageQueue, sizeof(configurationAcknowledgeMessage));
-						FIFO_Write(messageQueue, &ack, sizeof(configurationAcknowledgeMessage));
-					}
-
-					i += sizeof(configurationMessage);
+					match = false;
+					break;
 				}
-				break;
+			}
 
-			case MESSAGE_CONFIGURATION_ACKNOWLEDGE:
+			if (match) // for this node?
+			{
+				assignedSlot = m->slot;
+
+				uint16_t delay = 0;
+				delayValues[assignedSlot] = 0;
+				delayValues[assignedSlot - 1] = 0;
+				for (int8_t i = (assignedSlot - 2); i >= 0; i--)
 				{
-					if (isMasterNode)
-					{
-						// unused for now but should be implemented
-					}
-
-					i += sizeof(configurationAcknowledgeMessage);
+					delay += m->slots[i + 1];
+					delayValues[i] = delay;
 				}
-				break;
+				currentSlotAllocationMessageSequenceNumber = m->sequenceNumber;
 
-			case MESSAGE_SLOT_ALLOCATIONS:
+				state = STATE_INACTIVE;
+
+				configurationAcknowledgeMessage ack;
+				ack.id = MESSAGE_CONFIGURATION_ACKNOWLEDGE;
+				//ack.slot = assignedSlot;
+				FIFO_WriteByte(messageQueue, sizeof(configurationAcknowledgeMessage));
+				FIFO_Write(messageQueue, &ack, sizeof(configurationAcknowledgeMessage));
+			}
+		}
+	}
+	else
+	{
+		nodesConnected = nodeCount;
+
+		if (state == STATE_SYNCHRONIZING) // waiting for sync to send queued messages?
+		{
+			if (source < assignedSlot) // a node before us?
+			{
+				if (source == (assignedSlot - 1)) // our turn to send?
 				{
-					slotAllocationsMessage* m = currentMsg;
+					DoSend();
+				}
+				else // no => wait before sending
+				{
+					uint16_t timeToWait = delayValues[source];
+					// set timer
+				}
 
-					if (m->sequenceNumber > currentSlotAllocationMessageSequenceNumber) // skip if message is obsolete
+				state = STATE_ACTIVE;
+			}
+			else // a node after us
+			{
 
+			}
+		}
+
+		for (uint8_t i = sizeof(networkFrame); i < length;) // process all messages in the frame
+		{
+			void* currentMsg = &data[i];
+			baseMessage* baseMsg = currentMsg;
+
+			switch (baseMsg->id)
+			{
+				// Configuration
+
+				case MESSAGE_CONFIGURATION:
 					{
-						uint16_t delay = 0;
-						for (int8_t i = 15; i >= 0; i--)
+						configurationMessage* m = currentMsg;
+
+						uint8_t sn[16];
+						GetSerialNumber(sn);
+
+						bool match = true;
+						for (uint8_t i = 0; i < 16; i++)
 						{
-							if (i >= (assignedSlot - 1))
+							//if (m->serialNumber[i] != eeprom_read_byte((void*) i))
+							if (m->serialNumber[i] != sn[i])
 							{
-								delayValues[i] = 0;
+								match = false;
+								break;
 							}
-							else
+						}
+
+						if (match) // for this node?
+						{
+							assignedSlot = m->slot;
+
+							uint16_t delay = 0;
+							delayValues[assignedSlot] = 0;
+							delayValues[assignedSlot - 1] = 0;
+							for (int8_t i = (assignedSlot - 2); i >= 0; i--)
 							{
-								delay += m->slots[i + 1]; // safe because of if statement
+								delay += m->slots[i + 1];
 								delayValues[i] = delay;
 							}
+							currentSlotAllocationMessageSequenceNumber = m->sequenceNumber;
+
+							state = STATE_INACTIVE;
+
+							configurationAcknowledgeMessage ack;
+							ack.id = MESSAGE_CONFIGURATION_ACKNOWLEDGE;
+							//ack.slot = assignedSlot;
+							FIFO_WriteByte(messageQueue, sizeof(configurationAcknowledgeMessage));
+							FIFO_Write(messageQueue, &ack, sizeof(configurationAcknowledgeMessage));
 						}
 
-						currentSlotAllocationMessageSequenceNumber = m->sequenceNumber;
-
-						FIFO_WriteByte(messageQueue, sizeof(slotAllocationsMessage));
-						FIFO_Write(messageQueue, m, sizeof(slotAllocationsMessage));
+						i += sizeof(configurationMessage);
 					}
+					break;
 
-					i += sizeof(slotAllocationsMessage);
-				}
-				break;
-
-
-				// Transport
-
-			case MESSAGE_SENSOR_DATA:
-				{
-					sensorDataMessage* m = currentMsg;
-
-					if (isMasterNode)
+				case MESSAGE_CONFIGURATION_ACKNOWLEDGE:
 					{
-						((uint8_t*) poolObject)[0] = m->length;
-						((uint8_t*) poolObject)[1] = m->sensor;
-						memcpy(poolObject + 2, m->data, m->length);
-						poolObject = EventDispatcher_Publish(EVENT_SENSOR_DATA, poolObject);
-					}
-					else
-					{
-						if (m->nextNode == assignedSlot) // this node was selected as a hop
-
+						if (isMasterNode)
 						{
-							// forward towards node 0
-							m->nextNode = GetNextNodeTowardsZero();
-							// add to application layer queue
+							// unused for now but should be implemented
 						}
+
+						i += sizeof(configurationAcknowledgeMessage);
 					}
+					break;
 
-					i += sizeof(sensorDataMessage) + m->length;
-				}
-				break;
-
-			case MESSAGE_SENSOR_DATA_ACKNOWLEDGE:
-				{
-					sensorDataAcknowledgeMessage* m = currentMsg;
-
-					if (m->destination == assignedSlot)
+				case MESSAGE_SLOT_ALLOCATIONS:
 					{
+						slotAllocationsMessage* m = currentMsg;
 
+						if (m->sequenceNumber > currentSlotAllocationMessageSequenceNumber) // skip if message is obsolete
+						{
+							uint16_t delay = 0;
+							delayValues[assignedSlot] = 0;
+							delayValues[assignedSlot - 1] = 0;
+							for (int8_t i = (assignedSlot - 2); i >= 0; i--)
+							{
+								delay += m->slots[i + 1];
+								delayValues[i] = delay;
+							}
+							currentSlotAllocationMessageSequenceNumber = m->sequenceNumber;
+
+							FIFO_WriteByte(messageQueue, sizeof(slotAllocationsMessage));
+							FIFO_Write(messageQueue, m, sizeof(slotAllocationsMessage));
+						}
+
+						i += sizeof(slotAllocationsMessage);
 					}
-					else if (m->nextNode == assignedSlot)
+					break;
+
+
+					// Transport
+
+				case MESSAGE_SENSOR_DATA:
 					{
+						sensorDataMessage* m = currentMsg;
 
+						if (isMasterNode)
+						{
+							((uint8_t*) poolObject)[0] = m->length;
+							((uint8_t*) poolObject)[1] = m->sensor;
+							memcpy(poolObject + 2, m->data, m->length);
+							poolObject = EventDispatcher_Publish(EVENT_SENSOR_DATA, poolObject);
+						}
+						else
+						{
+							if (m->nextNode == assignedSlot) // this node was selected as a hop
+							{
+								// forward towards node 0
+								m->nextNode = GetNextNodeTowardsZero();
+								// add to application layer queue
+							}
+						}
+
+						i += sizeof(sensorDataMessage) + m->length;
 					}
+					break;
 
-					i += sizeof(sensorDataAcknowledgeMessage);
-				}
-				break;
-
-
-				// Routing
-
-			case MESSAGE_NEIGHBOR_REPORT:
-				{
-					neighborReportMessage* m = currentMsg;
-
-					rssi* r = &rssis[m->node];
-
-					if (m->sequenceNumber > r->sequenceNumber) // skip if message is obsolete
-
+				case MESSAGE_SENSOR_DATA_ACKNOWLEDGE:
 					{
-						r->rssi[0] = m->rssi0;
-						r->rssi[1] = m->rssi1;
-						r->rssi[2] = m->rssi2;
-						r->rssi[3] = m->rssi3;
-						r->rssi[4] = m->rssi4;
-						r->rssi[5] = m->rssi5;
-						r->rssi[6] = m->rssi6;
-						r->rssi[7] = m->rssi7;
-						r->rssi[8] = m->rssi8;
-						r->rssi[9] = m->rssi9;
-						r->rssi[10] = m->rssi10;
-						r->rssi[11] = m->rssi11;
-						r->rssi[12] = m->rssi12;
-						r->rssi[13] = m->rssi13;
-						r->rssi[14] = m->rssi14;
-						r->rssi[15] = m->rssi15;
+						sensorDataAcknowledgeMessage* m = currentMsg;
 
-						r->sequenceNumber = m->sequenceNumber;
+						if (m->destination == assignedSlot)
+						{
 
-						r->age = 0;
+						}
+						else if (m->nextNode == assignedSlot)
+						{
 
-						FIFO_WriteByte(messageQueue, sizeof(neighborReportMessage));
-						FIFO_Write(messageQueue, m, sizeof(neighborReportMessage));
+						}
+
+						i += sizeof(sensorDataAcknowledgeMessage);
 					}
+					break;
 
-					i += sizeof(neighborReportMessage);
-				}
-				break;
 
-			case MESSAGE_NODE_STATE:
-				{
-					nodeStateMessage* m = currentMsg;
+					// Routing
 
-					nodeState* ns = &nodeStates[m->node];
-
-					if (m->sequenceNumber > ns->sequenceNumber) // skip if message is obsolete
-
+				case MESSAGE_NEIGHBOR_REPORT:
 					{
-						ns->txLevel = m->txLevel;
-						ns->energyLevel = m->energyLevel;
-						ns->queueLevel = m->queueLevel;
-						ns->busyLevel = m->busyLevel;
+						neighborReportMessage* m = currentMsg;
 
-						ns->sequenceNumber = m->sequenceNumber;
+						rssi* r = &rssis[m->node];
 
-						ns->age = 0;
+						if (m->sequenceNumber > r->sequenceNumber) // skip if message is obsolete
+						{
+							r->rssi[0] = m->rssi0;
+							r->rssi[1] = m->rssi1;
+							r->rssi[2] = m->rssi2;
+							r->rssi[3] = m->rssi3;
+							r->rssi[4] = m->rssi4;
+							r->rssi[5] = m->rssi5;
+							r->rssi[6] = m->rssi6;
+							r->rssi[7] = m->rssi7;
+							r->rssi[8] = m->rssi8;
+							r->rssi[9] = m->rssi9;
+							r->rssi[10] = m->rssi10;
+							r->rssi[11] = m->rssi11;
+							r->rssi[12] = m->rssi12;
+							r->rssi[13] = m->rssi13;
+							r->rssi[14] = m->rssi14;
+							r->rssi[15] = m->rssi15;
 
-						FIFO_WriteByte(messageQueue, sizeof(nodeStateMessage));
-						FIFO_Write(messageQueue, m, sizeof(nodeStateMessage));
+							r->sequenceNumber = m->sequenceNumber;
+
+							r->age = 0;
+
+							FIFO_WriteByte(messageQueue, sizeof(neighborReportMessage));
+							FIFO_Write(messageQueue, m, sizeof(neighborReportMessage));
+						}
+
+						i += sizeof(neighborReportMessage);
 					}
+					break;
 
-					i += sizeof(nodeStateMessage);
-				}
-				break;
+				case MESSAGE_NODE_STATE:
+					{
+						nodeStateMessage* m = currentMsg;
 
-			default: // error -> abort
-				i = length;
-				break;
+						nodeState* ns = &nodeStates[m->node];
+
+						if (m->sequenceNumber > ns->sequenceNumber) // skip if message is obsolete
+						{
+							ns->txLevel = m->txLevel;
+							ns->energyLevel = m->energyLevel;
+							ns->queueLevel = m->queueLevel;
+							ns->busyLevel = m->busyLevel;
+
+							ns->sequenceNumber = m->sequenceNumber;
+
+							ns->age = 0;
+
+							FIFO_WriteByte(messageQueue, sizeof(nodeStateMessage));
+							FIFO_Write(messageQueue, m, sizeof(nodeStateMessage));
+						}
+
+						i += sizeof(nodeStateMessage);
+					}
+					break;
+
+				default: // error -> abort
+					i = length;
+					break;
+			}
 		}
 	}
 }
