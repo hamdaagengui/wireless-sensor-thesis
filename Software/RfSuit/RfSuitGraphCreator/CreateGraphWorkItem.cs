@@ -49,7 +49,7 @@ namespace RfSuitGraphCreator
       myPane.YAxis.MajorGrid.DashOff = 7f;
       myPane.YAxis.MinorGrid.PenWidth = 2f;
 
-      myPane.Fill = new Fill(Color.Transparent);
+      myPane.Fill = new Fill(Color.White);
       myPane.Border.IsVisible = false;
 
       myPane.Chart.Fill = new Fill(Color.White);
