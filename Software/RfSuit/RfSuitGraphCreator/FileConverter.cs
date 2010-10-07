@@ -14,6 +14,13 @@ namespace RfSuitGraphCreator
 {
   class FileConverter
   {
+    enum ConvertTypes
+    {
+      AbsoluteRSSI,
+      LossRSSI,
+    }
+
+
     private readonly BlockingCollection<string> _fileCollection = new BlockingCollection<string>(20);
     private readonly BlockingCollection<GraphFactory> _graphCollection = new BlockingCollection<GraphFactory>(8);
 
