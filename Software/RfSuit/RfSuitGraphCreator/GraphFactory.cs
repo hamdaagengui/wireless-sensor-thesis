@@ -4,7 +4,7 @@ using ZedGraph;
 
 namespace RfSuitGraphCreator
 {
-  class CreateGraphWorkItem
+  class GraphFactory
   {
     public double[] XAxis { get; set; }
     public double[] YAxis { get; set; }
@@ -17,7 +17,7 @@ namespace RfSuitGraphCreator
     public List<TextObj> TextObjs { get; private set; }
     public bool DroppedPackages { get; set; }
 
-    public CreateGraphWorkItem()
+    public GraphFactory()
     {
       Boxes = new List<BoxData>();
       TextObjs = new List<TextObj>();
@@ -26,7 +26,6 @@ namespace RfSuitGraphCreator
     public GraphPane CreateGraph()
     {
       var myPane = new GraphPane(new RectangleF(0, 0, 1024, 768), Title, XTitle, YTitle);
-
       // Set the title and axis labels
       myPane.Title.IsVisible = false;
       myPane.Legend.IsVisible = false;
@@ -69,8 +68,9 @@ namespace RfSuitGraphCreator
       myPane.GraphObjList.AddRange(TextObjs);
 
       var list = new ClippedPointList(XAxis, YAxis, 0, DroppedPackages ? XAxis.Length - 1 : XAxis.Length);
-      var curve = new LineItem("", list, Color.Black, SymbolType.None, 3f) {Line = {IsSmooth = true, SmoothTension = 0.5f}};
+      var curve = new LineItem("", list, Color.Black, SymbolType.None, 3f);
       myPane.CurveList.Add(curve);
+
       myPane.AxisChange();
       return myPane;
     }
