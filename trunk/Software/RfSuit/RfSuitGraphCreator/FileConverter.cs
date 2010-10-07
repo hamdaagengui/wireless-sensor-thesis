@@ -4,29 +4,27 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using RfSuitLoggerInterfaces;
 using RfSuitPlayer;
 using ZedGraph;
+using System.Threading;
 
 namespace RfSuitGraphCreator
 {
-  class FileToGraph
+  class FileConverter
   {
-    private readonly BlockingCollection<string> _fileCollection = new BlockingCollection<string>();
-    private readonly BlockingCollection<CreateGraphWorkItem> _graphCollection = new BlockingCollection<CreateGraphWorkItem>(boundedCapacity: 8);
-    private readonly Control _fileStatus;
-    private readonly Control _queueStatus;
+    private readonly BlockingCollection<string> _fileCollection = new BlockingCollection<string>(20);
+    private readonly BlockingCollection<GraphFactory> _graphCollection = new BlockingCollection<GraphFactory>(8);
 
     private static Fill RedFill { get { return new Fill(Color.FromArgb(100, Color.Red), Color.FromArgb(200, Color.Red), -90f); } }
     private static Fill GreenFill { get { return new Fill(Color.FromArgb(100, Color.Green), Color.FromArgb(200, Color.Green), -90f); } }
 
-    public FileToGraph(Control fileStatus, Control queueStatus)
+    public int Processed;
+    public int Added;
+
+    public FileConverter()
     {
-      _fileStatus = fileStatus;
-      _queueStatus = queueStatus;
       Process();
     }
 
@@ -42,20 +40,19 @@ namespace RfSuitGraphCreator
     private void Process()
     {
       // Stage 1: Create the graph
+      
       Task.Factory.StartNew(() =>
       {
-        try
-        {
           foreach (var file in _fileCollection.GetConsumingEnumerable())
           {
             var filename = file;
-            _fileStatus.BeginInvokeIfRequired(label => label.Text = Path.GetFileName(filename));
             var graphData = OpenLogFile(filename);
-            Parallel.ForEach(graphData.ConnectionDatas, data =>
+            foreach(var data in graphData.ConnectionDatas)
             {
+              Interlocked.Increment(ref Added);
               var cleanQualities = CleanQuality(data.Quality);
               var tuple = CreateCumulativeDistribution(cleanQualities, true);
-              var createGraphWorkItem = new CreateGraphWorkItem
+              var createGraphWorkItem = new GraphFactory
               {
                 Title = String.Format("{0:00}-{1:00}", data.EndPointA, data.EndPointB),
                 XAxis = tuple.Item1,
@@ -71,6 +68,11 @@ namespace RfSuitGraphCreator
               var q = 0.25;
               foreach (var dBm in FindQuartiles(tuple))
               {
+                if (double.IsNaN(dBm))
+                {
+                  q += 0.25;
+                  continue;
+                }
                 var textObj = new TextObj(string.Format("{0:0.0} [dBm]", dBm), dBm, q) { Location = { AlignH = AlignH.Right, AlignV = AlignV.Bottom } };
                 createGraphWorkItem.TextObjs.Add(textObj);
                 q += 0.25;
@@ -78,7 +80,7 @@ namespace RfSuitGraphCreator
               // create red and green boxes
               if (tuple.Item1[lastIndex] == -100)
               {
-                var boxData = new CreateGraphWorkItem.BoxData
+                var boxData = new GraphFactory.BoxData
                 {
                   Top = tuple.Item2[lastIndex],
                   Bottom = tuple.Item1.Length > 1 ? tuple.Item2[lastIndex - 1] : 0,
@@ -86,9 +88,10 @@ namespace RfSuitGraphCreator
                 };
                 createGraphWorkItem.Boxes.Add(boxData);
                 createGraphWorkItem.DroppedPackages = true;
+                createGraphWorkItem.TextObjs.Add(new TextObj(string.Format("{0:0.0%} frame loss", 1 - boxData.Bottom), 0, boxData.Bottom) { Location = { AlignH = AlignH.Left, AlignV = AlignV.Top, CoordinateFrame = CoordType.XChartFractionYScale } });
                 if (boxData.Bottom != 0)
                 {
-                  createGraphWorkItem.Boxes.Add(new CreateGraphWorkItem.BoxData
+                  createGraphWorkItem.Boxes.Add(new GraphFactory.BoxData
                   {
                     Top = boxData.Bottom,
                     Bottom = 0,
@@ -98,7 +101,7 @@ namespace RfSuitGraphCreator
               }
               else
               {
-                createGraphWorkItem.Boxes.Add(new CreateGraphWorkItem.BoxData
+                createGraphWorkItem.Boxes.Add(new GraphFactory.BoxData
                 {
                   Top = 1,
                   Bottom = 0,
@@ -106,62 +109,62 @@ namespace RfSuitGraphCreator
                 });
               }
               _graphCollection.Add(createGraphWorkItem);
-            });
+            }
           }
-        }
-        finally
-        {
-          _graphCollection.CompleteAdding();
-        }
       });
 
       // Stage 2: Create the new bitmap file
       Task.Factory.StartNew(() =>
       {
-        Parallel.ForEach(_graphCollection.GetConsumingEnumerable(), createGraphWorkItem =>
+        var action = new Action<object>(obj =>
         {
-          _queueStatus.BeginInvokeIfRequired(label => label.Text = _graphCollection.Count.ToString());
-          var filename = Path.ChangeExtension(createGraphWorkItem.Filename, "." + createGraphWorkItem.Title + ".png");
-          var graph = createGraphWorkItem.CreateGraph();
+          var item = (GraphFactory) obj;
+          var filename = Path.ChangeExtension(item.Filename, "." + item.Title + ".png");
+          var graph = item.CreateGraph();
           var image = graph.GetImage();
           image.Save(filename);
+          Interlocked.Increment(ref Processed);
         });
+        foreach (var createGraphWorkItem in _graphCollection.GetConsumingEnumerable())
+          Task.Factory.StartNew(action, createGraphWorkItem);
       });
     }
 
     private static IEnumerable<double> FindQuartiles(Tuple<double[], double[]> tuple)
     {
-      //TODO: if to points crosses several quartiles, these should all be added
       var quartiles = new List<double>();
       // first quartile to find
       var q = 0.25;
       for (var i = 1; i < tuple.Item2.Length-1 && q < 1; i++)
       {
-        // if quartile is not found yet
         var value = tuple.Item2[i];
-        if (tuple.Item2[i] < q) continue;
-        // current quartile
-        q = ((int)(value / 0.25)) * 0.25;
-        // we only need 0.25, 0.5 and 0.75
-        if (q >= 1) break;
-        var x1 = tuple.Item1[i - 1];
-        var x2 = tuple.Item1[i];
-        var y1 = tuple.Item2[i - 1];
-        var y2 = tuple.Item2[i];
-        // y1 = a*x1 + b
-        // y2 = a*x2 + b
-        // b = y1 - a*x1;
-        // b = y2 - a*x2;
-        // y2 - a*x2 = y1 - a*x1
-        // y2 - y1 = a*x2 - a*x1
-        // y2 - y1 = (x2 - x1)*a
-        var a = (y2 - y1) / (x2 - x1);
-        var b = y1 - a * x1;
-        // q = a*x + b
-        // q - b = a*x
-        var x = (q - b)/a;
-        quartiles.Add(x);
-        q += 0.25;
+        while (q < value && q < 1)
+        {
+          if (q < tuple.Item2[i-1])
+          {
+            q += 0.25;
+            quartiles.Add(double.NaN);
+            continue;
+          }
+          var x1 = tuple.Item1[i - 1];
+          var x2 = tuple.Item1[i];
+          var y1 = tuple.Item2[i - 1];
+          var y2 = tuple.Item2[i];
+          // y1 = a*x1 + b
+          // y2 = a*x2 + b
+          // b = y1 - a*x1;
+          // b = y2 - a*x2;
+          // y2 - a*x2 = y1 - a*x1
+          // y2 - y1 = a*x2 - a*x1
+          // y2 - y1 = (x2 - x1)*a
+          var a = (y2 - y1)/(x2 - x1);
+          var b = y1 - a*x1;
+          // q = a*x + b
+          // q - b = a*x
+          var x = (q - b)/a;
+          quartiles.Add(x);
+          q += 0.25;
+        }
       }
       return quartiles.ToArray();
     }

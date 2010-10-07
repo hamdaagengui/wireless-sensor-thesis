@@ -55,9 +55,9 @@
   <ItemGroup>
     <Compile Include="ClippedPointList.cs" />
     <Compile Include="ConnectionData.cs" />
-    <Compile Include="CreateGraphWorkItem.cs" />
+    <Compile Include="GraphFactory.cs" />
     <Compile Include="DoubleComparer.cs" />
-    <Compile Include="FileToGraph.cs" />
+    <Compile Include="FileConverter.cs" />
     <Compile Include="GraphData.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>

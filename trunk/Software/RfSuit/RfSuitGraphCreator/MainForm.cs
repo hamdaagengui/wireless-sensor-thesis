@@ -1,24 +1,16 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Windows.Forms;
-using RfSuitLoggerInterfaces;
-using RfSuitPlayer;
-using System.Threading.Tasks;
 
 namespace RfSuitGraphCreator
 {
   public partial class MainForm : Form
   {
-    private readonly FileToGraph _fileToGraph;
+    private readonly FileConverter _fileConverter;
 
     public MainForm()
     {
       InitializeComponent();
-      _fileToGraph = new FileToGraph(statusLabel, queueLabel);
+      _fileConverter = new FileConverter();
     }
 
     private void MainForm_Load(object sender, EventArgs e)
@@ -37,7 +29,13 @@ namespace RfSuitGraphCreator
     {
       var data = e.Data.GetData(DataFormats.FileDrop) as string[];
       if (data == null) return;
-      _fileToGraph.BeginProcessFiles(data);
+      _fileConverter.BeginProcessFiles(data);
+    }
+
+    private void TimerTick(object sender, EventArgs e)
+    {
+      var str = string.Format("{0}/{1}", _fileConverter.Processed, _fileConverter.Added);
+      processedLabel.Text = str;
     }
   }
 }
