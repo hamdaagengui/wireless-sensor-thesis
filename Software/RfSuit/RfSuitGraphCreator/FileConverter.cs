@@ -9,20 +9,14 @@ using RfSuitLoggerInterfaces;
 using RfSuitPlayer;
 using ZedGraph;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace RfSuitGraphCreator
 {
   class FileConverter
   {
-    enum ConvertTypes
-    {
-      AbsoluteRSSI,
-      LossRSSI,
-    }
-
-
-    private readonly BlockingCollection<string> _fileCollection = new BlockingCollection<string>(20);
-    private readonly BlockingCollection<GraphFactory> _graphCollection = new BlockingCollection<GraphFactory>(8);
+    private readonly BlockingCollection<ConvertJob> _loadQueue = new BlockingCollection<ConvertJob>(20);
+    private readonly BlockingCollection<GraphJob> _graphQueue = new BlockingCollection<GraphJob>(8);
 
     private static Fill RedFill { get { return new Fill(Color.FromArgb(100, Color.Red), Color.FromArgb(200, Color.Red), -90f); } }
     private static Fill GreenFill { get { return new Fill(Color.FromArgb(100, Color.Green), Color.FromArgb(200, Color.Green), -90f); } }
@@ -35,13 +29,9 @@ namespace RfSuitGraphCreator
       Process();
     }
 
-    public void BeginProcessFiles(IEnumerable<string> files)
+    public void BeginProcessFiles(string[] files, bool mergeScenarios, ConvertTypes convertType)
     {
-      Task.Factory.StartNew(() =>
-      {
-        foreach (var file in files)
-          _fileCollection.Add(file);
-      });
+      Task.Factory.StartNew(() => _loadQueue.Add(new ConvertJob(convertType, files, mergeScenarios)));
     }
 
     private void Process()
@@ -50,72 +40,17 @@ namespace RfSuitGraphCreator
       
       Task.Factory.StartNew(() =>
       {
-          foreach (var file in _fileCollection.GetConsumingEnumerable())
+          foreach (var convertJob in _loadQueue.GetConsumingEnumerable())
           {
-            var filename = file;
-            var graphData = OpenLogFile(filename);
-            foreach(var data in graphData.ConnectionDatas)
+            switch (convertJob.ConvertType)
             {
-              Interlocked.Increment(ref Added);
-              var cleanQualities = CleanQuality(data.Quality);
-              var tuple = CreateCumulativeDistribution(cleanQualities, true);
-              var createGraphWorkItem = new GraphFactory
-              {
-                Title = String.Format("{0:00}-{1:00}", data.EndPointA, data.EndPointB),
-                XAxis = tuple.Item1,
-                YAxis = tuple.Item2,
-                XTitle = "[dBm]",
-                YTitle = "",
-                Filename = filename,
-                Reverse = true,
-              };
-
-              var lastIndex = tuple.Item1.Length - 1;
-
-              var q = 0.25;
-              foreach (var dBm in FindQuartiles(tuple))
-              {
-                if (double.IsNaN(dBm))
-                {
-                  q += 0.25;
-                  continue;
-                }
-                var textObj = new TextObj(string.Format("{0:0.0} [dBm]", dBm), dBm, q) { Location = { AlignH = AlignH.Right, AlignV = AlignV.Bottom } };
-                createGraphWorkItem.TextObjs.Add(textObj);
-                q += 0.25;
-              }
-              // create red and green boxes
-              if (tuple.Item1[lastIndex] == -100)
-              {
-                var boxData = new GraphFactory.BoxData
-                {
-                  Top = tuple.Item2[lastIndex],
-                  Bottom = tuple.Item1.Length > 1 ? tuple.Item2[lastIndex - 1] : 0,
-                  Fill = RedFill
-                };
-                createGraphWorkItem.Boxes.Add(boxData);
-                createGraphWorkItem.DroppedPackages = true;
-                createGraphWorkItem.TextObjs.Add(new TextObj(string.Format("{0:0.0%} frame loss", 1 - boxData.Bottom), 0, boxData.Bottom) { Location = { AlignH = AlignH.Left, AlignV = AlignV.Top, CoordinateFrame = CoordType.XChartFractionYScale } });
-                if (boxData.Bottom != 0)
-                {
-                  createGraphWorkItem.Boxes.Add(new GraphFactory.BoxData
-                  {
-                    Top = boxData.Bottom,
-                    Bottom = 0,
-                    Fill = GreenFill
-                  });
-                }
-              }
-              else
-              {
-                createGraphWorkItem.Boxes.Add(new GraphFactory.BoxData
-                {
-                  Top = 1,
-                  Bottom = 0,
-                  Fill = GreenFill
-                });
-              }
-              _graphCollection.Add(createGraphWorkItem);
+              case ConvertTypes.AbsoluteRSSI:
+                AbsoluteRSSI(convertJob);
+                break;
+              case ConvertTypes.LossRSSI:
+                throw new NotImplementedException();
+              default:
+                throw new ArgumentOutOfRangeException();
             }
           }
       });
@@ -125,16 +60,130 @@ namespace RfSuitGraphCreator
       {
         var action = new Action<object>(obj =>
         {
-          var item = (GraphFactory) obj;
-          var filename = Path.ChangeExtension(item.Filename, "." + item.Title + ".png");
-          var graph = item.CreateGraph();
+          var job = (GraphJob)obj;
+          var graph = job.GraphFactory.CreateGraph();
           var image = graph.GetImage();
-          image.Save(filename);
+          image.Save(job.Filename);
           Interlocked.Increment(ref Processed);
         });
-        foreach (var createGraphWorkItem in _graphCollection.GetConsumingEnumerable())
+        foreach (var createGraphWorkItem in _graphQueue.GetConsumingEnumerable())
           Task.Factory.StartNew(action, createGraphWorkItem);
       });
+    }
+
+    private void AbsoluteRSSI(ConvertJob convertJob)
+    {
+      if (convertJob.MergeScenarios)
+      {
+        var listConnectionDatas = convertJob.Files.Select(file => OpenLogFile(file).ConnectionDatas).ToList();
+        var firstConnectionData = listConnectionDatas[0];
+        var links = firstConnectionData.Length;
+
+        var linkData = new List<double>[links];
+        for (int i = 0; i < links; i++)
+          linkData[i] = new List<double>();
+
+        foreach (var connectionData in listConnectionDatas)
+        {
+          for (int i = 0; i < links; i++)
+          {
+            var data = connectionData[i];
+            linkData[i].AddRange(data.Quality);
+          }
+        }
+
+        for (int i = 0; i < linkData.Length; i++)
+        {
+          var data = linkData[i];
+          var tuple = CreateCleanCumulativeDistribution(data.ToArray());
+          var graphFactory = CreateGraphFactory(tuple, firstConnectionData[i].EndPointA, firstConnectionData[i].EndPointB);
+          _graphQueue.Add(new GraphJob(convertJob.GetNewFullPathWithoutExtension(string.Format("{0:00}-{1:00}", firstConnectionData[i].EndPointA, firstConnectionData[i].EndPointB)) + ".png", graphFactory));
+        }
+      }
+      else
+      {
+        foreach (var file in convertJob.Files)
+        {
+          var connectionDatas = OpenLogFile(file).ConnectionDatas;
+          foreach (var connectionData in connectionDatas)
+          {
+            var tuple = CreateCleanCumulativeDistribution(connectionData.Quality);
+            var graphFactory = CreateGraphFactory(tuple, connectionData.EndPointA, connectionData.EndPointB);
+            _graphQueue.Add(new GraphJob(convertJob.GetNewFullPathWithoutExtension(string.Format("{0:00}-{1:00}", connectionData.EndPointA, connectionData.EndPointB)) + ".png", graphFactory));
+          }
+        }
+      }
+    }
+
+    /// <summary>
+    /// This will clean the data set
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns>A tuple containing x and y axis information.</returns>
+    private static Tuple<double[], double[]> CreateCleanCumulativeDistribution(IEnumerable<double> data)
+    {
+      return CreateCumulativeDistribution(data.Select(d => double.IsNaN(d) ? -100 : d), true);      
+    }
+    
+    private GraphFactory CreateGraphFactory(Tuple<double[], double[]> tuple, int endPointA, int endPointB)
+    {
+        Interlocked.Increment(ref Added);
+        var createGraphWorkItem = new GraphFactory
+        {
+          Title = String.Format("{0:00}-{1:00}", endPointA, endPointB),
+          XAxis = tuple.Item1,
+          YAxis = tuple.Item2,
+          XTitle = "[dBm]",
+          YTitle = "",
+          Reverse = true,
+        };
+
+        var lastIndex = tuple.Item1.Length - 1;
+
+        var q = 0.25;
+        foreach (var dBm in FindQuartiles(tuple))
+        {
+          if (double.IsNaN(dBm))
+          {
+            q += 0.25;
+            continue;
+          }
+          var textObj = new TextObj(string.Format("{0:0.0} [dBm]", dBm), dBm, q) { Location = { AlignH = AlignH.Right, AlignV = AlignV.Bottom } };
+          createGraphWorkItem.TextObjs.Add(textObj);
+          q += 0.25;
+        }
+        // create red and green boxes
+        if (tuple.Item1[lastIndex] == -100)
+        {
+          var boxData = new GraphFactory.BoxData
+          {
+            Top = tuple.Item2[lastIndex],
+            Bottom = tuple.Item1.Length > 1 ? tuple.Item2[lastIndex - 1] : 0,
+            Fill = RedFill
+          };
+          createGraphWorkItem.Boxes.Add(boxData);
+          createGraphWorkItem.DroppedPackages = true;
+          createGraphWorkItem.TextObjs.Add(new TextObj(string.Format("{0:0.0%} frame loss", 1 - boxData.Bottom), 0, boxData.Bottom) { Location = { AlignH = AlignH.Left, AlignV = AlignV.Top, CoordinateFrame = CoordType.XChartFractionYScale } });
+          if (boxData.Bottom != 0)
+          {
+            createGraphWorkItem.Boxes.Add(new GraphFactory.BoxData
+            {
+              Top = boxData.Bottom,
+              Bottom = 0,
+              Fill = GreenFill
+            });
+          }
+        }
+        else
+        {
+          createGraphWorkItem.Boxes.Add(new GraphFactory.BoxData
+          {
+            Top = 1,
+            Bottom = 0,
+            Fill = GreenFill
+          });
+        }
+        return createGraphWorkItem;
     }
 
     private static IEnumerable<double> FindQuartiles(Tuple<double[], double[]> tuple)
@@ -182,18 +231,14 @@ namespace RfSuitGraphCreator
       return new GraphData(entries.ToArray());
     }
 
-    private static double[] CleanQuality(double[] qualities)
-    {
-      return Array.ConvertAll(qualities, d => double.IsNaN(d) ? -100 : d);
-    }
-
-    private static Tuple<double[], double[]> CreateCumulativeDistribution(double[] x, bool reverse = false)
+    private static Tuple<double[], double[]> CreateCumulativeDistribution(IEnumerable<double> x, bool reverse = false)
     {
       if (x == null) throw new ArgumentNullException("x");
-      var length = x.Length;
       var dict = new Dictionary<double, int>();
+      var count = 0;
       foreach (var d in x)
       {
+        count++;
         if (dict.ContainsKey(d))
           dict[d]++;
         else
@@ -210,11 +255,57 @@ namespace RfSuitGraphCreator
         sum += dict[key];
         tuple.Item1[i] = key;
 
-        tuple.Item2[i] = (double)sum / length;
+        tuple.Item2[i] = (double)sum / count;
         i++;
       }
 
       return tuple;
+    }
+  }
+
+  internal enum ConvertTypes
+  {
+    AbsoluteRSSI,
+    LossRSSI,
+  }
+
+  internal class ConvertJob
+  {
+    public ConvertTypes ConvertType { get; private set; }
+    public string[] Files { get; private set; }
+    public bool MergeScenarios { get; private set; }
+
+    public ConvertJob(ConvertTypes ct, string[] file, bool mergeScenarios)
+    {
+      ConvertType = ct;
+      Files = file;
+      MergeScenarios = mergeScenarios;
+    }
+    private readonly Regex _matchFile = new Regex(@"log(?<time>\d+)\[ch (?<channel>\d+), (?<dBm>-?\d+) dBm\]\s*(?<title>.*)");
+
+    public string GetNewFullPathWithoutExtension(string subtitle)
+    {
+      // org: log1285938414696[ch 11, -3 dBm] Radiodøde rum_compressed.rflogz
+      var match = _matchFile.Match(Path.GetFileNameWithoutExtension(Files[0]));
+      var channel = int.Parse(match.Groups["channel"].Value);
+      var dBm = int.Parse(match.Groups["dBm"].Value);
+      var title = match.Groups["title"].Value;
+      var time = long.Parse(match.Groups["time"].Value);
+      var filename = string.Format("{0} {1} [{2}, {3}]{4}", MergeScenarios ? "Merged" : title, subtitle, channel, dBm, MergeScenarios ? "" : " " + Utils.MillisecondsSinceEpoch(time).ToString("yyyyMMddTHHmmss"));
+      var directory = Path.GetDirectoryName(Files[0]);
+      return Path.Combine(directory, filename);
+    }
+  }
+
+  internal class GraphJob
+  {
+    public GraphFactory GraphFactory { get; private set; }
+    public string Filename { get; private set; } 
+    
+    public GraphJob(string outputPath, GraphFactory gf)
+    {
+      Filename = outputPath;
+      GraphFactory = gf;
     }
   }
 }

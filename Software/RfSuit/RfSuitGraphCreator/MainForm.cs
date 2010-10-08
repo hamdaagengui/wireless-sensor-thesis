@@ -29,7 +29,14 @@ namespace RfSuitGraphCreator
     {
       var data = e.Data.GetData(DataFormats.FileDrop) as string[];
       if (data == null) return;
-      _fileConverter.BeginProcessFiles(data);
+      ConvertTypes convertType;
+      if (absoluteRSSIRadioButton.Checked)
+        convertType = ConvertTypes.AbsoluteRSSI;
+      else if (linkLossRadioButton.Checked)
+        convertType = ConvertTypes.LossRSSI;
+      else
+        throw new ApplicationException();
+      _fileConverter.BeginProcessFiles(data, mergeScenariosCheckBox.Checked, convertType);
     }
 
     private void TimerTick(object sender, EventArgs e)
