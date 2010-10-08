@@ -11,7 +11,7 @@
 
 
 // TODO EVENTDISPATCHER_HIGHEST_EVENT_ID should be replaced by EVENT_LAST_ID or something like that so the user shouldn't explicitly define it.
-static eventHandler subscribers[EVENTDISPATCHER_HIGHEST_EVENT_ID][EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS];
+static event_handler subscribers[EVENTDISPATCHER_HIGHEST_EVENT_ID][EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS];
 
 typedef struct
 {
@@ -20,7 +20,7 @@ typedef struct
 	{
 		struct
 		{
-			completionHandler handler;
+			completion_handler handler;
 		} notification;
 		struct
 		{
@@ -28,14 +28,14 @@ typedef struct
 			void* data;
 		} publication;
 	};
-} queueElement;
+} queue_element;
 
-static uint8_t eventQueue[Queue_CalculateSize(sizeof(queueElement), EVENTDISPATCHER_QUEUE_SIZE)];
+static uint8_t eventQueue[Queue_CalculateSize(sizeof(queue_element), EVENTDISPATCHER_QUEUE_SIZE)];
 static uint8_t bufferPool[Pool_CalculateSize(EVENTDISPATCHER_REPORT_DATA_SIZE, EVENTDISPATCHER_REPORT_DATA_POOL_SIZE)];
 
 void EventDispatcher_Initialize()
 {
-	Queue_Initialize(eventQueue, sizeof(queueElement), EVENTDISPATCHER_QUEUE_SIZE);
+	Queue_Initialize(eventQueue, sizeof(queue_element), EVENTDISPATCHER_QUEUE_SIZE);
 	Pool_Initialize(bufferPool, EVENTDISPATCHER_REPORT_DATA_SIZE, EVENTDISPATCHER_REPORT_DATA_POOL_SIZE);
 }
 
@@ -47,7 +47,7 @@ void EventDispatcher_Dispatch()
 {
 	while (Queue_IsEmpty(eventQueue) == false)
 	{
-		queueElement* qe = Queue_Tail(eventQueue);
+		queue_element* qe = Queue_Tail(eventQueue);
 
 		if (qe->isNotification)
 		{
@@ -74,7 +74,7 @@ void EventDispatcher_Dispatch()
 	}
 }
 
-void EventDispatcher_RegisterSubscriber(uint8_t event, eventHandler handler)
+void EventDispatcher_RegisterSubscriber(uint8_t event, event_handler handler)
 {
 	for (uint8_t i = 0; i < EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS; i++)
 	{
@@ -110,7 +110,7 @@ void* EventDispatcher_Publish(uint8_t event, void* data)
 	}
 #endif
 
-	queueElement* qe = Queue_Head(eventQueue);
+	queue_element* qe = Queue_Head(eventQueue);
 
 	qe->isNotification = false;
 	qe->publication.event = event;
@@ -123,7 +123,7 @@ void* EventDispatcher_Publish(uint8_t event, void* data)
 	return Pool_AllocateBlock(bufferPool);
 }
 
-void EventDispatcher_Notify(completionHandler handler)
+void EventDispatcher_Notify(completion_handler handler)
 {
 	if (Queue_IsFull(eventQueue)) // queue full ?
 	{
@@ -131,7 +131,7 @@ void EventDispatcher_Notify(completionHandler handler)
 		return;
 	}
 
-	queueElement* qe = Queue_Head(eventQueue);
+	queue_element* qe = Queue_Head(eventQueue);
 
 	qe->isNotification = true;
 	qe->notification.handler = handler;

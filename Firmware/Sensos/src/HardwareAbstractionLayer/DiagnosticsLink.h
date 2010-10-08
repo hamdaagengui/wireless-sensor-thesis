@@ -8,9 +8,9 @@
 #ifndef DIAGNOSTICSLINK_H_
 #define DIAGNOSTICSLINK_H_
 
-#include <Globals.h>
+#include "../Globals.h"
 
-extern void DiagnosticsLink_Initialize(uint32_t baudrate, blockHandlerCallback frameReceivedHandler);
+extern void DiagnosticsLink_Initialize(uint32_t baudrate, block_handler frameReceivedHandler);
 extern void DiagnosticsLink_Send(void* data, uint8_t length);
 
 #endif /* DIAGNOSTICSLINK_H_ */

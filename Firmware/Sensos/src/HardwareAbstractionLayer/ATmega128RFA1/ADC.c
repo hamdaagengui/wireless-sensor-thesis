@@ -24,7 +24,7 @@ void ADC_Initialize()
 	// nothing to setup that can't be done at compile time
 }
 
-void ADC_Subscribe(adcConfiguration* configuration)
+void ADC_Subscribe(adc_configuration* configuration)
 {
 	enable = true;
 

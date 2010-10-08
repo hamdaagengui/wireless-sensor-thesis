@@ -13,7 +13,7 @@ void IIC_Initialize()
 
 }
 
-void IIC_Subscribe(iicConfiguration* configuration)
+void IIC_Subscribe(iic_configuration* configuration)
 {
 
 }
@@ -23,7 +23,7 @@ void IIC_Start()
 
 }
 
-void IIC_BeginTransaction(iicConfiguration* configuration)
+void IIC_BeginTransaction(iic_configuration* configuration)
 {
 
 }

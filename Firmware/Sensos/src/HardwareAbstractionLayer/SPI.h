@@ -16,8 +16,8 @@ typedef struct
 {
 	uint32_t bitrate;
 	uint8_t csPin;
-	completionHandler completed;
-} spiConfiguration;
+	completion_handler completed;
+} spi_configuration;
 
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/SPI.h"
@@ -26,12 +26,12 @@ typedef struct
 #endif
 
 extern void SPI_Initialize();
-extern void SPI_Subscribe(spiConfiguration* configuration);
+extern void SPI_Subscribe(spi_configuration* configuration);
 extern void SPI_Start();
 
 /**
  * Queues a transfer command. OBS Only a pointer to the output buffer is queued so it is not safe to modify the buffer until the completion handler is called!
  */
-extern void SPI_Transfer(spiConfiguration* configuration, uint8_t* output, uint8_t* input, uint8_t length);
+extern void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length);
 
 #endif /* SPI_H_ */

@@ -196,8 +196,8 @@ typedef struct
 	uint32_t framesSent;
 	int8_t maximumRawRssi;
 	int8_t minimumRawRssi;
-} radioDriverStatistics_t;
+} radiodriver_statistics;
 
-extern radioDriverStatistics_t radioDriverStatistics;
+extern radiodriver_statistics radioDriverStatistics;
 
 #endif

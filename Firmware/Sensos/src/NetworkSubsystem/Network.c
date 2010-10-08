@@ -41,8 +41,8 @@ typedef struct
 	uint8_t busyLevel;
 	uint8_t sequenceNumber;
 	uint8_t age;
-} nodeState;
-static nodeState nodeStates[16];
+} node_state;
+static node_state nodeStates[16];
 
 // Routing
 typedef struct
@@ -67,7 +67,7 @@ typedef struct
 	uint8_t source :4; // source node of this frame
 	uint8_t nodeCount :4; // number of sensor nodes that this device thinks exist in the network
 	uint8_t messages[];
-} networkFrame;
+} network_frame;
 
 // Messages
 enum
@@ -85,7 +85,7 @@ enum
 typedef struct
 {
 	uint8_t id :4;
-} baseMessage;
+} base_message;
 
 // Configuration messages
 typedef struct
@@ -96,20 +96,20 @@ typedef struct
 	uint8_t sequenceNumber :4;
 	uint8_t :4;
 	uint8_t slots[16];
-} configurationMessage;
+} configuration_message;
 
 typedef struct
 {
 	uint8_t id :4;
 	uint8_t :4;
-} configurationAcknowledgeMessage;
+} configurationAcknowledge_message;
 
 typedef struct
 {
 	uint8_t id :4;
 	uint8_t sequenceNumber :4;
 	uint8_t slots[16];
-} slotAllocationsMessage;
+} slotAllocations_message;
 
 typedef struct
 {
@@ -117,7 +117,7 @@ typedef struct
 	uint8_t sequenceNumber :4;
 	uint8_t slot :4;
 	uint8_t :4;
-} slotAllocationsAcknowledgeMessage;
+} slotAllocationsAcknowledge_message;
 
 // Sensor messages
 typedef struct
@@ -128,7 +128,7 @@ typedef struct
 	uint8_t length :4;
 	uint8_t sensor;
 	uint8_t data[];
-} sensorDataMessage;
+} sensorData_message;
 
 typedef struct
 {
@@ -136,7 +136,7 @@ typedef struct
 	uint8_t nextNode :4;
 	uint8_t destination :4;
 	uint8_t sequenceNumber :4;
-} sensorDataAcknowledgeMessage;
+} sensorDataAcknowledge_message;
 
 // Network messages
 typedef struct
@@ -161,7 +161,7 @@ typedef struct
 	uint8_t rssi13 :5;
 	uint8_t rssi14 :5;
 	uint8_t rssi15 :5;
-} neighborReportMessage;
+} neighborReport_message;
 
 typedef struct
 {
@@ -173,7 +173,7 @@ typedef struct
 	uint8_t energyLevel;
 	uint8_t queueLevel;
 	uint8_t busyLevel;
-} nodeStateMessage;
+} nodeState_message;
 
 static uint8_t assignedSlot;
 
@@ -221,11 +221,11 @@ static void DoSend()
 {
 	uint8_t frame[MAX_FRAME_SIZE];
 
-	networkFrame* nf = (networkFrame*) frame;
+	network_frame* nf = (network_frame*) frame;
 	nf->source = assignedSlot;
 	nf->nodeCount = nodesConnected;
 
-	uint8_t length = sizeof(networkFrame);
+	uint8_t length = sizeof(network_frame);
 
 	while (FIFO_IsEmpty(messageQueue) == false)
 	{
@@ -241,7 +241,7 @@ static void DoSend()
 		}
 	}
 
-	if (length > sizeof(networkFrame)) // more than just the header?
+	if (length > sizeof(network_frame)) // more than just the header?
 	{
 		RadioDriver_Send(frame, length);
 	}
@@ -249,17 +249,17 @@ static void DoSend()
 
 static void FrameReceived(uint8_t* data, uint8_t length)
 {
-	uint8_t source = ((networkFrame*) data)->source;
-	uint8_t nodeCount = ((networkFrame*) data)->nodeCount;
+	uint8_t source = ((network_frame*) data)->source;
+	uint8_t nodeCount = ((network_frame*) data)->nodeCount;
 
 	if (nodeCount == 0)
 	{
-		void* currentMsg = &data[i];
-		baseMessage* baseMsg = currentMsg;
+		void* currentMsg = &data[sizeof(network_frame)];
+		base_message* baseMsg = currentMsg;
 
 		if (baseMsg->id == MESSAGE_CONFIGURATION)
 		{
-			configurationMessage* m = currentMsg;
+			configuration_message* m = currentMsg;
 
 			uint8_t sn[16];
 			GetSerialNumber(sn);
@@ -291,11 +291,11 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 				state = STATE_INACTIVE;
 
-				configurationAcknowledgeMessage ack;
+				configurationAcknowledge_message ack;
 				ack.id = MESSAGE_CONFIGURATION_ACKNOWLEDGE;
 				//ack.slot = assignedSlot;
-				FIFO_WriteByte(messageQueue, sizeof(configurationAcknowledgeMessage));
-				FIFO_Write(messageQueue, &ack, sizeof(configurationAcknowledgeMessage));
+				FIFO_WriteByte(messageQueue, sizeof(configurationAcknowledge_message));
+				FIFO_Write(messageQueue, &ack, sizeof(configurationAcknowledge_message));
 			}
 		}
 	}
@@ -325,10 +325,10 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 			}
 		}
 
-		for (uint8_t i = sizeof(networkFrame); i < length;) // process all messages in the frame
+		for (uint8_t i = sizeof(network_frame); i < length;) // process all messages in the frame
 		{
 			void* currentMsg = &data[i];
-			baseMessage* baseMsg = currentMsg;
+			base_message* baseMsg = currentMsg;
 
 			switch (baseMsg->id)
 			{
@@ -336,7 +336,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 				case MESSAGE_CONFIGURATION:
 					{
-						configurationMessage* m = currentMsg;
+						configuration_message* m = currentMsg;
 
 						uint8_t sn[16];
 						GetSerialNumber(sn);
@@ -368,14 +368,14 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 							state = STATE_INACTIVE;
 
-							configurationAcknowledgeMessage ack;
+							configurationAcknowledge_message ack;
 							ack.id = MESSAGE_CONFIGURATION_ACKNOWLEDGE;
 							//ack.slot = assignedSlot;
-							FIFO_WriteByte(messageQueue, sizeof(configurationAcknowledgeMessage));
-							FIFO_Write(messageQueue, &ack, sizeof(configurationAcknowledgeMessage));
+							FIFO_WriteByte(messageQueue, sizeof(configurationAcknowledge_message));
+							FIFO_Write(messageQueue, &ack, sizeof(configurationAcknowledge_message));
 						}
 
-						i += sizeof(configurationMessage);
+						i += sizeof(configuration_message);
 					}
 					break;
 
@@ -386,13 +386,13 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 							// unused for now but should be implemented
 						}
 
-						i += sizeof(configurationAcknowledgeMessage);
+						i += sizeof(configurationAcknowledge_message);
 					}
 					break;
 
 				case MESSAGE_SLOT_ALLOCATIONS:
 					{
-						slotAllocationsMessage* m = currentMsg;
+						slotAllocations_message* m = currentMsg;
 
 						if (m->sequenceNumber > currentSlotAllocationMessageSequenceNumber) // skip if message is obsolete
 						{
@@ -406,11 +406,11 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 							}
 							currentSlotAllocationMessageSequenceNumber = m->sequenceNumber;
 
-							FIFO_WriteByte(messageQueue, sizeof(slotAllocationsMessage));
-							FIFO_Write(messageQueue, m, sizeof(slotAllocationsMessage));
+							FIFO_WriteByte(messageQueue, sizeof(slotAllocations_message));
+							FIFO_Write(messageQueue, m, sizeof(slotAllocations_message));
 						}
 
-						i += sizeof(slotAllocationsMessage);
+						i += sizeof(slotAllocations_message);
 					}
 					break;
 
@@ -419,7 +419,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 				case MESSAGE_SENSOR_DATA:
 					{
-						sensorDataMessage* m = currentMsg;
+						sensorData_message* m = currentMsg;
 
 						if (isMasterNode)
 						{
@@ -438,13 +438,13 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 							}
 						}
 
-						i += sizeof(sensorDataMessage) + m->length;
+						i += sizeof(sensorData_message) + m->length;
 					}
 					break;
 
 				case MESSAGE_SENSOR_DATA_ACKNOWLEDGE:
 					{
-						sensorDataAcknowledgeMessage* m = currentMsg;
+						sensorDataAcknowledge_message* m = currentMsg;
 
 						if (m->destination == assignedSlot)
 						{
@@ -455,7 +455,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 						}
 
-						i += sizeof(sensorDataAcknowledgeMessage);
+						i += sizeof(sensorDataAcknowledge_message);
 					}
 					break;
 
@@ -464,7 +464,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 				case MESSAGE_NEIGHBOR_REPORT:
 					{
-						neighborReportMessage* m = currentMsg;
+						neighborReport_message* m = currentMsg;
 
 						rssi* r = &rssis[m->node];
 
@@ -491,19 +491,19 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 							r->age = 0;
 
-							FIFO_WriteByte(messageQueue, sizeof(neighborReportMessage));
-							FIFO_Write(messageQueue, m, sizeof(neighborReportMessage));
+							FIFO_WriteByte(messageQueue, sizeof(neighborReport_message));
+							FIFO_Write(messageQueue, m, sizeof(neighborReport_message));
 						}
 
-						i += sizeof(neighborReportMessage);
+						i += sizeof(neighborReport_message);
 					}
 					break;
 
 				case MESSAGE_NODE_STATE:
 					{
-						nodeStateMessage* m = currentMsg;
+						nodeState_message* m = currentMsg;
 
-						nodeState* ns = &nodeStates[m->node];
+						node_state* ns = &nodeStates[m->node];
 
 						if (m->sequenceNumber > ns->sequenceNumber) // skip if message is obsolete
 						{
@@ -516,11 +516,11 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 							ns->age = 0;
 
-							FIFO_WriteByte(messageQueue, sizeof(nodeStateMessage));
-							FIFO_Write(messageQueue, m, sizeof(nodeStateMessage));
+							FIFO_WriteByte(messageQueue, sizeof(nodeState_message));
+							FIFO_Write(messageQueue, m, sizeof(nodeState_message));
 						}
 
-						i += sizeof(nodeStateMessage);
+						i += sizeof(nodeState_message);
 					}
 					break;
 
