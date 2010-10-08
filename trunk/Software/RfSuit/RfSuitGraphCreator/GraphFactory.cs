@@ -4,14 +4,13 @@ using ZedGraph;
 
 namespace RfSuitGraphCreator
 {
-  class GraphFactory
+  internal class GraphFactory
   {
     public double[] XAxis { get; set; }
     public double[] YAxis { get; set; }
     public string Title { get; set; }
     public string XTitle { get; set; }
     public string YTitle { get; set; }
-    public string Filename { get; set; }
     public bool Reverse { get; set; }
     public List<BoxData> Boxes { get; private set; }
     public List<TextObj> TextObjs { get; private set; }
