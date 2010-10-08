@@ -17,14 +17,14 @@ static bool enabled = false;
 
 typedef struct
 {
-	spiConfiguration* configuration;
+	spi_configuration* configuration;
 	uint8_t* output;
 	uint8_t* input;
 	uint8_t length;
-} transferCommand;
-static uint8_t transferQueue[Queue_CalculateSize(sizeof(transferCommand), SPI_TRANSFER_QUEUE_SIZE)];
+} transfer_command;
+static uint8_t transferQueue[Queue_CalculateSize(sizeof(transfer_command), SPI_TRANSFER_QUEUE_SIZE)];
 
-static transferCommand* currentTransfer;
+static transfer_command* currentTransfer;
 static uint8_t* currentOutput;
 static uint8_t* currentInput;
 static uint8_t remainingBytes;
@@ -33,10 +33,10 @@ static void StartTransfer();
 
 void SPI_Initialize()
 {
-	Queue_Initialize(transferQueue, sizeof(transferCommand), SPI_TRANSFER_QUEUE_SIZE);
+	Queue_Initialize(transferQueue, sizeof(transfer_command), SPI_TRANSFER_QUEUE_SIZE);
 }
 
-void SPI_Subscribe(spiConfiguration* configuration)
+void SPI_Subscribe(spi_configuration* configuration)
 {
 	enabled = true;
 }
@@ -54,7 +54,7 @@ void SPI_Start()
 	}
 }
 
-void SPI_Transfer(spiConfiguration* configuration, uint8_t* output, uint8_t* input, uint8_t length)
+void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length)
 {
 	if (Queue_IsFull(transferQueue))
 	{
@@ -65,7 +65,7 @@ void SPI_Transfer(spiConfiguration* configuration, uint8_t* output, uint8_t* inp
 	bool isIdle;
 	atomic(isIdle = Queue_IsEmpty(transferQueue));
 
-	transferCommand* cmd = Queue_Head(transferQueue);
+	transfer_command* cmd = Queue_Head(transferQueue);
 
 	cmd->configuration = configuration;
 	cmd->output = output;

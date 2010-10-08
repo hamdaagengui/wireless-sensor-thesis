@@ -8,7 +8,7 @@
 #ifndef GPIO_H_
 #define GPIO_H_
 
-#include <Globals.h>
+#include "../Globals.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../DefaultConfiguration.h"
 
@@ -17,21 +17,22 @@ typedef struct
 	uint8_t mode :2;
 	uint8_t outputValue :1;
 	uint8_t inputValue :1;
-} gpioPin;
+	uint8_t :4;
+} gpio_pin;
 
 typedef struct
 {
 	uint32_t bitrate;
 	uint8_t csPin;
-	completionHandler completed;
-} gpioConfiguration;
+	completion_handler completed;
+} gpio_configuration;
 
-enum
+typedef enum
 {
 	GPIO_INPUT,
 	GPIO_INPUT_PULL_UP,
 	GPIO_OUTPUT
-};
+} gpio_mode;
 
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/GPIO.h"
@@ -40,7 +41,7 @@ enum
 #endif
 
 extern void GPIO_Initialize();
-extern void GPIO_Subscribe(gpioConfiguration* configuration);
+extern void GPIO_Subscribe(gpio_configuration* configuration);
 extern void GPIO_Start();
 
 extern bool GPIO_ReadPin(uint8_t pin);

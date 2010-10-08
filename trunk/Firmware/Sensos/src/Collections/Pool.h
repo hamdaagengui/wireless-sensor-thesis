@@ -8,7 +8,7 @@
 #ifndef POOL_H_
 #define POOL_H_
 
-#include  <Globals.h>
+#include "../Globals.h"
 
 typedef struct
 {
@@ -23,10 +23,10 @@ typedef struct
 {
 	bool used;
 	uint8_t data[];
-} poolBlock;
+} pool_block;
 
 // Usage example: uint8_t poo[Pool_CalculateSize(8, 10)];
-#define Pool_CalculateSize(blockSize, blockCount) (sizeof(pool) + (((blockSize) + sizeof(poolBlock)) * (blockCount)))
+#define Pool_CalculateSize(blockSize, blockCount) (sizeof(pool) + (((blockSize) + sizeof(pool_block)) * (blockCount)))
 
 extern void Pool_Initialize(void* p, uint8_t blockSize, uint8_t blockCount);
 extern bool Pool_IsExhausted(void* p);

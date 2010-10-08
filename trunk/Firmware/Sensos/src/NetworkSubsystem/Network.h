@@ -29,8 +29,8 @@ typedef struct
 {
 	uint8_t flowType;
 	uint32_t bandwidth; // in units of bytes per second
-	completionHandler completed;
-} networkConfiguration;
+	completion_handler completed;
+} network_configuration;
 
 typedef struct
 {
@@ -41,7 +41,7 @@ typedef struct
 } sensor;
 
 extern void Network_Initialize();
-extern void Network_Subscribe(networkConfiguration* configuration);
+extern void Network_Subscribe(network_configuration* configuration);
 extern void Network_Start();
 
 extern void Network_ConfigureNode(uint8_t serialNumber[], uint8_t sensorCount, uint8_t slotLength);

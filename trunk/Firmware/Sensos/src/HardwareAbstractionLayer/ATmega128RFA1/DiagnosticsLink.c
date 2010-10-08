@@ -12,7 +12,7 @@
 #define EOF																													254
 #define ESC																													253
 
-static blockHandlerCallback frameHandler;
+static block_handler frameHandler;
 
 enum
 {
@@ -42,7 +42,7 @@ static uint8_t receiverQueue[DIAGNOSTICSLINK_RECEPTION_BUFFER_SIZE];
 static uint16_t receiverQueueIn = 0;
 static uint16_t receiverQueueOut = 0;
 
-void DiagnosticsLink_Initialize(uint32_t baudrate, blockHandlerCallback frameReceivedHandler)
+void DiagnosticsLink_Initialize(uint32_t baudrate, block_handler frameReceivedHandler)
 {
 	frameHandler = frameReceivedHandler;
 

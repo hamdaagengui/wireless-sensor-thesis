@@ -10,7 +10,7 @@
 #ifndef ADC_H_
 #define ADC_H_
 
-#include <Globals.h>
+#include "../Globals.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../DefaultConfiguration.h"
 
@@ -22,8 +22,8 @@ typedef struct
 {
 	uint32_t interval;
 	uint8_t channel;
-	completionHandler completed;
-} adcConfiguration;
+	completion_handler completed;
+} adc_configuration;
 
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/ADC.h"
@@ -32,7 +32,7 @@ typedef struct
 #endif
 
 extern void ADC_Initialize();
-extern void ADC_Subscribe(adcConfiguration* configuration);
+extern void ADC_Subscribe(adc_configuration* configuration);
 extern void ADC_Start();
 
 #endif /* ADC_H_ */
