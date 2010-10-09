@@ -12,13 +12,6 @@
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../DefaultConfiguration.h"
 
-typedef struct
-{
-	uint32_t bitrate;
-	uint8_t csPin;
-	completion_handler completed;
-} spi_configuration;
-
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/SPI.h"
 #else
@@ -28,6 +21,8 @@ typedef struct
 extern void SPI_Initialize();
 extern void SPI_Subscribe(spi_configuration* configuration);
 extern void SPI_Start();
+
+extern void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate, uint8_t phase, uint8_t polarity, uint8_t dataOrder, uint8_t csPin, completion_handler completed);
 
 /**
  * Queues a transfer command. OBS Only a pointer to the output buffer is queued so it is not safe to modify the buffer until the completion handler is called!
