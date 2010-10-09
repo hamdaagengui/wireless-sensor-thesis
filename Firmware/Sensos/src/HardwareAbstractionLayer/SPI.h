@@ -18,11 +18,24 @@
 #error "No SPI driver found for the selected processor!"
 #endif
 
+typedef enum
+{
+	SPI_DATA_MODE_LEADING_RISING,
+	SPI_DATA_MODE_LEADING_FALLING,
+	SPI_DATA_MODE_TRAILING_FALLING,
+	SPI_DATA_MODE_TRAILING_RISING
+} spi_data_mode;
+
+typedef enum
+{
+	SPI_DATA_ORDER_LSB_FIRST,
+	SPI_DATA_ORDER_MSB_FIRST
+} spi_data_order;
+
 extern void SPI_Initialize();
-extern void SPI_Subscribe(spi_configuration* configuration);
 extern void SPI_Start();
 
-extern void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate, uint8_t phase, uint8_t polarity, uint8_t dataOrder, uint8_t csPin, completion_handler completed);
+extern void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate, spi_data_mode mode, spi_data_order order, uint8_t csPin, completion_handler completed);
 
 /**
  * Queues a transfer command. OBS Only a pointer to the output buffer is queued so it is not safe to modify the buffer until the completion handler is called!

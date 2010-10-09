@@ -19,10 +19,6 @@ typedef struct
 	completion_handler failed;
 } iic_configuration;
 
-typedef struct
-{
-} iic_event;
-
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/IIC.h"
 #else

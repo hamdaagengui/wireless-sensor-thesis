@@ -13,7 +13,8 @@
 
 enum
 {
-	EVENT_SENSOR_DATA = 128
+	EVENT_SENSOR_DATA = 128,
+	EVENT_SENSOR_MAX6662
 };
 
 typedef struct
