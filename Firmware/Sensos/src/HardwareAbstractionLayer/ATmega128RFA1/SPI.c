@@ -13,6 +13,14 @@
 #include "../../EventSubsystem/EventDispatcher.h"
 #include "../../Diagnostics/Message.h"
 
+#define SPI_PRESCALER_2																							0x04
+#define SPI_PRESCALER_4																							0x00
+#define SPI_PRESCALER_8																							0x05
+#define SPI_PRESCALER_16																						0x01
+#define SPI_PRESCALER_32																						0x06
+#define SPI_PRESCALER_64																						0x02
+#define SPI_PRESCALER_128																						0x03
+
 static bool enabled = false;
 
 typedef struct
@@ -33,7 +41,6 @@ static void StartTransfer();
 
 void SPI_Initialize()
 {
-	Queue_Initialize(transferQueue, sizeof(transfer_command), SPI_TRANSFER_QUEUE_SIZE);
 }
 
 void SPI_Subscribe(spi_configuration* configuration)
@@ -46,12 +53,29 @@ void SPI_Start()
 	if (enabled)
 	{
 		power_spi_enable();
+
+
 		// basic initialization - only that which is not set by each separate transfers configuration.
+		Queue_Initialize(transferQueue, sizeof(transfer_command), SPI_TRANSFER_QUEUE_SIZE);
+
+		PORTB |= (1 << 2) | (1 << 1);
+
+		uint8_t dummy = SPSR; // make sure interrupt flag is cleared
+		dummy = SPDR;
 	}
 	else
 	{
 		power_spi_disable();
 	}
+}
+
+void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate, uint8_t phase, uint8_t polarity, uint8_t dataOrder, uint8_t csPin, completion_handler completed)
+{
+	// calc prescaler
+	// spi2x
+
+	configuration->spcr = (1 << SPIE) | (1 << SPE) | (1 << MSTR);
+	configuration->spsr = 0;
 }
 
 void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length)
@@ -89,12 +113,13 @@ void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* in
 static void StartTransfer()
 {
 	currentTransfer = Queue_Tail(transferQueue);
+
 	currentOutput = currentTransfer->output;
 	currentInput = currentTransfer->input;
 	remainingBytes = currentTransfer->length;
 
-
-	// load configuration
+	SPCR = currentTransfer->configuration->spcr;
+	SPSR = currentTransfer->configuration->spsr;
 
 	SPDR = *currentOutput;
 }

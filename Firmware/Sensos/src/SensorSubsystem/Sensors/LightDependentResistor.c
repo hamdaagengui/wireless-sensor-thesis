@@ -19,11 +19,13 @@ static void TimerTick();
 static void ComDone();
 
 // static timerConfiguration timerConfig = { };
-static spi_configuration spiConfig = { 1000000, GPIOB3, ComDone };
+static spi_configuration spiConfig;
 
 void LightDependentResistor_Initialize()
 {
 	// Timer_Subscribe(&timerConfig);
+
+	SPI_CreateConfiguration(&spiConfig, 1000000, 0, 0, 0, GPIOD2, ComDone);
 	SPI_Subscribe(&spiConfig);
 }
 
