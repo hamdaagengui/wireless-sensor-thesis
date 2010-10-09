@@ -11,25 +11,17 @@
 #include "../../Collections/Queue.h"
 #include "../../EventSubsystem/EventDispatcher.h"
 
-static bool enable = false;
+static bool enable;
 
-static uint8_t currentChannel = 0;
-static uint8_t nextChannel = 0;
-static bool activeChannels[8] = { false, false, false, false, false, false, false, false };
+static uint8_t currentChannel;
+static uint8_t nextChannel;
+static bool activeChannels[8];
 
-static uint16_t* eventData = NULL;
+static uint16_t* eventData;
 
 void ADC_Initialize()
 {
 	// nothing to setup that can't be done at compile time
-}
-
-void ADC_Subscribe(adc_configuration* configuration)
-{
-	enable = true;
-
-
-	// save configuration
 }
 
 void ADC_Start()

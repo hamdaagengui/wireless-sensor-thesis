@@ -29,9 +29,10 @@ typedef struct
 
 typedef enum
 {
-	GPIO_INPUT,
-	GPIO_INPUT_PULL_UP,
-	GPIO_OUTPUT
+	GPIO_MODE_INPUT,
+	GPIO_MODE_INPUT_PULL_UP,
+	GPIO_MODE_OUTPUT_LOW,
+	GPIO_MODE_OUTPUT_HIGH
 } gpio_mode;
 
 #ifdef __AVR_ATmega128RFA1__
@@ -44,6 +45,12 @@ extern void GPIO_Initialize();
 extern void GPIO_Subscribe(gpio_configuration* configuration);
 extern void GPIO_Start();
 
+extern void GPIO_SetupPin(uint8_t pin, uint8_t mode);
+
 extern bool GPIO_ReadPin(uint8_t pin);
+
+extern void GPIO_WritePin(uint8_t pin, uint8_t value);
+extern void GPIO_ClearPin(uint8_t pin);
+extern void GPIO_SetPin(uint8_t pin);
 
 #endif /* GPIO_H_ */

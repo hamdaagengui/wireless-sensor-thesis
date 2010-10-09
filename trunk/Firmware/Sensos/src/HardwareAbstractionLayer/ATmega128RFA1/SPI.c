@@ -12,16 +12,9 @@
 #include "../../Collections/Queue.h"
 #include "../../EventSubsystem/EventDispatcher.h"
 #include "../../Diagnostics/Message.h"
+#include "../GPIO.h"
 
-#define SPI_PRESCALER_2																							0x04
-#define SPI_PRESCALER_4																							0x00
-#define SPI_PRESCALER_8																							0x05
-#define SPI_PRESCALER_16																						0x01
-#define SPI_PRESCALER_32																						0x06
-#define SPI_PRESCALER_64																						0x02
-#define SPI_PRESCALER_128																						0x03
-
-static bool enabled = false;
+static bool enabled;
 
 typedef struct
 {
@@ -43,16 +36,11 @@ void SPI_Initialize()
 {
 }
 
-void SPI_Subscribe(spi_configuration* configuration)
-{
-	enabled = true;
-}
-
 void SPI_Start()
 {
 	if (enabled)
 	{
-		power_spi_enable();
+		//power_spi_enable();
 
 
 		// basic initialization - only that which is not set by each separate transfers configuration.
@@ -65,17 +53,83 @@ void SPI_Start()
 	}
 	else
 	{
-		power_spi_disable();
+		//power_spi_disable();
 	}
 }
 
-void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate, uint8_t phase, uint8_t polarity, uint8_t dataOrder, uint8_t csPin, completion_handler completed)
+void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate, spi_data_mode mode, spi_data_order order, uint8_t csPin, completion_handler completed)
 {
-	// calc prescaler
-	// spi2x
-
 	configuration->spcr = (1 << SPIE) | (1 << SPE) | (1 << MSTR);
 	configuration->spsr = 0;
+
+	switch (order)
+	{
+		case SPI_DATA_ORDER_LSB_FIRST:
+			configuration->spcr |= (1 << DORD);
+			break;
+
+		case SPI_DATA_ORDER_MSB_FIRST:
+			break;
+	}
+
+	switch (mode)
+	{
+		case SPI_DATA_MODE_LEADING_RISING:
+			break;
+
+		case SPI_DATA_MODE_LEADING_FALLING:
+			configuration->spcr |= (1 << CPOL);
+			break;
+
+		case SPI_DATA_MODE_TRAILING_FALLING:
+			configuration->spcr |= (1 << CPHA);
+			break;
+
+		case SPI_DATA_MODE_TRAILING_RISING:
+			configuration->spcr |= (1 << CPOL) | (1 << CPHA);
+			break;
+	}
+
+	if ((F_CPU / 2) <= bitrate)
+	{
+		configuration->spsr |= (1 << SPI2X);
+	}
+	else if ((F_CPU / 4) <= bitrate)
+	{
+	}
+	else if ((F_CPU / 8) <= bitrate)
+	{
+		configuration->spcr |= (1 << SPR0);
+		configuration->spsr |= (1 << SPI2X);
+	}
+	else if ((F_CPU / 16) <= bitrate)
+	{
+		configuration->spcr |= (1 << SPR0);
+	}
+	else if ((F_CPU / 32) <= bitrate)
+	{
+		configuration->spcr |= (1 << SPR1);
+		configuration->spsr |= (1 << SPI2X);
+	}
+	else if ((F_CPU / 64) <= bitrate)
+	{
+		configuration->spcr |= (1 << SPR1);
+	}
+	else if ((F_CPU / 128) <= bitrate)
+	{
+		configuration->spcr |= (1 << SPR1) | (1 << SPR0);
+	}
+	else
+	{
+		// error bitrate too high
+	}
+
+	configuration->csPin = csPin;
+	configuration->completed = completed;
+
+	GPIO_SetupPin(csPin, GPIO_MODE_OUTPUT_HIGH);
+
+	enabled = true;
 }
 
 void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length)
@@ -101,7 +155,6 @@ void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* in
 	if (isIdle) // just check some register bit instead of isIdle?
 	{
 		// power up peripheral
-		// enable interrupt
 		StartTransfer();
 	}
 
@@ -113,6 +166,8 @@ void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* in
 static void StartTransfer()
 {
 	currentTransfer = Queue_Tail(transferQueue);
+
+	GPIO_ClearPin(currentTransfer->configuration->csPin);
 
 	currentOutput = currentTransfer->output;
 	currentInput = currentTransfer->input;
@@ -130,12 +185,15 @@ ISR(SPI_STC_vect)
 
 	if (--remainingBytes == 0)
 	{
-		EventDispatcher_Notify(currentTransfer->configuration->completed);
-		Queue_AdvanceTail(transferQueue);
+		GPIO_SetPin(currentTransfer->configuration->csPin);
 
+		EventDispatcher_Notify(currentTransfer->configuration->completed);
+
+		Queue_AdvanceTail(transferQueue);
 		if (Queue_IsEmpty(transferQueue))
 		{
 			// power down peripheral
+			SPCR = 0x00; // disable SPI
 		}
 		else
 		{
