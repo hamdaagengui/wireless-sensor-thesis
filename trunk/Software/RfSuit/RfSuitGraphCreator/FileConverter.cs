@@ -48,7 +48,8 @@ namespace RfSuitGraphCreator
                 AbsoluteRSSI(convertJob);
                 break;
               case ConvertTypes.LossRSSI:
-                throw new NotImplementedException();
+                LossRSSI(convertJob);
+                break;
               default:
                 throw new ArgumentOutOfRangeException();
             }
@@ -71,11 +72,26 @@ namespace RfSuitGraphCreator
       });
     }
 
+    private delegate double[] QualityConverter(double[] qualities);
+
+    private readonly QualityConverter _absoluteQualityConverter = (d => d);
+
+    private void LossRSSI(ConvertJob convertJob)
+    {
+      var txPower = convertJob.Files[0].dBm;
+      Process(convertJob, array => Array.ConvertAll(array, rxPower => txPower - rxPower));
+    }
+
     private void AbsoluteRSSI(ConvertJob convertJob)
+    {
+      Process(convertJob, _absoluteQualityConverter);
+    }
+
+    private void Process(ConvertJob convertJob, QualityConverter qualityConverter)
     {
       if (convertJob.MergeScenarios)
       {
-        var listConnectionDatas = convertJob.Files.Select(file => OpenLogFile(file).ConnectionDatas).ToList();
+        var listConnectionDatas = convertJob.Files.Select(file => OpenLogFile(file.Path).ConnectionDatas).ToList();
         var firstConnectionData = listConnectionDatas[0];
         var links = firstConnectionData.Length;
 
@@ -88,7 +104,7 @@ namespace RfSuitGraphCreator
           for (int i = 0; i < links; i++)
           {
             var data = connectionData[i];
-            linkData[i].AddRange(data.Quality);
+            linkData[i].AddRange(qualityConverter(data.Quality));
           }
         }
 
@@ -104,10 +120,10 @@ namespace RfSuitGraphCreator
       {
         foreach (var file in convertJob.Files)
         {
-          var connectionDatas = OpenLogFile(file).ConnectionDatas;
+          var connectionDatas = OpenLogFile(file.Path).ConnectionDatas;
           foreach (var connectionData in connectionDatas)
           {
-            var tuple = CreateCleanCumulativeDistribution(connectionData.Quality);
+            var tuple = CreateCleanCumulativeDistribution(qualityConverter(connectionData.Quality));
             var graphFactory = CreateGraphFactory(tuple, connectionData.EndPointA, connectionData.EndPointB);
             _graphQueue.Add(new GraphJob(convertJob.GetNewFullPathWithoutExtension(string.Format("{0:00}-{1:00}", connectionData.EndPointA, connectionData.EndPointB)) + ".png", graphFactory));
           }
@@ -272,28 +288,44 @@ namespace RfSuitGraphCreator
   internal class ConvertJob
   {
     public ConvertTypes ConvertType { get; private set; }
-    public string[] Files { get; private set; }
+    public RfLogFile[] Files { get; private set; }
     public bool MergeScenarios { get; private set; }
 
     public ConvertJob(ConvertTypes ct, string[] file, bool mergeScenarios)
     {
       ConvertType = ct;
-      Files = file;
+      Files = Array.ConvertAll(file, path => new RfLogFile(path));
       MergeScenarios = mergeScenarios;
     }
-    private readonly Regex _matchFile = new Regex(@"log(?<time>\d+)\[ch (?<channel>\d+), (?<dBm>-?\d+) dBm\]\s*(?<title>.*)");
-
+    
     public string GetNewFullPathWithoutExtension(string subtitle)
     {
-      // org: log1285938414696[ch 11, -3 dBm] Radiodøde rum_compressed.rflogz
-      var match = _matchFile.Match(Path.GetFileNameWithoutExtension(Files[0]));
-      var channel = int.Parse(match.Groups["channel"].Value);
-      var dBm = int.Parse(match.Groups["dBm"].Value);
-      var title = match.Groups["title"].Value;
-      var time = long.Parse(match.Groups["time"].Value);
-      var filename = string.Format("{0} {1} [{2}, {3}]{4}", MergeScenarios ? "Merged" : title, subtitle, channel, dBm, MergeScenarios ? "" : " " + Utils.MillisecondsSinceEpoch(time).ToString("yyyyMMddTHHmmss"));
-      var directory = Path.GetDirectoryName(Files[0]);
+
+      var filename = string.Format("{0} {1} [{2}, {3}]{4}", MergeScenarios ? "Merged" : Files[0].Title, subtitle, Files[0].Channel, Files[0].dBm, MergeScenarios ? "" : " " + Files[0].Time.ToString("yyyyMMddTHHmmss"));
+      var directory = Path.GetDirectoryName(Files[0].Path);
       return Path.Combine(directory, filename);
+    }
+  }
+
+  class RfLogFile
+  {
+    public string Path { get; private set; }
+    public string Title { get; private set; }
+    public DateTime Time { get; private set; }
+    public int Channel { get; private set; }
+    public int dBm { get; private set; }
+
+    private readonly Regex _matchFile = new Regex(@"log(?<time>\d+)\[ch (?<channel>\d+), (?<dBm>-?\d+) dBm\]\s*(?<title>.*)");
+
+    public RfLogFile(string path)
+    {
+      // org: log1285938414696[ch 11, -3 dBm] Radiodøde rum_compressed.rflogz
+      Path = path;
+      var match = _matchFile.Match(System.IO.Path.GetFileNameWithoutExtension(Path));
+      Channel = int.Parse(match.Groups["channel"].Value);
+      dBm = int.Parse(match.Groups["dBm"].Value);
+      Title = match.Groups["title"].Value;
+      Time = Utils.MillisecondsSinceEpoch(long.Parse(match.Groups["time"].Value));
     }
   }
 
