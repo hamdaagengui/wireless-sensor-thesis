@@ -27,8 +27,8 @@ void MAX6662_Initialize(uint16_t interval)
 
 enum
 {
-	REGISTER_TEMPERATURE_READ,
-	REGISTER_CONFIGURATION_READ
+	REGISTER_TEMPERATURE_READ = 0xc1,
+	REGISTER_CONFIGURATION_READ = 0xc4
 };
 static uint8_t commandBuffer[3] = { REGISTER_TEMPERATURE_READ };
 static uint8_t replyBuffer[3];
