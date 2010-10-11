@@ -51,15 +51,16 @@ enum
 #define WaitWhileStatus(s)											while ((TRX_STATUS & TRX_STATUS_MASK) == s);
 #define ReadStatus()														(TRX_STATUS & TRX_STATUS_MASK)
 
-static block_handler frameHandler = NULL;
-static volatile bool transmitting = false;
-static volatile uint8_t rssi = 0;
+static block_handler frameHandler;
+static notification_handler rxStartHandler;
+static volatile bool transmitting;
+static volatile uint8_t rssi;
 
 #ifdef STATISTICS
 radiodriver_statistics radioDriverStatistics;
 #endif
 
-void RadioDriver_Initialize(block_handler fh)
+void RadioDriver_Initialize(block_handler frameReceived)
 {
 #ifdef STATISTICS
 	radioDriverStatistics.framesReceived = 0;
@@ -69,7 +70,7 @@ void RadioDriver_Initialize(block_handler fh)
 	radioDriverStatistics.minimumRawRssi = 0;
 #endif
 
-	frameHandler = fh;
+	frameHandler = frameReceived;
 
 
 #if defined(RADIODRIVER_USE_CRC)
@@ -87,6 +88,11 @@ void RadioDriver_Initialize(block_handler fh)
 #else
 	ChangeState(STATE_TRX_OFF);
 #endif
+}
+
+void RadioDriver_SetRxStartHandler(notification_handler handler)
+{
+	rxStartHandler = handler;
 }
 
 void RadioDriver_SetBitRate(uint8_t bitRate)
@@ -270,7 +276,7 @@ ISR( TRX24_RX_END_vect)
 	radioDriverStatistics.framesReceived++;
 #endif
 
-	if (frameHandler != NULL)
+	if (frameHandler)
 	{
 		frameHandler(buffer, length);
 	}
@@ -279,6 +285,11 @@ ISR( TRX24_RX_END_vect)
 ISR( TRX24_RX_START_vect)
 {
 	rssi = PHY_RSSI;
+
+	if (rxStartHandler)
+	{
+		rxStartHandler();
+	}
 
 
 #ifdef STATISTICS

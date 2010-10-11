@@ -4,6 +4,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdint.h>
+#include <stddef.h>
 #include "DefaultConfiguration.h"
 
 #define ReadBit(var, bit)												(((var) & (1 << (bit))) != 0)
@@ -17,7 +18,7 @@
 #define true																		(1)
 typedef uint8_t bool;
 
-#define NULL																		(0)
+//#define NULL																		(0)
 
 #define atomic(action)													do {Critical(); action ; NonCritical();} while(0)
 

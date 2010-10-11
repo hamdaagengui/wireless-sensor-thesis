@@ -142,7 +142,7 @@ enum
 
 /**
  * Set transceiver bit rate.
- * Use on of the RADIODRIVER_BITRATE_<bitrate>_KBPS constants.
+ * Use one of the RADIODRIVER_BITRATE_<bitrate>_KBPS constants.
  */
 extern void RadioDriver_SetBitRate(uint8_t bitRate);
 
