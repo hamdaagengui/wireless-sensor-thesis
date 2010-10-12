@@ -8,11 +8,9 @@
 #include <avr/eeprom.h>
 #include <string.h>
 #include "Network.h"
-#include "../HardwareAbstractionLayer/RadioDriver.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../Collections/FIFO.h"
-#include "../HardwareAbstractionLayer/NetworkTimer.h"
-#include "../HardwareAbstractionLayer/NonVolatileStorage.h"
+#include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
 //
 #define ROUTE_ENTRY_TIMEOUT																					100
 #define MAX_FRAME_SIZE																							64
@@ -26,6 +24,8 @@
 #define NETWORK_MASTER_NODE_TIME_SLOT_LENGTH												42
 //
 EEMEM uint32_t eeSerialNumber;
+
+extern uint32_t sn;
 
 // Device statistics
 typedef struct
@@ -53,8 +53,8 @@ static uint16_t delayValues[16];
 
 static uint8_t currentTimeSlot = 1;
 static uint8_t activeTimeSlots = 1;
-static uint8_t timeSlotLengths[16];
-static uint16_t unallocatedFrameTime;
+static uint8_t timeSlotLengths[16] = { NETWORK_MASTER_NODE_TIME_SLOT_LENGTH };
+static uint16_t unallocatedFrameTime = NETWORK_TICKS_PER_FRAME - NETWORK_MASTER_NODE_TIME_SLOT_LENGTH;
 
 static uint8_t slotAllocationSequenceNumber;
 #ifdef NETWORK_MASTER_NODE
@@ -195,6 +195,21 @@ static bool SendMessageWithData(void* msg, uint8_t length, void* data, uint8_t d
 //static routeCalculatorProtoype routeCalculators[2] = { };
 //static routeFindingProtoype routeFinders[2] = { };
 
+static void NodeConnected(event_report* er)
+{
+	PORTE ^= (1 << 4);
+
+	unallocatedFrameTime -= timeSlotLengths[activeTimeSlots];
+
+	activeTimeSlots++;
+
+	slot_allocations_message m;
+	m.msgId = MESSAGE_SLOT_ALLOCATIONS;
+	m.sequenceNumber = slotAllocationSequenceNumber;
+	memcpy(&m.slots, &timeSlotLengths, 16);
+	SendMessage(&m, sizeof(slot_allocations_message));
+}
+
 void Network_Initialize()
 {
 	FIFO_Initialize(messageQueue, MESSAGE_QUEUE_SIZE);
@@ -203,10 +218,12 @@ void Network_Initialize()
 
 	RadioDriver_Initialize(FrameReceived);
 
-	timeSlotLengths[0] = NETWORK_MASTER_NODE_TIME_SLOT_LENGTH;
-	unallocatedFrameTime = NETWORK_TICKS_PER_FRAME - NETWORK_MASTER_NODE_TIME_SLOT_LENGTH;
-
 	NetworkTimer_Initialize(TimerTick);
+
+
+#ifdef NETWORK_MASTER_NODE
+	EventDispatcher_Subscribe(EVENT_NODE_CONNECTED, NodeConnected);
+#endif
 
 
 #ifdef NETWORK_MASTER_NODE
@@ -215,6 +232,19 @@ void Network_Initialize()
 	Network_SynchronizeTimer();
 #endif
 }
+
+#ifdef NETWORK_MASTER_NODE
+void Network_ConfigureNode(uint32_t serialNumber, uint8_t sensorCount, uint8_t slotLength)
+{
+	configuration_message m;
+	m.msgId = MESSAGE_CONFIGURATION;
+	m.slot = activeTimeSlots;
+	m.serialNumber = serialNumber;
+	SendMessage(&m, sizeof(configuration_message));
+
+	timeSlotLengths[activeTimeSlots] = slotLength;
+}
+#endif
 
 #ifndef NETWORK_MASTER_NODE
 enum
@@ -284,6 +314,9 @@ static void TimerTick()
 	}
 #endif
 
+	PORTF ^= (1 << 0);
+	PORTE ^= (1 << 2);
+
 	if (++currentTimeSlot > activeTimeSlots)
 	{
 		currentTimeSlot = 0;
@@ -291,6 +324,8 @@ static void TimerTick()
 
 	if (currentTimeSlot == assignedSlot)
 	{
+		PORTF ^= (2 << 0);
+		PORTE ^= (1 << 3);
 		DoSend();
 	}
 	else if (currentTimeSlot < activeTimeSlots)
@@ -338,8 +373,8 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 #ifndef NETWORK_MASTER_NODE
 					configuration_message* m = currentMsg;
 
-					uint32_t sn;
-					NonVolatileStorage_Read(&eeSerialNumber, &sn, sizeof(sn));
+					//	uint32_t sn;
+					//	NonVolatileStorage_Read(&eeSerialNumber, &sn, sizeof(sn));
 
 					if (m->serialNumber == sn) // for this node?
 
@@ -414,6 +449,19 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 						slotAllocationSequenceNumbers[m->node] = slotAllocationSequenceNumber;
 						// check if all have sent ack now
 						//   stop sending out slot allocation updates
+						bool ok = true;
+						for (uint8_t = 0; i < activeTimeSlots && ok == true; i++)
+						{
+							if (slotAllocationSequenceNumbers[i] != slotAllocationSequenceNumber)
+							{
+								ok = false;
+							}
+						}
+
+						if (ok)
+						{
+							slotAllocationSequenceNumber = ++slotAllocationSequenceNumber & 0x0f;
+						}
 					}
 #else
 					if (m->hop == assignedSlot) // hopping on me?

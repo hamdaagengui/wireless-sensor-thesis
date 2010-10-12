@@ -76,7 +76,7 @@ void EventDispatcher_Dispatch()
 	}
 }
 
-void EventDispatcher_RegisterSubscriber(uint8_t event, event_handler handler)
+void EventDispatcher_Subscribe(uint8_t event, event_handler handler)
 {
 	for (uint8_t i = 0; i < EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS; i++)
 	{

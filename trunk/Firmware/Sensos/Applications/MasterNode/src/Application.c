@@ -5,42 +5,13 @@
  *      Author: coma
  */
 
-#include <Globals.h>
-#include <HardwareAbstractionLayer/RadioDriver.h>
 #include <EventSubsystem/EventDispatcher.h>
 
-void Sensors_RegisterSensor();
-
-void SensorDataHandler(eventReport* e)
+void SensorDataHandler(event_report* e)
 {
-
 }
 
 void Start()
 {
-
-
-	//	Adc_Activate();
-
-	//sensor thermo;
-	//thermo.bandwidth
-
-	//	Sensors_RegisterSensor();
-
-	EventDispatcher_RegisterSubscriber(EVENT_SENSOR_DATA, SensorDataHandler);
-
+	EventDispatcher_Subscribe(EVENT_SENSOR_DATA_RECEIVED, SensorDataHandler);
 }
-
-/*
-
-
- void Start()
- {
- enable peripherals
- register sensors
- register event listeners
- }
-
-
-
- */
