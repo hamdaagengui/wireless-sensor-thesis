@@ -57,12 +57,14 @@ static uint8_t timeSlotLengths[16];
 static uint16_t unallocatedFrameTime;
 
 static uint8_t slotAllocationSequenceNumber;
+#ifdef NETWORK_MASTER_NODE
 static uint8_t slotAllocationSequenceNumbers[16];
+#endif
 
 // Network layer transmission queue
 uint8_t messageQueue[FIFO_CalculateSize(MESSAGE_QUEUE_SIZE)];
 
-// The raw network frame as sent over the air
+// The raw network frame as sent to the radio driver
 typedef struct
 {
 	uint8_t source :4; // source node of this frame
@@ -169,7 +171,7 @@ enum
 	NETWORK_STATE_ACTIVE,
 	NETWORK_STATE_SYNCHRONIZING
 };
-static uint8_t networkState = NETWORK_STATE_UNINITIALIZED;
+static uint8_t networkState;
 
 //static uint8_t queues[2][QUEUE_SIZE];
 
@@ -179,7 +181,6 @@ void Network_SynchronizeTimer();
 static void FrameReceived(uint8_t* data, uint8_t length);
 static uint8_t GetNextNodeInRouteToNodeZero();
 static uint8_t GetNextNodeInRouteToNode(uint8_t destination);
-static bool CheckSequenceNumbers(uint8_t new, uint8_t* current);
 static void TimerTick();
 static bool SendMessage(void* msg, uint8_t length);
 static bool SendMessageWithData(void* msg, uint8_t length, void* data, uint8_t dataLength);
@@ -361,6 +362,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 				{
 #ifdef NETWORK_MASTER_NODE
 					// config was acknowledged by <source>
+					EventDispatcher_Publish(EVENT_NODE_CONNECTED, NULL);
 #endif
 
 					i += sizeof(configuration_acknowledge_message);
@@ -372,8 +374,10 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 #ifndef NETWORK_MASTER_NODE
 					slot_allocations_message* m = currentMsg;
 
-					if (CheckSequenceNumbers(m->sequenceNumber, &slotAllocationSequenceNumber))
+					if (m->sequenceNumber != slotAllocationSequenceNumber)
 					{
+						slotAllocationSequenceNumber = m->sequenceNumber;
+
 						SendMessage(m, sizeof(slot_allocations_message)); // forward message to all
 
 						uint16_t delay = 0;
@@ -413,6 +417,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 					}
 #else
 					if (m->hop == assignedSlot) // hopping on me?
+
 					{
 						m->hop = GetNextNodeInRouteToNodeZero(); // forward message
 						SendMessage(m, sizeof(slot_allocations_acknowledge_message));
@@ -431,8 +436,10 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 					neighbor_report_message* m = currentMsg;
 					rssi* r = &rssis[m->node];
 
-					if (CheckSequenceNumbers(m->sequenceNumber, &r->sequenceNumber)) // skip if message is obsolete
+					if (m->sequenceNumber != r->sequenceNumber) // skip if message is obsolete
 					{
+						r->sequenceNumber = m->sequenceNumber;
+
 						SendMessage(m, sizeof(neighbor_report_message)); // forward message to all
 
 						for (uint8_t i = 0; i < 16; i++)
@@ -452,8 +459,10 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 					node_state_message* m = currentMsg;
 					node_state* ns = &nodeStates[m->node];
 
-					if (CheckSequenceNumbers(m->sequenceNumber, &ns->sequenceNumber)) // skip if message is obsolete
+					if (m->sequenceNumber != ns->sequenceNumber) // skip if message is obsolete
 					{
+						ns->sequenceNumber = m->sequenceNumber;
+
 						SendMessage(m, sizeof(node_state_message)); // forward message to all
 
 						ns->txLevel = m->txLevel;
@@ -487,10 +496,11 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 						r->sensorId = m->sensor;
 						r->length = m->length;
 						memcpy(r->data, m->data, m->length);
-						poolObject = EventDispatcher_Publish(EVENT_SENSOR_DATA, poolObject);
+						poolObject = EventDispatcher_Publish(EVENT_SENSOR_DATA_RECEIVED, poolObject);
 					}
 #else
 					if (m->hop == assignedSlot) // hopping on me?
+
 					{
 						m->hop = GetNextNodeInRouteToNodeZero(); // forward message
 						SendMessage(m, sizeof(sensor_data_message));
@@ -507,6 +517,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 					sensor_data_acknowledge_message* m = currentMsg;
 
 					if (m->hop == assignedSlot) // hopping on me?
+
 					{
 						m->hop = GetNextNodeInRouteToNodeZero(); // forward message
 						SendMessage(m, sizeof(sensor_data_acknowledge_message));
@@ -537,19 +548,6 @@ static uint8_t GetNextNodeInRouteToNodeZero()
 static uint8_t GetNextNodeInRouteToNode(uint8_t destination)
 {
 	return 0;
-}
-
-static bool CheckSequenceNumbers(uint8_t new, uint8_t* current)
-{
-	if (new == *current)
-	{
-		return false;
-	}
-	else
-	{
-		*current = new;
-		return true;
-	}
 }
 
 static bool SendMessage(void* msg, uint8_t length)
