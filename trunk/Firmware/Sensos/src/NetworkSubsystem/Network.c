@@ -13,7 +13,7 @@
 #include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
 //
 #define ROUTE_ENTRY_TIMEOUT																					100
-#define MAX_FRAME_SIZE																							64
+----#define MAX_FRAME_SIZE																							64
 #define QUEUE_APPLICATION																						0
 #define QUEUE_NETWORK																								1
 #define QUEUE_SIZE																									50
