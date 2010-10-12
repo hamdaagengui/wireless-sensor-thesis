@@ -9,7 +9,6 @@
 #include "../Collections/Pool.h"
 #include "../Collections/Queue.h"
 
-
 // TODO EVENTDISPATCHER_HIGHEST_EVENT_ID should be replaced by EVENT_LAST_ID or something like that so the user shouldn't explicitly define it.
 static event_handler subscribers[EVENTDISPATCHER_HIGHEST_EVENT_ID][EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS];
 
@@ -67,7 +66,10 @@ void EventDispatcher_Dispatch()
 				}
 			}
 
-			Pool_ReleaseBlock(bufferPool, qe->publication.data);
+			if (qe->publication.data != NULL)
+			{
+				Pool_ReleaseBlock(bufferPool, qe->publication.data);
+			}
 		}
 
 		Queue_AdvanceTail(eventQueue);
@@ -118,9 +120,15 @@ void* EventDispatcher_Publish(uint8_t event, void* data)
 
 	Queue_AdvanceHead(eventQueue);
 
-
-	// return new buffer => error if no buffers are available
-	return Pool_AllocateBlock(bufferPool);
+	if (data != NULL)
+	{
+		// return new buffer => error if no buffers are available
+		return Pool_AllocateBlock(bufferPool);
+	}
+	else
+	{
+		return NULL;
+	}
 }
 
 void EventDispatcher_Notify(completion_handler handler)
