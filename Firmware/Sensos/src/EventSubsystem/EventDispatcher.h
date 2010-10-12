@@ -37,7 +37,7 @@ typedef void (*completion_handler)();
 
 extern void EventDispatcher_Initialize();
 extern void EventDispatcher_Start();
-extern void EventDispatcher_RegisterSubscriber(uint8_t event, event_handler handler);
+extern void EventDispatcher_Subscribe(uint8_t event, event_handler handler);
 extern void* EventDispatcher_RegisterPublisher(uint8_t id);
 
 extern void EventDispatcher_Dispatch();
