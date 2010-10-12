@@ -24,6 +24,13 @@ bool FIFO_IsEmpty(void* f)
 	return _f->free == _f->size;
 }
 
+bool FIFO_GetFreeSpace(void* f)
+{
+	fifo* _f = f;
+
+	return _f->free;
+}
+
 uint8_t FIFO_PeekFirst(void* f)
 {
 	fifo* _f = f;

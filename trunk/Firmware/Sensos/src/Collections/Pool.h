@@ -26,7 +26,7 @@ typedef struct
 } pool_block;
 
 // Usage example: uint8_t poo[Pool_CalculateSize(8, 10)];
-#define Pool_CalculateSize(blockSize, blockCount) (sizeof(pool) + (((blockSize) + sizeof(pool_block)) * (blockCount)))
+#define Pool_CalculateSize(blockSize, blockCount) (sizeof(pool) + ((sizeof(pool_block) + (blockSize)) * (blockCount)))
 
 extern void Pool_Initialize(void* p, uint8_t blockSize, uint8_t blockCount);
 extern bool Pool_IsExhausted(void* p);

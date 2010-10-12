@@ -25,6 +25,7 @@ typedef struct
 
 extern void FIFO_Initialize(void* f, uint8_t byteCount);
 extern bool FIFO_IsEmpty(void* f);
+extern uint8_t FIFO_GetFreeSpace(void* f);
 extern uint8_t FIFO_PeekFirst(void* f);
 extern bool FIFO_WriteByte(void* f, uint8_t value);
 extern bool FIFO_Write(void* f, void* buffer, uint8_t length);
