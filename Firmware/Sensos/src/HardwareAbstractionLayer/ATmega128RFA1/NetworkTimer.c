@@ -10,30 +10,28 @@
 #include <avr/power.h>
 #include "../NetworkTimer.h"
 
-void NetworkTimer_Initialize()
+static notification_handler hnd;
+
+void NetworkTimer_Initialize(notification_handler handler)
 {
+	hnd = handler;
 }
 
-void NetworkTimer_SetHandler(notification_handler handler)
-{
-
-}
-
-void NetworkTimer_SetTimerValue(uint8_t value)
+void NetworkTimer_SetTimerValue(uint16_t value)
 {
 
 }
 
-void NetworkTimer_SetTopValue(uint8_t value)
+void NetworkTimer_SetTimerPeriod(uint16_t value)
 {
 
 }
 
 // Internals
 
-
-//ISR(TMR NetworkTimer_STC_vect)
-//{
-//}
+ISR(TIMER2_COMPA_vect)
+{
+	hnd();
+}
 
 #endif

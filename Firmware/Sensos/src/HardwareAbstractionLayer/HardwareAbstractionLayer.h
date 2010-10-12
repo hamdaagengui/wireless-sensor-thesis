@@ -13,6 +13,11 @@
 #include "RadioDriver.h"
 #include "SPI.h"
 #include "PowerManager.h"
+#include "ADC.h"
+#include "DiagnosticsLink.h"
+#include "NetworkTimer.h"
+#include "NonVolatileStorage.h"
+#include "Timer.h"
 
 extern void HardwareAbstractionLayer_Initialize();
 extern void HardwareAbstractionLayer_Start();

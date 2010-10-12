@@ -23,6 +23,13 @@ typedef struct
 	void* data;
 } event_report;
 
+typedef struct
+{
+	uint8_t sensorId;
+	uint8_t length;
+	uint8_t data[];
+} sensor_event_report;
+
 typedef void (*event_handler)(event_report* report);
 typedef void (*completion_handler)();
 

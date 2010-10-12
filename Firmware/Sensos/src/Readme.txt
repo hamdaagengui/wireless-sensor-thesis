@@ -35,59 +35,6 @@ Processor peripherals
 		Analog comparator
 
 
-
-Messages
-
-	source:4
-	messageCount:4
-
-	Configuration (CFG)
-		id:4
-		slot:4
-		serialNumber:8 [16]
-	
-	Configuration Acknowledge (CAC)
-		id:4
-		:4
-
-	Slot Allocations (SLO)
-		id:4
-		sequenceNumber:4
-		slots:8 [15]
-
-	Sensor Data (SDA)
-		id:4
-		nextNode:4
-		sequenceNumber:4
-		length:4
-		sensor:8
-		data:8 [1..16]
-
-	Sensor Data Acknowledge (SAC)
-		id:4
-		nextNode:4
-		destination:4
-		sequenceNumber:4
-
-	Neighbor Report (NER)
-		id:4
-		node:4
-		sequenceNumber:4
-		:4
-		rssi0:5
-		...
-		rssi15:5
-
-	Node State (NOS)
-		id:4
-		node:4
-		sequenceNumber:4
-		:4
-		txLevel:8
-		energyLevel:8
-		queueLevel:8
-		busyLevel:8
-
 	
 Connecting
 
