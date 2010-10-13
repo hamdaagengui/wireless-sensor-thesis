@@ -13,15 +13,21 @@
 #include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
 //
 #define ROUTE_ENTRY_TIMEOUT																					100
-----#define MAX_FRAME_SIZE																							64
 #define QUEUE_APPLICATION																						0
 #define QUEUE_NETWORK																								1
 #define QUEUE_SIZE																									50
-#define NETWORK_FRAMES_PER_SECOND																		32
+//
+#define NETWORK_DATA_RATE																						31250
+#define NETWORK_TRANSCEIVER_TX_OVERHEAD_TICKS												5 // time for transceiver to switch to tx mode
+#define NETWORK_TRANSCEIVER_TX_OVERHEAD_BYTES												8 // bytes used for preample etc
+#define NETWORK_TICKS_PER_SECOND																		32768
 #define NETWORK_TICKS_PER_FRAME																			1024
-#define NETWORK_TICKS_PER_SECOND																		(NETWORK_FRAMES_PER_SECOND * NETWORK_TICKS_PER_FRAME)
+#define NETWORK_FRAMES_PER_SECOND																		(NETWORK_CLOCK / NETWORK_TICKS_PER_FRAME)
 #define NETWORK_INITIAL_DELAY																				100
-#define NETWORK_MASTER_NODE_TIME_SLOT_LENGTH												42
+#define NETWORK_MASTER_NODE_MAXIMUM_FRAME_SIZE											32
+#define NETWORK_MASTER_NODE_MAXIMUM_BYTES_OVER_THE_AIR							(NETWORK_TRANSCEIVER_TX_OVERHEAD_BYTES + NETWORK_MASTER_NODE_MAXIMUM_FRAME_SIZE)
+#define NETWORK_CALCULATE_TICKS(bytes)															(NETWORK_TRANSCEIVER_TX_OVERHEAD_TICKS + ((NETWORK_TICKS_PER_SECOND * bytes) / NETWORK_DATA_RATE) + 1)
+#define NETWORK_MASTER_NODE_TIME_SLOT_LENGTH												NETWORK_CALCULATE_TICKS(NETWORK_MASTER_NODE_MAXIMUM_BYTES_OVER_THE_AIR)
 //
 EEMEM uint32_t eeSerialNumber;
 
@@ -195,6 +201,7 @@ static bool SendMessageWithData(void* msg, uint8_t length, void* data, uint8_t d
 //static routeCalculatorProtoype routeCalculators[2] = { };
 //static routeFindingProtoype routeFinders[2] = { };
 
+#ifdef NETWORK_MASTER_NODE
 static void NodeConnected(event_report* er)
 {
 	PORTE ^= (1 << 4);
@@ -209,6 +216,7 @@ static void NodeConnected(event_report* er)
 	memcpy(&m.slots, &timeSlotLengths, 16);
 	SendMessage(&m, sizeof(slot_allocations_message));
 }
+#endif
 
 void Network_Initialize()
 {
@@ -278,7 +286,7 @@ void Network_SendSensorData(uint8_t sensorId, void* data, uint8_t length)
 
 static void DoSend()
 {
-	uint8_t frame[MAX_FRAME_SIZE];
+	uint8_t frame[NETWORK_MASTER_NODE_MAXIMUM_FRAME_SIZE];
 
 	network_frame* nf = (network_frame*) frame;
 	nf->source = assignedSlot;
@@ -288,7 +296,7 @@ static void DoSend()
 	while (FIFO_IsEmpty(messageQueue) == false)
 	{
 		uint8_t l = FIFO_PeekFirst(messageQueue);
-		if ((length + l) <= MAX_FRAME_SIZE)
+		if ((length + l) <= NETWORK_MASTER_NODE_MAXIMUM_FRAME_SIZE)
 		{
 			FIFO_Read(messageQueue, &frame[length], l);
 			length += l;
@@ -372,6 +380,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 				{
 #ifndef NETWORK_MASTER_NODE
 					configuration_message* m = currentMsg;
+
 
 					//	uint32_t sn;
 					//	NonVolatileStorage_Read(&eeSerialNumber, &sn, sizeof(sn));
