@@ -249,8 +249,7 @@ void Network_ConfigureNode(uint32_t serialNumber, uint8_t sensorCount, uint8_t s
 	m.slot = activeTimeSlots;
 	m.serialNumber = serialNumber;
 	SendMessage(&m, sizeof(configuration_message));
-
-	timeSlotLengths[activeTimeSlots] = slotLength;
+	timeSlotLengths[activeTimeSlots] = NETWORK_CALCULATE_TICKS(slotLength);
 }
 #endif
 
@@ -381,7 +380,6 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 #ifndef NETWORK_MASTER_NODE
 					configuration_message* m = currentMsg;
 
-
 					//	uint32_t sn;
 					//	NonVolatileStorage_Read(&eeSerialNumber, &sn, sizeof(sn));
 
@@ -459,7 +457,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 						// check if all have sent ack now
 						//   stop sending out slot allocation updates
 						bool ok = true;
-						for (uint8_t = 0; i < activeTimeSlots && ok == true; i++)
+						for (uint8_t i = 0; i < activeTimeSlots && ok == true; i++)
 						{
 							if (slotAllocationSequenceNumbers[i] != slotAllocationSequenceNumber)
 							{
@@ -469,7 +467,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 
 						if (ok)
 						{
-							slotAllocationSequenceNumber = ++slotAllocationSequenceNumber & 0x0f;
+							slotAllocationSequenceNumber = (slotAllocationSequenceNumber + 1) & 0x0f;
 						}
 					}
 #else

@@ -70,7 +70,7 @@ int main()
 		if (((PIND & (1 << 5)) == 0) && (connect == false))
 		{
 			connect = true;
-			Network_ConfigureNode(1, 0, 20);
+			Network_ConfigureNode(1, 0, 40);
 		}
 #endif
 	}
