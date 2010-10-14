@@ -1,3 +1,5 @@
+
+
 /*
  * Network.c
  *
@@ -204,8 +206,6 @@ static bool SendMessageWithData(void* msg, uint8_t length, void* data, uint8_t d
 #ifdef NETWORK_MASTER_NODE
 static void NodeConnected(event_report* er)
 {
-	PORTE ^= (1 << 4);
-
 	unallocatedFrameTime -= timeSlotLengths[activeTimeSlots];
 
 	activeTimeSlots++;
@@ -213,7 +213,7 @@ static void NodeConnected(event_report* er)
 	slot_allocations_message m;
 	m.msgId = MESSAGE_SLOT_ALLOCATIONS;
 	m.sequenceNumber = slotAllocationSequenceNumber;
-	memcpy(&m.slots, &timeSlotLengths, 16);
+	memcpy(&m.slots, &timeSlotLengths, sizeof(timeSlotLengths));
 	SendMessage(&m, sizeof(slot_allocations_message));
 }
 #endif
@@ -306,8 +306,10 @@ static void DoSend()
 		}
 	}
 
+	ToggleBit(PORTE, 2);
 	if (length > sizeof(network_frame)) // more than just the header?
 	{
+		ToggleBit(PORTE, 3);
 		RadioDriver_Send(frame, length);
 	}
 }
@@ -321,9 +323,6 @@ static void TimerTick()
 	}
 #endif
 
-	PORTF ^= (1 << 0);
-	PORTE ^= (1 << 2);
-
 	if (++currentTimeSlot > activeTimeSlots)
 	{
 		currentTimeSlot = 0;
@@ -331,8 +330,6 @@ static void TimerTick()
 
 	if (currentTimeSlot == assignedSlot)
 	{
-		PORTF ^= (2 << 0);
-		PORTE ^= (1 << 3);
 		DoSend();
 	}
 	else if (currentTimeSlot < activeTimeSlots)
@@ -354,6 +351,8 @@ static void TimerTick()
 static void FrameReceived(uint8_t* data, uint8_t length)
 {
 	uint8_t source = ((network_frame*) data)->source;
+
+	ToggleBit(PORTE, 4);
 
 
 #ifndef NETWORK_MASTER_NODE
@@ -379,6 +378,7 @@ static void FrameReceived(uint8_t* data, uint8_t length)
 				{
 #ifndef NETWORK_MASTER_NODE
 					configuration_message* m = currentMsg;
+
 
 					//	uint32_t sn;
 					//	NonVolatileStorage_Read(&eeSerialNumber, &sn, sizeof(sn));
