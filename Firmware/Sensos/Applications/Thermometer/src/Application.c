@@ -5,34 +5,12 @@
  *      Author: coma
  */
 
-#include <Globals.h>
-#include <HardwareAbstractionLayer/RadioDriver.h>
-
-void Sensors_RegisterSensor();
+#include <SensorSubsystem/SensorManager.h>
+#include <SensorSubsystem/Sensors/HeartRateVariability.h>
 
 void Start()
 {
-
-
-//	Adc_Activate();
-
-	//sensor thermo;
-	//thermo.bandwidth
-
-	//	Sensors_RegisterSensor();
-
+	sensor_interface hrv;
+	HeartRateVariability_Create(&hrv);
+	SensorManager_InstallSensor(&hrv);
 }
-
-/*
-
-
- void Start()
- {
- enable peripherals
- register sensors
- register event listeners
- }
-
-
-
- */
