@@ -10,7 +10,7 @@
 
 void Start()
 {
-	sensor_interface hrv;
-	HeartRateVariability_Create(&hrv);
-	SensorManager_InstallSensor(&hrv);
+//	sensor_interface hrv;
+//	HeartRateVariability_Create(&hrv);
+//	SensorManager_InstallSensor(&hrv);
 }

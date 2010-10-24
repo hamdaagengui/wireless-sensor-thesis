@@ -30,7 +30,7 @@ typedef uint8_t bool;
 
 #define MemoryBarrier()													__asm__ volatile ("" : : : "memory")
 
-typedef void (*block_handler)(uint8_t* data, uint8_t length);
+typedef void (*block_handler)(void* data, uint8_t length);
 typedef void (*notification_handler)();
 
 #endif /* GLOBALS_H_ */

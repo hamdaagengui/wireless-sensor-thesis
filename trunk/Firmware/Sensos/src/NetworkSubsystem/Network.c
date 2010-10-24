@@ -1,24 +1,24 @@
-
-
 /*
  * Network.c
  *
  *  Created on: 10/09/2010
  *      Author: Coma
  */
-//
+
 #include <avr/eeprom.h>
 #include <string.h>
+#include <stdlib.h>
+#include <util/delay.h>
 #include "Network.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../Collections/FIFO.h"
 #include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
-//
+
 #define ROUTE_ENTRY_TIMEOUT																					100
 #define QUEUE_APPLICATION																						0
 #define QUEUE_NETWORK																								1
 #define QUEUE_SIZE																									50
-//
+
 #define NETWORK_DATA_RATE																						31250
 #define NETWORK_TRANSCEIVER_TX_OVERHEAD_TICKS												5 // time for transceiver to switch to tx mode
 #define NETWORK_TRANSCEIVER_TX_OVERHEAD_BYTES												8 // bytes used for preample etc
@@ -30,608 +30,582 @@
 #define NETWORK_MASTER_NODE_MAXIMUM_BYTES_OVER_THE_AIR							(NETWORK_TRANSCEIVER_TX_OVERHEAD_BYTES + NETWORK_MASTER_NODE_MAXIMUM_FRAME_SIZE)
 #define NETWORK_CALCULATE_TICKS(bytes)															(NETWORK_TRANSCEIVER_TX_OVERHEAD_TICKS + ((NETWORK_TICKS_PER_SECOND * bytes) / NETWORK_DATA_RATE) + 1)
 #define NETWORK_MASTER_NODE_TIME_SLOT_LENGTH												NETWORK_CALCULATE_TICKS(NETWORK_MASTER_NODE_MAXIMUM_BYTES_OVER_THE_AIR)
-//
-EEMEM uint32_t eeSerialNumber;
 
-extern uint32_t sn;
+// NEW VERSION
+// 	Configuration
+#define NETWORK_MAXIMUM_FRAME_SIZE																	80
+//  Constants
+#define RTS_DELAY_SLOT_DURATION																			100
 
-// Device statistics
-typedef struct
-{
-	uint8_t txLevel;
-	uint8_t energyLevel;
-	uint8_t queueLevel;
-	uint8_t busyLevel;
-	uint8_t sequenceNumber;
-	uint8_t age;
-} node_state;
-static node_state nodeStates[16];
+#define BROADCAST_ID																								15
 
-// Routing
-typedef struct
-{
-	uint8_t rssis[16];
-	uint8_t sequenceNumber;
-	uint8_t age;
-} rssi;
-static rssi rssis[16];
-
-static uint8_t routeTable[16];
-static uint16_t delayValues[16];
-
-static uint8_t currentTimeSlot = 1;
-static uint8_t activeTimeSlots = 1;
-static uint8_t timeSlotLengths[16] = { NETWORK_MASTER_NODE_TIME_SLOT_LENGTH };
-static uint16_t unallocatedFrameTime = NETWORK_TICKS_PER_FRAME - NETWORK_MASTER_NODE_TIME_SLOT_LENGTH;
-
-static uint8_t slotAllocationSequenceNumber;
-#ifdef NETWORK_MASTER_NODE
-static uint8_t slotAllocationSequenceNumbers[16];
-#endif
-
-// Network layer transmission queue
-uint8_t messageQueue[FIFO_CalculateSize(MESSAGE_QUEUE_SIZE)];
-
-// The raw network frame as sent to the radio driver
-typedef struct
-{
-	uint8_t source :4; // source node of this frame
-	uint8_t :4;
-	uint8_t messages[];
-} network_frame;
-
-// Messages
-enum
-{
-	MESSAGE_CONFIGURATION,
-	MESSAGE_CONFIGURATION_ACKNOWLEDGE,
-	MESSAGE_SLOT_ALLOCATIONS,
-	MESSAGE_SLOT_ALLOCATIONS_ACKNOWLEDGE,
-
-	MESSAGE_NEIGHBOR_REPORT,
-	MESSAGE_NODE_STATE,
-
-	MESSAGE_SENSOR_DATA,
-	MESSAGE_SENSOR_DATA_ACKNOWLEDGE
-};
+uint8_t frameQueue[FIFO_CalculateSize(MESSAGE_QUEUE_SIZE)];
 
 typedef struct
 {
-	uint8_t msgId :4;
-} base_message;
-
-// Configuration messages
-typedef struct
-{
-	uint8_t msgId :4;
-	uint8_t slot :4;
-	uint32_t serialNumber;
-} configuration_message;
-
-typedef struct
-{
-	uint8_t msgId :4;
-	uint8_t :4;
-} configuration_acknowledge_message;
-
-typedef struct
-{
-	uint8_t msgId :4;
-	uint8_t sequenceNumber :4;
-	uint8_t slots[16];
-} slot_allocations_message;
-
-typedef struct
-{
-	uint8_t msgId :4;
-	uint8_t sequenceNumber :4;
-	uint8_t node :4;
-	uint8_t hop :4;
-} slot_allocations_acknowledge_message;
-
-// Network messages
-typedef struct
-{
-	uint8_t msgId :4;
-	uint8_t sequenceNumber :4;
-	uint8_t node :4;
-	uint8_t :4;
-	int8_t rssis[16];
-} neighbor_report_message;
-
-typedef struct
-{
-	uint8_t msgId :4;
-	uint8_t sequenceNumber :4;
-	uint8_t node :4;
-	uint8_t :4;
-	int8_t txLevel;
-	uint8_t energyLevel;
-	uint8_t queueLevel;
-	uint8_t busyLevel;
-} node_state_message;
-
-// Sensor messages
-typedef struct
-{
-	uint8_t msgId :4;
-	uint8_t sequenceNumber :4;
-	uint8_t hop :4;
-	uint8_t length :4;
-	uint8_t sensor;
-	uint8_t data[];
-} sensor_data_message;
-
-typedef struct
-{
-	uint8_t msgId :4;
-	uint8_t sequenceNumber :4;
-	uint8_t hop :4;
 	uint8_t destination :4;
-} sensor_data_acknowledge_message;
+	uint8_t source :4;
+	uint8_t type;
+} link_header;
 
-static uint8_t assignedSlot;
+typedef struct
+{
+	uint8_t receiver :4;
+	uint8_t sender :4;
+} network_header;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+} link_network_header;
 
 enum
 {
-	NETWORK_STATE_UNINITIALIZED,
-	NETWORK_STATE_INACTIVE,
-	NETWORK_STATE_ACTIVE,
-	NETWORK_STATE_SYNCHRONIZING
+	TYPE_RTS,
+	TYPE_CTS,
+	TYPE_ACK,
+	TYPE_DATA,
+	TYPE_SENSOR_DATA,
+	TYPE_SET,
+	TYPE_SET_COMPLETE,
+	TYPE_GET,
+	TYPE_GET_COMPLETE,
+	TYPE_READ,
+	TYPE_READ_COMPLETE,
+	TYPE_WRITE,
+	TYPE_WRITE_COMPLETE,
+//	TYPE_,
+//	TYPE_,
+//	TYPE_,
 };
-static uint8_t networkState;
 
-//static uint8_t queues[2][QUEUE_SIZE];
+typedef struct
+{
+	link_header link;
+	uint8_t slot;
+} rts_packet;
+
+typedef struct
+{
+	link_header link;
+} cts_packet;
+
+typedef struct
+{
+	link_header link;
+} acknowledge_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	uint8_t length;
+	uint8_t data[];
+} data_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	uint8_t sensorId;
+	uint8_t length;
+	uint8_t data[];
+} sensor_data_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	uint8_t sensorId;
+	uint8_t propertyId;
+	uint8_t length;
+	uint8_t data[];
+} set_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	uint8_t status;
+} set_complete_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	uint8_t sensorId;
+	uint8_t propertyId;
+} get_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	uint8_t status;
+	uint8_t length;
+	uint8_t data[];
+} get_complete_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	uint16_t address;
+	uint8_t length;
+	//char fieldName[10]
+	uint8_t data[];
+} write_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	uint8_t status;
+} write_complete_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	uint16_t address;
+	uint8_t length;
+//char fieldName[10]
+} read_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	uint8_t status;
+	uint8_t length;
+	uint8_t data[];
+} read_complete_packet;
+
+static uint8_t assignedNodeId;
 
 static void* poolObject;
+static unsigned long randomContext;
 
-void Network_SynchronizeTimer();
-static void FrameReceived(uint8_t* data, uint8_t length);
-static uint8_t GetNextNodeInRouteToNodeZero();
-static uint8_t GetNextNodeInRouteToNode(uint8_t destination);
-static void TimerTick();
-static bool SendMessage(void* msg, uint8_t length);
-static bool SendMessageWithData(void* msg, uint8_t length, void* data, uint8_t dataLength);
+static rts_packet rtsPacketTemplate;
+static cts_packet ctsPacketTemplate;
+static acknowledge_packet ackPacketTemplate;
 
-//typedef void (*routeCalculatorProtoype)();
-//typedef uint8_t (*routeFindingProtoype)();
-//
-//#define ROUTING_STRATEGY_CALCULATE_AT_UPDATE			0
-//#define ROUTING_STRATEGY_CALCULATE_AT_REQUEST			1
-//
-//static uint8_t currentRoutingStrategy = ROUTING_STRATEGY_CALCULATE_AT_UPDATE;
-//static routeCalculatorProtoype routeCalculators[2] = { };
-//static routeFindingProtoype routeFinders[2] = { };
+static block_handler dataHandler;
 
-#ifdef NETWORK_MASTER_NODE
-static void NodeConnected(event_report* er)
-{
-	unallocatedFrameTime -= timeSlotLengths[activeTimeSlots];
-
-	activeTimeSlots++;
-
-	slot_allocations_message m;
-	m.msgId = MESSAGE_SLOT_ALLOCATIONS;
-	m.sequenceNumber = slotAllocationSequenceNumber;
-	memcpy(&m.slots, &timeSlotLengths, sizeof(timeSlotLengths));
-	SendMessage(&m, sizeof(slot_allocations_message));
-}
-#endif
+static void ConnectionEstablished();
+static bool SendPacket(void* packet, uint8_t length);
+static bool SendPacketWithData(void* packet, uint8_t packetLength, void* data, uint8_t dataLength);
+static void FrameReceived(void* data, uint8_t length);
+static uint8_t FindNext(uint8_t destination);
+static void UpdateCCA();
+static bool IsChannelClear();
 
 void Network_Initialize()
 {
-	FIFO_Initialize(messageQueue, MESSAGE_QUEUE_SIZE);
+	FIFO_Initialize(frameQueue, MESSAGE_QUEUE_SIZE);
 
 	poolObject = EventDispatcher_RegisterPublisher(0);
 
 	RadioDriver_Initialize(FrameReceived);
 
-	NetworkTimer_Initialize(TimerTick);
-
-
-#ifdef NETWORK_MASTER_NODE
-	EventDispatcher_Subscribe(EVENT_NODE_CONNECTED, NodeConnected);
-#endif
-
-
-#ifdef NETWORK_MASTER_NODE
-	NetworkTimer_SetTimerPeriod(NETWORK_INITIAL_DELAY);
-#else
-	Network_SynchronizeTimer();
-#endif
+	srand(RadioDriver_GetRandomNumber());
 }
 
-#ifdef NETWORK_MASTER_NODE
-void Network_ConfigureNode(uint32_t serialNumber, uint8_t sensorCount, uint8_t slotLength)
+void Network_SetId(uint8_t id)
 {
-	configuration_message m;
-	m.msgId = MESSAGE_CONFIGURATION;
-	m.slot = activeTimeSlots;
-	m.serialNumber = serialNumber;
-	SendMessage(&m, sizeof(configuration_message));
-	timeSlotLengths[activeTimeSlots] = NETWORK_CALCULATE_TICKS(slotLength);
+	assignedNodeId = id;
+	ConnectionEstablished();
 }
-#endif
 
-#ifndef NETWORK_MASTER_NODE
+void Network_SetDataHandler(block_handler handler)
+{
+	dataHandler = handler;
+}
+
+void Network_SendData(uint8_t receiver, void* data, uint8_t length)
+{
+	data_packet p;
+	p.link.source = assignedNodeId;
+	p.link.type = TYPE_DATA;
+	p.network.receiver = receiver;
+	p.network.sender = assignedNodeId;
+	p.length = length;
+
+	SendPacketWithData(&p, sizeof(p), data, length);
+}
+
+void Network_SendSensorData(uint8_t receiver, uint8_t sensorId, void* data, uint8_t length)
+{
+	sensor_data_packet p;
+	p.link.source = assignedNodeId;
+	p.link.type = TYPE_DATA;
+	p.network.receiver = receiver;
+	p.network.sender = assignedNodeId;
+	p.sensorId = sensorId;
+	p.length = length;
+
+	SendPacketWithData(&p, sizeof(p), data, length);
+}
+
+// Internal
+
 enum
 {
-	TIMER_STATE_UNSYNCHRONIZED,
-	TIMER_STATE_SYNCHRONIZING,
-	TIMER_STATE_SYNCHRONIZED,
+	STATE_UNSYNCHRONIZED,
+	STATE_IDLE,
+	STATE_EXPECTING_CTS,
+	STATE_EXPECTING_ACK,
+	STATE_EXPECTING_DATA,
+	STATE_EXPECTING_PACKET
 };
-static uint8_t timerState;
+static volatile uint8_t state;
+static uint8_t currentLink;
+static uint8_t currentFrameLength;
+static uint8_t currentFrame[NETWORK_MAXIMUM_FRAME_SIZE];
 
-static void RxStartReceived()
+static void ConnectionEstablished()
 {
-	NetworkTimer_SetTimerValue(1);
-	NetworkTimer_SetTimerPeriod(255);
+	rtsPacketTemplate.link.source = assignedNodeId;
+	rtsPacketTemplate.link.type = TYPE_RTS;
+	ctsPacketTemplate.link.source = assignedNodeId;
+	ctsPacketTemplate.link.type = TYPE_CTS;
+	ackPacketTemplate.link.source = assignedNodeId;
+	ackPacketTemplate.link.type = TYPE_ACK;
 }
 
-void Network_SynchronizeTimer()
+static bool SendPacket(void* frame, uint8_t length)
 {
-	timerState = TIMER_STATE_SYNCHRONIZING;
-
-	RadioDriver_SetRxStartHandler(RxStartReceived);
-}
-#endif
-
-#ifndef NETWORK_MASTER_NODE
-void Network_SendSensorData(uint8_t sensorId, void* data, uint8_t length)
-{
-	// add to transport layer queue
-}
-#endif
-
-static void DoSend()
-{
-	uint8_t frame[NETWORK_MASTER_NODE_MAXIMUM_FRAME_SIZE];
-
-	network_frame* nf = (network_frame*) frame;
-	nf->source = assignedSlot;
-
-	uint8_t length = sizeof(network_frame);
-
-	while (FIFO_IsEmpty(messageQueue) == false)
+	if (FIFO_GetFreeSpace(frameQueue) >= (1 + length))
 	{
-		uint8_t l = FIFO_PeekFirst(messageQueue);
-		if ((length + l) <= NETWORK_MASTER_NODE_MAXIMUM_FRAME_SIZE)
-		{
-			FIFO_Read(messageQueue, &frame[length], l);
-			length += l;
-		}
-		else
-		{
-			break;
-		}
+		FIFO_WriteByte(frameQueue, length);
+		FIFO_Write(frameQueue, frame, length);
+		return true;
 	}
-
-	ToggleBit(PORTE, 2);
-	if (length > sizeof(network_frame)) // more than just the header?
+	else
 	{
-		ToggleBit(PORTE, 3);
-		RadioDriver_Send(frame, length);
+		// error - buffer overflow
+		return false;
 	}
 }
 
-static void TimerTick()
+static bool SendPacketWithData(void* frame, uint8_t frameLength, void* data, uint8_t dataLength)
 {
-#ifndef NETWORK_MASTER_NODE
-	if (timerState != TIMER_STATE_SYNCHRONIZED)
+	if (FIFO_GetFreeSpace(frameQueue) >= (1 + frameLength + dataLength))
+	{
+		FIFO_WriteByte(frameQueue, frameLength + dataLength);
+		FIFO_Write(frameQueue, frame, frameLength);
+		FIFO_Write(frameQueue, data, dataLength);
+		return true;
+	}
+	else
+	{
+		// error - buffer overflow
+		return false;
+	}
+}
+
+static void InitiateSynchronization()
+{
+	while (state != STATE_IDLE)
+		;
+
+	state = STATE_UNSYNCHRONIZED;
+}
+
+void Network_TimerEvent()
+{
+	if (state == STATE_UNSYNCHRONIZED)
 	{
 		return;
 	}
-#endif
 
-	if (++currentTimeSlot > activeTimeSlots)
+	UpdateCCA();
+
+	switch (state)
 	{
-		currentTimeSlot = 0;
+		case STATE_EXPECTING_CTS:
+			// RTS was never replied to. Inform router of bad node.
+			break;
+
+		case STATE_EXPECTING_ACK:
+			// Data was never acknowledged. Inform router of weak link.
+			break;
+
+		case STATE_EXPECTING_DATA:
+			// Got RTS but no Data. Inform router of weak link.
+			break;
+
+		case STATE_EXPECTING_PACKET:
+			// CCA indicated a transmission but no packet arrived. Note noisy environment.
+			break;
 	}
 
-	if (currentTimeSlot == assignedSlot)
+	state = STATE_IDLE;
+
+	if (currentFrameLength != 0 || FIFO_IsEmpty(frameQueue) == false) // frames to send
 	{
-		DoSend();
+		uint8_t slot = rand_r(&randomContext) & 0x3;
+		for (uint8_t i = 0; i < slot; i++)
+		{
+			if (IsChannelClear() == false)
+			{
+				break;
+			}
+			_delay_us(RTS_DELAY_SLOT_DURATION);
+		}
+
+		if (IsChannelClear())
+		{
+			if (currentFrameLength == 0) // has the frame already been loaded? (by a previous transmission attempt)
+			{
+				currentFrameLength = FIFO_ReadByte(frameQueue);
+				FIFO_Read(frameQueue, currentFrame, currentFrameLength);
+			}
+
+			// Should not be cached as the route may change
+			link_network_header* lnh = (link_network_header*) currentFrame;
+			currentLink = FindNext(lnh->network.receiver);
+			lnh->link.destination = currentLink;
+
+			if (IsChannelClear())
+			{
+				rtsPacketTemplate.link.destination = currentLink;
+				rtsPacketTemplate.slot = slot;
+				RadioDriver_Send(&rtsPacketTemplate, sizeof(rtsPacketTemplate));
+
+				state = STATE_EXPECTING_CTS;
+			}
+		}
+
+		if (state != STATE_EXPECTING_CTS) // receive the packet that's coming
+		{
+			state = STATE_EXPECTING_PACKET;
+			RadioDriver_EnableReceiveMode();
+		}
 	}
-	else if (currentTimeSlot < activeTimeSlots)
+	else // nothing to send => receive
 	{
-		// if node is visible from this node (rssi != 0) enable rx in case node use us for route
-		//   disable rx if rx start was not received within timeout limit
+		for (uint8_t i = 0; i < 4; i++)
+		{
+			if (IsChannelClear() == false)
+			{
+				state = STATE_EXPECTING_PACKET;
+				RadioDriver_EnableReceiveMode();
+				break;
+			}
+			_delay_us(RTS_DELAY_SLOT_DURATION);
+		}
 	}
 
-	if (currentTimeSlot == activeTimeSlots)
-	{
-		NetworkTimer_SetTimerPeriod(unallocatedFrameTime);
-	}
-	else
-	{
-		NetworkTimer_SetTimerPeriod(timeSlotLengths[currentTimeSlot]);
-	}
+
+	// process low resolution, high precision timers
 }
 
-static void FrameReceived(uint8_t* data, uint8_t length)
+static void FrameReceived(void* data, uint8_t length)
 {
-	uint8_t source = ((network_frame*) data)->source;
+	link_header* lh = data;
+	link_network_header* lnh = data;
 
-	ToggleBit(PORTE, 4);
-
-
-#ifndef NETWORK_MASTER_NODE
-	if (timerState == TIMER_STATE_SYNCHRONIZING)
+	if (lh->destination == assignedNodeId || lh->destination == BROADCAST_ID)
 	{
-		currentTimeSlot = source;
-		NetworkTimer_SetTimerPeriod(timeSlotLengths[source]);
-		timerState = TIMER_STATE_SYNCHRONIZED;
-		RadioDriver_SetRxStartHandler(NULL);
-	}
-#endif
-
-	for (uint8_t i = sizeof(network_frame); i < length;) // process all messages in the frame
-	{
-		void* currentMsg = &data[i];
-		base_message* baseMsg = currentMsg;
-
-		switch (baseMsg->msgId)
+		switch (lh->type)
 		{
-			// Configuration
-
-			case MESSAGE_CONFIGURATION:
+			// Non broadcast and non routable
+			case TYPE_RTS: // RTS is never broadcasted
 				{
-#ifndef NETWORK_MASTER_NODE
-					configuration_message* m = currentMsg;
-
-
-					//	uint32_t sn;
-					//	NonVolatileStorage_Read(&eeSerialNumber, &sn, sizeof(sn));
-
-					if (m->serialNumber == sn) // for this node?
-
+					if (state == STATE_UNSYNCHRONIZED)
 					{
-						assignedSlot = m->slot;
-
-						networkState = NETWORK_STATE_INACTIVE;
-
-						configuration_acknowledge_message ack; // send acknowledge
-						ack.msgId = MESSAGE_CONFIGURATION_ACKNOWLEDGE;
-						SendMessage(&ack, sizeof(configuration_acknowledge_message));
+						rts_packet* p = data;
+						uint8_t slot = p->slot;
+						// set timer
 					}
-#endif
 
-					i += sizeof(configuration_message);
+					if (state == STATE_EXPECTING_PACKET || state == STATE_UNSYNCHRONIZED)
+					{
+
+						ctsPacketTemplate.link.destination = lh->source;
+						RadioDriver_Send(&ctsPacketTemplate, sizeof(ctsPacketTemplate));
+
+						currentLink = lh->source;
+						state = STATE_EXPECTING_DATA;
+					}
 				}
 				break;
 
-			case MESSAGE_CONFIGURATION_ACKNOWLEDGE:
+			case TYPE_CTS: // CTS is never broadcasted
 				{
-#ifdef NETWORK_MASTER_NODE
-					// config was acknowledged by <source>
-					EventDispatcher_Publish(EVENT_NODE_CONNECTED, NULL);
-#endif
-
-					i += sizeof(configuration_acknowledge_message);
-				}
-				break;
-
-			case MESSAGE_SLOT_ALLOCATIONS:
-				{
-#ifndef NETWORK_MASTER_NODE
-					slot_allocations_message* m = currentMsg;
-
-					if (m->sequenceNumber != slotAllocationSequenceNumber)
+					if (state == STATE_EXPECTING_CTS && currentLink == lh->source)
 					{
-						slotAllocationSequenceNumber = m->sequenceNumber;
+						RadioDriver_Send(&currentFrame, currentFrameLength); // don't send the length indicator
 
-						SendMessage(m, sizeof(slot_allocations_message)); // forward message to all
-
-						uint16_t delay = 0;
-						delayValues[assignedSlot] = 0;
-						delayValues[assignedSlot - 1] = 0;
-						for (int8_t i = (assignedSlot - 2); i >= 0; i--)
-						{
-							delay += m->slots[i + 1];
-							delayValues[i] = delay;
-						}
-
-						slot_allocations_acknowledge_message ack; // send acknowledge
-						ack.msgId = MESSAGE_SLOT_ALLOCATIONS_ACKNOWLEDGE;
-						ack.sequenceNumber = slotAllocationSequenceNumber;
-						ack.node = assignedSlot;
-						ack.hop = GetNextNodeInRouteToNodeZero();
-						SendMessage(&ack, sizeof(slot_allocations_acknowledge_message));
-					}
-#endif
-
-					i += sizeof(slot_allocations_message);
-				}
-				break;
-
-			case MESSAGE_SLOT_ALLOCATIONS_ACKNOWLEDGE:
-				{
-					slot_allocations_acknowledge_message* m = currentMsg;
-
-
-#ifdef NETWORK_MASTER_NODE
-					// note that node <m->node> has received the updated slot allocations
-					if (m->sequenceNumber == slotAllocationSequenceNumber)
-					{
-						slotAllocationSequenceNumbers[m->node] = slotAllocationSequenceNumber;
-						// check if all have sent ack now
-						//   stop sending out slot allocation updates
-						bool ok = true;
-						for (uint8_t i = 0; i < activeTimeSlots && ok == true; i++)
-						{
-							if (slotAllocationSequenceNumbers[i] != slotAllocationSequenceNumber)
-							{
-								ok = false;
-							}
-						}
-
-						if (ok)
-						{
-							slotAllocationSequenceNumber = (slotAllocationSequenceNumber + 1) & 0x0f;
-						}
-					}
-#else
-					if (m->hop == assignedSlot) // hopping on me?
-
-					{
-						m->hop = GetNextNodeInRouteToNodeZero(); // forward message
-						SendMessage(m, sizeof(slot_allocations_acknowledge_message));
-					}
-#endif
-
-					i += sizeof(slot_allocations_acknowledge_message);
-				}
-				break;
-
-
-				// Routing
-
-			case MESSAGE_NEIGHBOR_REPORT:
-				{
-					neighbor_report_message* m = currentMsg;
-					rssi* r = &rssis[m->node];
-
-					if (m->sequenceNumber != r->sequenceNumber) // skip if message is obsolete
-					{
-						r->sequenceNumber = m->sequenceNumber;
-
-						SendMessage(m, sizeof(neighbor_report_message)); // forward message to all
-
-						for (uint8_t i = 0; i < 16; i++)
-						{
-							r->rssis[i] = m->rssis[i];
-						}
-
-						r->age = 0;
-					}
-
-					i += sizeof(neighbor_report_message);
-				}
-				break;
-
-			case MESSAGE_NODE_STATE:
-				{
-					node_state_message* m = currentMsg;
-					node_state* ns = &nodeStates[m->node];
-
-					if (m->sequenceNumber != ns->sequenceNumber) // skip if message is obsolete
-					{
-						ns->sequenceNumber = m->sequenceNumber;
-
-						SendMessage(m, sizeof(node_state_message)); // forward message to all
-
-						ns->txLevel = m->txLevel;
-						ns->energyLevel = m->energyLevel;
-						ns->queueLevel = m->queueLevel;
-						ns->busyLevel = m->busyLevel;
-
-						ns->age = 0;
-					}
-
-					i += sizeof(node_state_message);
-				}
-				break;
-
-
-				// Transport
-
-			case MESSAGE_SENSOR_DATA:
-				{
-					sensor_data_message* m = currentMsg;
-
-
-#ifdef NETWORK_MASTER_NODE
-					if ((sizeof(sensor_event_report) + m->length) > EVENTDISPATCHER_REPORT_DATA_SIZE)
-					{
-						// error
+						state = STATE_EXPECTING_ACK;
 					}
 					else
 					{
-						sensor_event_report* r = poolObject;
-						r->sensorId = m->sensor;
-						r->length = m->length;
-						memcpy(r->data, m->data, m->length);
-						poolObject = EventDispatcher_Publish(EVENT_SENSOR_DATA_RECEIVED, poolObject);
+						state = STATE_IDLE;
 					}
-#else
-					if (m->hop == assignedSlot) // hopping on me?
-
-					{
-						m->hop = GetNextNodeInRouteToNodeZero(); // forward message
-						SendMessage(m, sizeof(sensor_data_message));
-					}
-#endif
-
-					i += sizeof(sensor_data_message) + m->length;
 				}
 				break;
 
-			case MESSAGE_SENSOR_DATA_ACKNOWLEDGE:
+			case TYPE_ACK:
 				{
-#ifndef NETWORK_MASTER_NODE
-					sensor_data_acknowledge_message* m = currentMsg;
-
-					if (m->hop == assignedSlot) // hopping on me?
-
+					if (state == STATE_EXPECTING_ACK && currentLink == lh->source)
 					{
-						m->hop = GetNextNodeInRouteToNodeZero(); // forward message
-						SendMessage(m, sizeof(sensor_data_acknowledge_message));
-					}
-#endif
+						currentFrameLength = 0;
 
-					i += sizeof(sensor_data_acknowledge_message);
+						state = STATE_IDLE;
+
+
+						// signal packet sent event
+					}
 				}
 				break;
 
-			default: // error -> abort
-				i = length;
+
+				//			case TYPE_SENSOR_DATA:
+				//				{
+				//				}
+				//				break;
+
+
+			case TYPE_DATA:
+				{
+					if (state == STATE_EXPECTING_DATA && currentLink == lh->source)
+					{
+						ackPacketTemplate.link.destination = lh->source;
+						RadioDriver_Send(&ackPacketTemplate, sizeof(ackPacketTemplate));
+
+						if (lnh->network.receiver == assignedNodeId)
+						{
+							// data_packet* p = data;
+							// pass on data up the stack
+						}
+						else // forward data
+						{
+							lnh->link.source = assignedNodeId;
+							SendPacket(data, length);
+						}
+					}
+
+					state = STATE_IDLE;
+				}
 				break;
+
+			case TYPE_SET:
+				{
+					//set_packet* p = (set_packet*) f->payload;
+				}
+				break;
+
+
+				//			case TYPE_SET_COMPLETE:
+				//				{
+				//					set_complete_packet* p = (set_complete_packet*) f->payload;
+				//				}
+				//				break;
+
+			case TYPE_GET:
+				{
+					//	get_packet* p = (get_packet*) f->payload;
+				}
+				break;
+
+
+				//			case TYPE_GET_COMPLETE:
+				//				{
+				//					get_complete_packet* p = (get_complete_packet*) f->payload;
+				//				}
+				//				break;
+
+			case TYPE_WRITE:
+				{
+					//	write_packet* p = (write_packet*) f->payload;
+				}
+				break;
+
+
+				//			case TYPE_WRITE_COMPLETE:
+				//				{
+				//					write_complete_packet* p = (write_complete_packet*) f->payload;
+				//				}
+				//				break;
+
+			case TYPE_READ:
+				{
+					//		read_packet* p = (read_packet*) f->payload;
+				}
+				break;
+
+
+				//			case TYPE_WRITE_COMPLETE:
+				//				{
+				//					read_complete_packet* p = (read_complete_packet*) f->payload;
+				//				}
+				//				break;
 		}
 	}
 }
 
-static void UpdateRouteTable()
-{
+// Routing functionality
 
+static uint8_t FindNext(uint8_t destination)
+{
+	return destination;
 }
 
-static uint8_t GetNextNodeInRouteToNodeZero()
+static void LinkTransmissionTimeout()
 {
-	return 0;
+	// routeinfo.link[currentlink].timeoutcounter++
 }
 
-static uint8_t GetNextNodeInRouteToNode(uint8_t destination)
+#define RSSI_SAMPLE_COUNT																						8
+#define CCA_ALPHA																										0.06
+#define RSSI_OUTLIER_COUNT																					5
+#define CCA_RSSI_CHECK_INTERVAL																			2
+
+// TODO Please! use fixed point brrr
+static int8_t ccaThreshold = 0;
+
+static void UpdateCCA()
 {
-	return 0;
+	static float rssiSamples[RSSI_SAMPLE_COUNT];
+	static uint8_t rssiIndex = 0;
+	static float oldMedian = 0;
+	static float oldThreshold = 0;
+	static float sum = 0;
+
+	float rssi = RadioDriver_GetRssi();
+
+	sum -= rssiSamples[rssiIndex];
+	rssiSamples[rssiIndex] = rssi;
+	sum += rssi;
+
+	if (++rssiIndex >= RSSI_SAMPLE_COUNT)
+	{
+		rssiIndex = 0;
+	}
+
+	float median = sum / RSSI_SAMPLE_COUNT;
+
+	oldThreshold = CCA_ALPHA * oldMedian + (1.0 - CCA_ALPHA) * oldThreshold;
+
+	oldMedian = median;
+
+	ccaThreshold = oldThreshold;
 }
 
-static bool SendMessage(void* msg, uint8_t length)
+static bool IsChannelClear()
 {
-	if (FIFO_GetFreeSpace(messageQueue) >= (1 + length))
+	for (uint8_t i = 0; i < RSSI_OUTLIER_COUNT; i++)
 	{
-		FIFO_WriteByte(messageQueue, length);
-		FIFO_Write(messageQueue, msg, length);
-		return true;
-	}
-	else
-	{
-		// error - buffer overflow
-		return false;
-	}
-}
+		if (RadioDriver_GetRssi() < ccaThreshold)
+		{
+			return true;
+		}
 
-static bool SendMessageWithData(void* msg, uint8_t length, void* data, uint8_t dataLength)
-{
-	if (FIFO_GetFreeSpace(messageQueue) >= (1 + length + dataLength))
-	{
-		FIFO_WriteByte(messageQueue, length);
-		FIFO_Write(messageQueue, msg, length);
-		FIFO_Write(messageQueue, data, dataLength);
-		return true;
+		_delay_us(CCA_RSSI_CHECK_INTERVAL);
 	}
-	else
-	{
-		// error - buffer overflow
-		return false;
-	}
+
+	return false;
 }
