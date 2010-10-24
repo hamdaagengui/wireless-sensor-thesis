@@ -201,6 +201,11 @@ void RadioDriver_Send(void* data, uint8_t length)
 	ChangeState(STATE_TX_START);
 }
 
+bool RadioDriver_IsChannelClear()
+{
+	return true;
+}
+
 void RadioDriver_WaitForSendToComplete()
 {
 	while (transmitting)

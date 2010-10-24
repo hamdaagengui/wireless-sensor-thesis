@@ -9,6 +9,7 @@
 
 #include <avr/power.h>
 #include "../NetworkTimer.h"
+#include "../../NetworkSubsystem/Network.h"
 
 #define PRESCALER_VALUE																							8
 
@@ -42,7 +43,7 @@ void NetworkTimer_SetTimerPeriod(uint16_t value)
 
 ISR(TIMER2_COMPA_vect)
 {
-	hnd();
+	Network_TimerEvent();
 }
 
 #endif
