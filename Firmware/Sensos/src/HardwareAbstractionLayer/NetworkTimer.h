@@ -9,7 +9,6 @@
 #define NETWORKTIMER_H_
 
 #include "../Globals.h"
-#include "../DefaultConfiguration.h"
 
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/NetworkTimer.h"

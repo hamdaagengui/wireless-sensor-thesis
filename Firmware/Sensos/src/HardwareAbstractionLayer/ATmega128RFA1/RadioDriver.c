@@ -1,6 +1,7 @@
 #if defined(__AVR_ATmega128RFA1__)
 
 #include "../RadioDriver.h"
+#include "../../MemorySubsystem/MemoryManager.h"
 
 // Transceiver state status
 #define TRX_STATUS_MASK													0x1f
@@ -55,6 +56,7 @@ static block_handler frameHandler;
 static notification_handler rxStartHandler;
 static volatile bool transmitting;
 static volatile uint8_t rssi;
+static uint8_t* frameBufferObject;
 
 #ifdef STATISTICS
 radiodriver_statistics radioDriverStatistics;
@@ -69,6 +71,8 @@ void RadioDriver_Initialize(block_handler frameReceived)
 	radioDriverStatistics.maximumRawRssi = 0;
 	radioDriverStatistics.minimumRawRssi = 0;
 #endif
+
+	frameBufferObject = MemoryManager_AllocateNetworkBlock();
 
 	frameHandler = frameReceived;
 
@@ -201,11 +205,6 @@ void RadioDriver_Send(void* data, uint8_t length)
 	ChangeState(STATE_TX_START);
 }
 
-bool RadioDriver_IsChannelClear()
-{
-	return true;
-}
-
 void RadioDriver_WaitForSendToComplete()
 {
 	while (transmitting)
@@ -270,11 +269,16 @@ ISR( TRX24_RX_END_vect)
 #endif
 
 	uint8_t length = TST_RX_LENGTH;
-	uint8_t buffer[length];
+
+	if (length > NETWORK_MAXIMUM_LINK_PACKET_SIZE)
+	{
+		//error oversize link layer packet
+		return;
+	}
 
 	for (uint8_t i = 0; i < length; ++i)
 	{
-		buffer[i] = TRX_BUF(i);
+		frameBufferObject[i] = TRX_BUF(i);
 	}
 
 #ifdef STATISTICS
@@ -283,30 +287,32 @@ ISR( TRX24_RX_END_vect)
 
 	if (frameHandler)
 	{
-		frameHandler(buffer, length);
+		frameHandler(frameBufferObject, length);
 	}
+
+	frameBufferObject = MemoryManager_AllocateNetworkBlock();
 }
 
 ISR( TRX24_RX_START_vect)
 {
 	rssi = PHY_RSSI;
-
-	if (rxStartHandler)
-	{
-		rxStartHandler();
-	}
-
-
-#ifdef STATISTICS
-	if (rssi > radioDriverStatistics.maximumRawRssi)
-	{
-		radioDriverStatistics.maximumRawRssi = rssi;
-	}
-	else if (rssi < radioDriverStatistics.minimumRawRssi)
-	{
-		radioDriverStatistics.minimumRawRssi = rssi;
-	}
-#endif
+	//
+	//	if (rxStartHandler)
+	//	{
+	//		rxStartHandler();
+	//	}
+	//
+	//
+	//#ifdef STATISTICS
+	//	if (rssi > radioDriverStatistics.maximumRawRssi)
+	//	{
+	//		radioDriverStatistics.maximumRawRssi = rssi;
+	//	}
+	//	else if (rssi < radioDriverStatistics.minimumRawRssi)
+	//	{
+	//		radioDriverStatistics.minimumRawRssi = rssi;
+	//	}
+	//#endif
 }
 
 //ISR(TRX24_PLL_UNLOCK_vect)

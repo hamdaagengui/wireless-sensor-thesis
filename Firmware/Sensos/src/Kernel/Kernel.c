@@ -8,6 +8,7 @@
 #include "../Globals.h"
 #include "../DefaultConfiguration.h"
 #include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
+#include "../MemorySubsystem/MemoryManager.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../NetworkSubsystem/Network.h"
 
@@ -35,11 +36,13 @@ int main()
 
 
 	// Initialize sub systems
-	Network_Initialize();
+	MemoryManager_Initialize();
+	Network_Initialize(sn & 8 ? true : false);
+	Network_SetId(sn);
 	//	PowerManager_Initialize();
 	EventDispatcher_Initialize();
 	// Initialize peripherals
-	//	HardwareAbstractionLayer_Initialize();
+	HardwareAbstractionLayer_Initialize();
 
 
 	// Start user application
@@ -51,9 +54,6 @@ int main()
 	// Start peripherals
 	//	HardwareAbstractionLayer_Start();
 
-	bool connect = false;
-
-
 	// Run system
 	sei();
 	while (true)
@@ -64,15 +64,6 @@ int main()
 
 		// Sleep
 		PowerManager_PowerDown();
-
-
-#ifdef NETWORK_MASTER_NODE
-		if (((PIND & (1 << 5)) == 0) && (connect == false))
-		{
-			connect = true;
-			Network_ConfigureNode(1, 0, 40);
-		}
-#endif
 	}
 
 	return 0;

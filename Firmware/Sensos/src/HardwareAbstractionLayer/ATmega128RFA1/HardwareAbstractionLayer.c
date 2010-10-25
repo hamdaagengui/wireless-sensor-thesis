@@ -20,7 +20,7 @@ void HardwareAbstractionLayer_Initialize()
 	// Symbol counter p 133
 	// SRAM DR p 163
 	// PM p 503
-	SPI_Initialize();
+	//SPI_Initialize();
 }
 
 void HardwareAbstractionLayer_Start()
