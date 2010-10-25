@@ -313,6 +313,9 @@ static void InitiateSynchronization()
 	state = STATE_UNSYNCHRONIZED;
 }
 
+/**
+ * Called directly from the timer interrupt and so it atomic.
+ */
 void Network_TimerEvent()
 {
 	if (state == STATE_UNSYNCHRONIZED)
