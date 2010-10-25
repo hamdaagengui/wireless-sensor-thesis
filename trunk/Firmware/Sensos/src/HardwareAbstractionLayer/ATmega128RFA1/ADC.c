@@ -8,7 +8,7 @@
 #if defined(__AVR_ATmega128RFA1__)
 
 #include "../ADC.h"
-#include "../../Collections/Queue.h"
+#include "../../MemorySubsystem/MemoryManager.h"
 #include "../../EventSubsystem/EventDispatcher.h"
 
 static bool enable;
@@ -30,7 +30,7 @@ void ADC_Start()
 	{
 		// calculate timer settings
 
-		eventData = EventDispatcher_RegisterPublisher(0);
+		eventData = MemoryManager_AllocateSensorBlock();
 
 
 		// kick off sampling
@@ -48,7 +48,8 @@ ISR( ADC_vect)
 
 	// TODO Wtf to do about event id allocation???
 	uint8_t event = 0;// PERIPHERAL_EVENT_ADC_CHANNEL_0 + currentChannel;
-	eventData = EventDispatcher_Publish(event, eventData);
+	EventDispatcher_Publish(event, eventData);
+	eventData = MemoryManager_AllocateSensorBlock();
 
 
 	// set channel = nextChannel

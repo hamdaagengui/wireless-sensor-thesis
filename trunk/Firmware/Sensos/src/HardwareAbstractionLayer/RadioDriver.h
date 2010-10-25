@@ -46,9 +46,4 @@ extern int8_t RadioDriver_GetRssi();
  */
 extern void RadioDriver_Send(void* data, uint8_t length);
 
-/**
- *
- */
-extern bool RadioDriver_IsChannelClear();
-
 #endif /* RADIODRIVER_H_ */
