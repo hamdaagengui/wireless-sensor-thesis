@@ -260,6 +260,7 @@ ISR( TRX24_RX_END_vect)
 {
 #if defined(RADIODRIVER_USE_CRC)
 	if (ReadBit(PHY_RSSI, RX_CRC_VALID) == 0) // CRC error in frame => dump it
+
 	{
 #ifdef STATISTICS
 		radioDriverStatistics.framesDiscarded++;
@@ -269,6 +270,11 @@ ISR( TRX24_RX_END_vect)
 #endif
 
 	uint8_t length = TST_RX_LENGTH;
+
+
+#if defined(RADIODRIVER_USE_CRC)
+	length -= 2;
+#endif
 
 	if (length > NETWORK_MAXIMUM_LINK_PACKET_SIZE)
 	{
