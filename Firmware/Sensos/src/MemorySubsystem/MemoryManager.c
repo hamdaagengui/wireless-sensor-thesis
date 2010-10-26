@@ -23,29 +23,25 @@ void MemoryManager_Initialize()
 
 void* MemoryManager_AllocateNetworkBlock()
 {
-	com('a');
-	com('n');
+	com(DEBUG_MEMORY_ALLOCATE_NETWORK_BLOCK);
 	return Pool_AllocateBlock(networkPool);
 }
 
 void MemoryManager_ReleaseNetworkBlock(void* block)
 {
-	com('r');
-	com('n');
+	com(DEBUG_MEMORY_RELEASE_NETWORK_BLOCK);
 	Pool_ReleaseBlock(networkPool, block);
 }
 
 void* MemoryManager_AllocateSensorBlock()
 {
-	com('a');
-	com('s');
+	com(DEBUG_MEMORY_ALLOCATE_SENSOR_BLOCK);
 	return Pool_AllocateBlock(sensorPool);
 }
 
 void MemoryManager_ReleaseSensorBlock(void* block)
 {
-	com('r');
-	com('s');
+	com(DEBUG_MEMORY_RELEASE_SENSOR_BLOCK);
 	Pool_ReleaseBlock(sensorPool, block);
 }
 

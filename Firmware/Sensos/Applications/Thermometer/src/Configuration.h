@@ -20,4 +20,6 @@
 
 #define NETWORK_MASTER_NODE
 
+#define BUG 0
+
 #endif /* CONFIGURATION_H_ */
