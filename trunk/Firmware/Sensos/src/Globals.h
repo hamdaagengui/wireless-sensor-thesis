@@ -34,6 +34,16 @@ typedef void (*block_handler)(void* data, uint8_t length);
 typedef void (*notification_handler)();
 
 #define LA(x) {uint8_t r=0; r |= x&(1<<0)?(1<<0):0; r |= x&(1<<1)?(1<<2):0; r |= x&(1<<2)?(1<<4):0; r |= x&(1<<3)?(1<<6):0; PORTB = r;}
-#define com(x) while(!(UCSR0A & (1<<UDRE0))); UDR0 = x;
+#define com(x) if(BUG > 0) { while(!(UCSR0A & (1<<UDRE0))); UDR0 = x; }
+
+enum
+{
+	DEBUG_MEMORY_ALLOCATE_NETWORK_BLOCK,
+	DEBUG_MEMORY_RELEASE_NETWORK_BLOCK,
+	DEBUG_MEMORY_ALLOCATE_SENSOR_BLOCK,
+	DEBUG_MEMORY_RELEASE_SENSOR_BLOCK,
+	DEBUG_MEMORY_EMPTY_NETWORK_BLOCK,
+	DEBUG_MEMORY_EMPTY_SENSOR_BLOCK
+};
 
 #endif /* GLOBALS_H_ */
