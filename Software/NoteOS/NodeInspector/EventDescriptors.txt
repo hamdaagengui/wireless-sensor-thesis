@@ -1,0 +1,7 @@
+0;0;Memory;MemoryManager;Network block allocated
+1;0;Memory;MemoryManager;Network block released
+2;0;Memory;MemoryManager;Sensor block allocated
+3;0;Memory;MemoryManager;Sensor block released
+4;0;Memory;MemoryManager;Network block pool exhausted
+5;0;Memory;MemoryManager;Sensor block pool exhausted
+255;1;;;Unknown event
