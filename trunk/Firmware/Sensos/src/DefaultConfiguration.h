@@ -10,9 +10,8 @@
 
 // Network subssystem
 #define NETWORK_CAN_ROUTE																						1
-#define MESSAGE_QUEUE_SIZE																					200
 #define NETWORK_MAXIMUM_LINK_PACKET_SIZE														64
-#define NETWORK_LINK_PACKET_POOL_SIZE																10
+#define NETWORK_LINK_PACKET_POOL_SIZE																14
 
 // Sensor subsystem
 #define SENSOR_MAXIMUM_REPORT_SIZE																	8
@@ -22,8 +21,6 @@
 #define EVENTDISPATCHER_HIGHEST_EVENT_ID														128
 #define EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS								8
 #define EVENTDISPATCHER_QUEUE_SIZE																	8
-#define EVENTDISPATCHER_REPORT_DATA_SIZE														8
-#define EVENTDISPATCHER_REPORT_DATA_POOL_SIZE												16
 
 // Diagnostics
 #define DIAGNOSTICSLINK_TRANSMISSION_BUFFER_SIZE										200

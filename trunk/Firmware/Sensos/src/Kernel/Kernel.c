@@ -12,15 +12,25 @@
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../NetworkSubsystem/Network.h"
 
+#include <util/delay.h>
+
 // Entry point to user code.
 extern void Start();
 
 uint32_t sn = 0;
 
+void Bla(void* data, uint8_t length)
+{
+
+}
+
 int main()
 {
 	PORTF = 0x00;
 	DDRF = 0xff;
+
+	PORTB = 0x00;
+	DDRB = 0xff;
 
 
 	// Initialize IO ports
@@ -28,16 +38,32 @@ int main()
 	PORTE = 0x3c;
 
 	PORTD = 0b01010101; // Id configuration
-	DDRD = 0b10101010;
+	DDRD =  0b10101010;
 	sn += ReadBit(PIND, 0) ? 0 : 1;
 	sn += ReadBit(PIND, 2) ? 0 : 2;
 	sn += ReadBit(PIND, 4) ? 0 : 4;
 	sn += ReadBit(PIND, 6) ? 0 : 8;
 
+	UCSR0A = (1 << U2X0);
+	UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+	UBRR0H = (3 >> 8);
+	UBRR0L = (3 & 0xff);
+
+//	RadioDriver_Initialize(Bla);
+//	sei();
+//	uint8_t buf[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+//	while (1)
+//	{
+//		Leds_GreenOn();
+//		RadioDriver_Send(buf, 10);
+//		Leds_GreenOff();
+//		_delay_ms(500);
+//		Leds_YellowToggle();
+//	}
 
 	// Initialize sub systems
 	MemoryManager_Initialize();
-	Network_Initialize(sn & 8 ? true : false);
+	Network_Initialize(sn == 8 ? true : false);
 	Network_SetId(sn);
 	//	PowerManager_Initialize();
 	EventDispatcher_Initialize();

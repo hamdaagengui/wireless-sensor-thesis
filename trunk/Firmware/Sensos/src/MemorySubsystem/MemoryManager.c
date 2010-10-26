@@ -23,21 +23,29 @@ void MemoryManager_Initialize()
 
 void* MemoryManager_AllocateNetworkBlock()
 {
+	com('a');
+	com('n');
 	return Pool_AllocateBlock(networkPool);
 }
 
 void MemoryManager_ReleaseNetworkBlock(void* block)
 {
+	com('r');
+	com('n');
 	Pool_ReleaseBlock(networkPool, block);
 }
 
 void* MemoryManager_AllocateSensorBlock()
 {
+	com('a');
+	com('s');
 	return Pool_AllocateBlock(sensorPool);
 }
 
 void MemoryManager_ReleaseSensorBlock(void* block)
 {
+	com('r');
+	com('s');
 	Pool_ReleaseBlock(sensorPool, block);
 }
 
