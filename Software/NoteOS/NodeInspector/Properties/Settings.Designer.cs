@@ -106,5 +106,17 @@ namespace NodeInspector.Properties {
                 this["DeltaTime"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("305")]
+        public int SplitterDistance {
+            get {
+                return ((int)(this["SplitterDistance"]));
+            }
+            set {
+                this["SplitterDistance"] = value;
+            }
+        }
     }
 }

@@ -30,11 +30,7 @@
 		{
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainView));
-			this.checkBoxShowFramework = new System.Windows.Forms.CheckBox();
 			this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-			this.checkBoxShowApplication = new System.Windows.Forms.CheckBox();
-			this.textBox1 = new System.Windows.Forms.TextBox();
-			this.button1 = new System.Windows.Forms.Button();
 			this.checkBoxShowErrors = new System.Windows.Forms.CheckBox();
 			this.checkBoxShowWarnings = new System.Windows.Forms.CheckBox();
 			this.checkBoxShowMessages = new System.Windows.Forms.CheckBox();
@@ -44,6 +40,9 @@
 			this.checkBoxRun = new System.Windows.Forms.CheckBox();
 			this.checkBoxTrackNewest = new System.Windows.Forms.CheckBox();
 			this.checkBoxDeltaTime = new System.Windows.Forms.CheckBox();
+			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+			this.dataGridView1 = new System.Windows.Forms.DataGridView();
+			this.buttonReset = new System.Windows.Forms.Button();
 			this.listViewLogs = new NodeInspector.ListViewNoFlicker();
 			this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -51,61 +50,18 @@
 			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+			this.splitContainer1.Panel1.SuspendLayout();
+			this.splitContainer1.Panel2.SuspendLayout();
+			this.splitContainer1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
-			// 
-			// checkBoxShowFramework
-			// 
-			this.checkBoxShowFramework.Checked = true;
-			this.checkBoxShowFramework.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxShowFramework.ImageList = this.imageList1;
-			this.checkBoxShowFramework.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-			this.checkBoxShowFramework.Location = new System.Drawing.Point(75, 93);
-			this.checkBoxShowFramework.Name = "checkBoxShowFramework";
-			this.checkBoxShowFramework.Size = new System.Drawing.Size(40, 32);
-			this.checkBoxShowFramework.TabIndex = 18;
-			this.checkBoxShowFramework.UseVisualStyleBackColor = true;
-			this.checkBoxShowFramework.Visible = false;
 			// 
 			// imageList1
 			// 
 			this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
 			this.imageList1.ImageSize = new System.Drawing.Size(18, 18);
 			this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-			// 
-			// checkBoxShowApplication
-			// 
-			this.checkBoxShowApplication.Checked = true;
-			this.checkBoxShowApplication.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxShowApplication.ImageList = this.imageList1;
-			this.checkBoxShowApplication.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-			this.checkBoxShowApplication.Location = new System.Drawing.Point(29, 93);
-			this.checkBoxShowApplication.Name = "checkBoxShowApplication";
-			this.checkBoxShowApplication.Size = new System.Drawing.Size(40, 32);
-			this.checkBoxShowApplication.TabIndex = 17;
-			this.checkBoxShowApplication.UseVisualStyleBackColor = true;
-			this.checkBoxShowApplication.Visible = false;
-			// 
-			// textBox1
-			// 
-			this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-									| System.Windows.Forms.AnchorStyles.Right)));
-			this.textBox1.Location = new System.Drawing.Point(146, 99);
-			this.textBox1.Name = "textBox1";
-			this.textBox1.Size = new System.Drawing.Size(328, 20);
-			this.textBox1.TabIndex = 16;
-			this.textBox1.Visible = false;
-			// 
-			// button1
-			// 
-			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.button1.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-			this.button1.Location = new System.Drawing.Point(480, 97);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(39, 23);
-			this.button1.TabIndex = 15;
-			this.button1.Text = "Filter";
-			this.button1.UseVisualStyleBackColor = true;
-			this.button1.Visible = false;
 			// 
 			// checkBoxShowErrors
 			// 
@@ -149,7 +105,7 @@
 			// timer1
 			// 
 			this.timer1.Enabled = true;
-			this.timer1.Interval = 1000;
+			this.timer1.Interval = 200;
 			this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
 			// 
 			// comboBoxPort
@@ -224,11 +180,61 @@
 			this.checkBoxDeltaTime.UseVisualStyleBackColor = true;
 			this.checkBoxDeltaTime.Visible = false;
 			// 
-			// listViewLogs
+			// splitContainer1
 			// 
-			this.listViewLogs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+			this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
 									| System.Windows.Forms.AnchorStyles.Left)
 									| System.Windows.Forms.AnchorStyles.Right)));
+			this.splitContainer1.DataBindings.Add(new System.Windows.Forms.Binding("SplitterDistance", global::NodeInspector.Properties.Settings.Default, "SplitterDistance", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.splitContainer1.Location = new System.Drawing.Point(12, 50);
+			this.splitContainer1.Name = "splitContainer1";
+			this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+			// 
+			// splitContainer1.Panel1
+			// 
+			this.splitContainer1.Panel1.Controls.Add(this.listViewLogs);
+			// 
+			// splitContainer1.Panel2
+			// 
+			this.splitContainer1.Panel2.Controls.Add(this.dataGridView1);
+			this.splitContainer1.Size = new System.Drawing.Size(830, 542);
+			this.splitContainer1.SplitterDistance = global::NodeInspector.Properties.Settings.Default.SplitterDistance;
+			this.splitContainer1.SplitterWidth = 5;
+			this.splitContainer1.TabIndex = 25;
+			// 
+			// dataGridView1
+			// 
+			this.dataGridView1.AllowUserToAddRows = false;
+			this.dataGridView1.AllowUserToDeleteRows = false;
+			this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+			this.dataGridView1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+			this.dataGridView1.BackgroundColor = System.Drawing.SystemColors.Window;
+			this.dataGridView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+			this.dataGridView1.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
+			this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridView1.Location = new System.Drawing.Point(0, 0);
+			this.dataGridView1.MultiSelect = false;
+			this.dataGridView1.Name = "dataGridView1";
+			this.dataGridView1.RowHeadersVisible = false;
+			this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+			this.dataGridView1.Size = new System.Drawing.Size(830, 232);
+			this.dataGridView1.StandardTab = true;
+			this.dataGridView1.TabIndex = 0;
+			// 
+			// buttonReset
+			// 
+			this.buttonReset.Location = new System.Drawing.Point(326, 16);
+			this.buttonReset.Name = "buttonReset";
+			this.buttonReset.Size = new System.Drawing.Size(46, 23);
+			this.buttonReset.TabIndex = 26;
+			this.buttonReset.Text = "Reset";
+			this.buttonReset.UseVisualStyleBackColor = true;
+			this.buttonReset.Click += new System.EventHandler(this.buttonReset_Click);
+			// 
+			// listViewLogs
+			// 
+			this.listViewLogs.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.listViewLogs.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader5,
             this.columnHeader1,
@@ -236,15 +242,15 @@
             this.columnHeader3,
             this.columnHeader6,
             this.columnHeader4});
+			this.listViewLogs.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.listViewLogs.FullRowSelect = true;
-			this.listViewLogs.Location = new System.Drawing.Point(12, 50);
+			this.listViewLogs.Location = new System.Drawing.Point(0, 0);
 			this.listViewLogs.Name = "listViewLogs";
-			this.listViewLogs.Size = new System.Drawing.Size(830, 542);
+			this.listViewLogs.Size = new System.Drawing.Size(830, 305);
 			this.listViewLogs.SmallImageList = this.imageList1;
-			this.listViewLogs.TabIndex = 19;
+			this.listViewLogs.TabIndex = 20;
 			this.listViewLogs.UseCompatibleStateImageBehavior = false;
 			this.listViewLogs.View = System.Windows.Forms.View.Details;
-			this.listViewLogs.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listViewLogs_MouseDoubleClick);
 			// 
 			// columnHeader5
 			// 
@@ -280,30 +286,30 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(854, 604);
+			this.Controls.Add(this.buttonReset);
+			this.Controls.Add(this.splitContainer1);
 			this.Controls.Add(this.checkBoxDeltaTime);
 			this.Controls.Add(this.checkBoxTrackNewest);
 			this.Controls.Add(this.checkBoxRun);
 			this.Controls.Add(this.comboBoxBaudrate);
-			this.Controls.Add(this.textBox1);
-			this.Controls.Add(this.button1);
-			this.Controls.Add(this.checkBoxShowFramework);
-			this.Controls.Add(this.checkBoxShowApplication);
 			this.Controls.Add(this.comboBoxPort);
-			this.Controls.Add(this.listViewLogs);
 			this.Controls.Add(this.checkBoxShowErrors);
 			this.Controls.Add(this.checkBoxShowWarnings);
 			this.Controls.Add(this.checkBoxShowMessages);
 			this.DataBindings.Add(new System.Windows.Forms.Binding("Location", global::NodeInspector.Properties.Settings.Default, "MainViewLocation", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-			this.DataBindings.Add(new System.Windows.Forms.Binding("WindowState", global::NodeInspector.Properties.Settings.Default, "MainViewWindowState", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Location = global::NodeInspector.Properties.Settings.Default.MainViewLocation;
 			this.MinimumSize = new System.Drawing.Size(708, 260);
 			this.Name = "MainView";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Node Inspector";
-			this.WindowState = global::NodeInspector.Properties.Settings.Default.MainViewWindowState;
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainView_FormClosing);
 			this.Load += new System.EventHandler(this.Form1_Load);
+			this.splitContainer1.Panel1.ResumeLayout(false);
+			this.splitContainer1.Panel2.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+			this.splitContainer1.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -311,27 +317,26 @@
 
 		#endregion
 
-		private System.Windows.Forms.CheckBox checkBoxShowFramework;
-		private System.Windows.Forms.CheckBox checkBoxShowApplication;
-		private System.Windows.Forms.TextBox textBox1;
-		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.CheckBox checkBoxShowErrors;
 		private System.Windows.Forms.CheckBox checkBoxShowWarnings;
 		private System.Windows.Forms.CheckBox checkBoxShowMessages;
-		private ListViewNoFlicker listViewLogs;
-		private System.Windows.Forms.ColumnHeader columnHeader1;
-		private System.Windows.Forms.ColumnHeader columnHeader2;
-		private System.Windows.Forms.ColumnHeader columnHeader3;
-		private System.Windows.Forms.ColumnHeader columnHeader4;
 		private System.Windows.Forms.ImageList imageList1;
-		private System.Windows.Forms.ColumnHeader columnHeader5;
-		private System.Windows.Forms.ColumnHeader columnHeader6;
 		private System.Windows.Forms.Timer timer1;
 		private System.Windows.Forms.ComboBox comboBoxPort;
 		private System.Windows.Forms.ComboBox comboBoxBaudrate;
 		private System.Windows.Forms.CheckBox checkBoxRun;
 		private System.Windows.Forms.CheckBox checkBoxTrackNewest;
 		private System.Windows.Forms.CheckBox checkBoxDeltaTime;
+		private System.Windows.Forms.SplitContainer splitContainer1;
+		private ListViewNoFlicker listViewLogs;
+		private System.Windows.Forms.ColumnHeader columnHeader5;
+		private System.Windows.Forms.ColumnHeader columnHeader1;
+		private System.Windows.Forms.ColumnHeader columnHeader2;
+		private System.Windows.Forms.ColumnHeader columnHeader3;
+		private System.Windows.Forms.ColumnHeader columnHeader6;
+		private System.Windows.Forms.ColumnHeader columnHeader4;
+		private System.Windows.Forms.DataGridView dataGridView1;
+		private System.Windows.Forms.Button buttonReset;
 	}
 }
 

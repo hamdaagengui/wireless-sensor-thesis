@@ -7,6 +7,8 @@ using System.IO.Ports;
 using System.Windows.Forms;
 using Coma.Ports;
 using NodeInspector.Properties;
+using System.ComponentModel;
+using System.Threading;
 
 namespace NodeInspector
 {
@@ -16,6 +18,9 @@ namespace NodeInspector
 		ConcurrentQueue<PortQueueElement> portQueue = new ConcurrentQueue<PortQueueElement>();
 		Dictionary<int, EventDescriptor> eventDescriptors = new Dictionary<int, EventDescriptor>();
 		List<LogEntry> logs = new List<LogEntry>();
+		Dictionary<string, DynamicVariable> variables = new Dictionary<string, DynamicVariable>();
+		BindingList<DynamicVariable> variableList = new BindingList<DynamicVariable>();
+		ScriptEngine se = new ScriptEngine();
 
 		public MainView()
 		{
@@ -27,16 +32,19 @@ namespace NodeInspector
 			imageList1.Images.Add(SystemIcons.Information);
 			imageList1.Images.Add(SystemIcons.Warning);
 			imageList1.Images.Add(SystemIcons.Error);
-			imageList1.Images.Add(SystemIcons.Application);
-			imageList1.Images.Add(SystemIcons.Shield);
 
 			checkBoxShowMessages.ImageIndex = 0;
 			checkBoxShowWarnings.ImageIndex = 1;
 			checkBoxShowErrors.ImageIndex = 2;
-			checkBoxShowApplication.ImageIndex = 3;
-			checkBoxShowFramework.ImageIndex = 4;
+
+			//dataGridView1.AutoGenerateColumns = false;
+			//dataGridView1.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "Name", HeaderText = "Variable" });
+			//dataGridView1.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "Value", HeaderText = "Value" });
+			dataGridView1.DataSource = variableList;
 
 			LoadEventDescriptors();
+
+			se.Variables = variables;
 
 			UpdatePortList();
 
@@ -86,6 +94,16 @@ namespace NodeInspector
 					else
 					{
 						eventDescriptors[ed.Id] = ed;
+						if (ed.Script != "")
+						{
+							var name = se.GetVariableName(ed.Script);
+							if (variables.ContainsKey(name) == false)
+							{
+								var dv = new DynamicVariable() { Name = name, Value = 0 };
+								variables.Add(name, dv);
+								variableList.Add(dv);
+							}
+						}
 					}
 				}
 			}
@@ -158,6 +176,8 @@ namespace NodeInspector
 				{
 					logs.Add(log);
 
+					se.RunScript(log.EventDescriptor.Script);
+
 					if (levels[log.EventDescriptor.Level])
 					{
 						lvis.Add(log.ToListViewItem());
@@ -198,6 +218,7 @@ namespace NodeInspector
 					var spi = (SerialPortInfo)comboBoxPort.SelectedItem;
 					port = new SerialPort(spi.Name, int.Parse(comboBoxBaudrate.Text));
 					port.Open();
+					port.DiscardInBuffer();
 					port.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
 				}
 				catch
@@ -220,14 +241,31 @@ namespace NodeInspector
 
 		void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
-			portQueue.Enqueue(new PortQueueElement { Id = (byte)port.ReadByte(), Time = DateTime.Now });
+			var v = port.ReadByte();
+
+			Console.WriteLine(v);
+
+			portQueue.Enqueue(new PortQueueElement { Id = (byte)v, Time = DateTime.Now });
 		}
 
-		private void listViewLogs_MouseDoubleClick(object sender, MouseEventArgs e)
+		private void buttonReset_Click(object sender, EventArgs e)
 		{
+			port.DtrEnable = true;
+
+			Thread.Sleep(300);
+
+			port.DiscardInBuffer();
+
 			logs.Clear();
 			LogEntry.ResetNumbering();
+			foreach (var v in variables.Values)
+			{
+				v.Value = 0;
+			}
 			UpdateListView();
+
+			
+			port.DtrEnable = false;
 		}
 	}
 }

@@ -12,7 +12,7 @@ namespace NodeInspector
 		public string Subsystem;
 		public string Module;
 		public string Details;
-//		public string Script;
+		public string Script;
 
 		static public EventDescriptor Parse(string description)
 		{
@@ -22,7 +22,7 @@ namespace NodeInspector
 			EventDescriptor ed = new EventDescriptor();
 
 			var parts = description.Split(new char[] { ';' });
-			if (parts.Length != 5)
+			if (parts.Length != 5 && parts.Length!=6)
 			{
 				return null;
 			}
@@ -43,7 +43,14 @@ namespace NodeInspector
 
 			ed.Details = parts[4];
 
-//			ed.Script = parts[5];
+			if (parts.Length == 6)
+			{
+				ed.Script = parts[5];
+			}
+			else
+			{
+				ed.Script = "";
+			}
 
 			return ed;
 		}
