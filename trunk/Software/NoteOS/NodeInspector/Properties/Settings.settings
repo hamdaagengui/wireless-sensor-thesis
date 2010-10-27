@@ -23,5 +23,8 @@
     <Setting Name="DeltaTime" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="SplitterDistance" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">305</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
