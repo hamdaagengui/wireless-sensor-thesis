@@ -247,6 +247,7 @@ bool Network_SendData(uint8_t receiver, void* data, uint8_t length)
 	if (Queue_IsFull(linkPacketQueue))
 	{
 		NonCritical();
+		NodeInspector_Send(NODE_INSPECTOR_DATA_NOT_QUEUED)
 		return false;
 	}
 
@@ -256,6 +257,8 @@ bool Network_SendData(uint8_t receiver, void* data, uint8_t length)
 	{
 		// no free network buffer objects
 		NonCritical();
+
+		NodeInspector_Send(NODE_INSPECTOR_DATA_NOT_QUEUED)
 		return false;
 	}
 
@@ -272,6 +275,9 @@ bool Network_SendData(uint8_t receiver, void* data, uint8_t length)
 	Queue_AdvanceHead(linkPacketQueue);
 
 	NonCritical();
+
+	NodeInspector_Send(NODE_INSPECTOR_DATA_QUEUED)
+
 	return true;
 }
 
@@ -326,6 +332,8 @@ void Network_TimerEvent()
 	{
 		return;
 	}
+
+	NodeInspector_Send(NODE_INSPECTOR_NETWORK_TICK)
 
 	UpdateCca();
 
@@ -383,6 +391,8 @@ void Network_TimerEvent()
 				rtsPacketTemplate.link.destination = currentLink;
 				rtsPacketTemplate.slot = slot;
 				RadioDriver_Send(&rtsPacketTemplate, sizeof(rtsPacketTemplate));
+
+				NodeInspector_Send(NODE_INSPECTOR_TX_RTS)
 
 				state = STATE_EXPECTING_CTS;
 			}
@@ -477,6 +487,8 @@ static void FrameReceived(void* data, uint8_t length)
 
 						state = STATE_EXPECTING_DATA;
 
+						NodeInspector_Send(NODE_INSPECTOR_RX_RTS)
+
 						LA(12);
 					}
 
@@ -492,6 +504,7 @@ static void FrameReceived(void* data, uint8_t length)
 
 						state = STATE_EXPECTING_ACK;
 
+						NodeInspector_Send(NODE_INSPECTOR_RX_CTS)
 						LA(13);
 					}
 					else
@@ -510,6 +523,7 @@ static void FrameReceived(void* data, uint8_t length)
 						Queue_AdvanceTail(linkPacketQueue); // remove it from the queue
 						MemoryManager_ReleaseAnyBlock(currentPacket);
 
+						NodeInspector_Send(NODE_INSPECTOR_RX_ACK)
 						LA(14);
 					}
 
@@ -538,6 +552,7 @@ static void FrameReceived(void* data, uint8_t length)
 
 							// dummy release since its not handled here yet
 							MemoryManager_ReleaseAnyBlock(data);
+							NodeInspector_Send(NODE_INSPECTOR_RX_DATA)
 						}
 						else // forward data
 						{
@@ -546,6 +561,7 @@ static void FrameReceived(void* data, uint8_t length)
 
 							// dummy release since its not handled here yet
 							MemoryManager_ReleaseAnyBlock(data);
+							NodeInspector_Send(NODE_INSPECTOR_NETWORK_FORWARDING)
 						}
 					}
 					else
