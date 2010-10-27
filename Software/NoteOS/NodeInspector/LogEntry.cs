@@ -9,7 +9,12 @@ namespace NodeInspector
 {
 	class LogEntry
 	{
-		static int NextNumber = 0;
+		static int NextNumber = 1;
+
+		static public void ResetNumbering()
+		{
+			NextNumber = 1;
+		}
 
 		public EventDescriptor EventDescriptor;
 		public DateTime Time;
@@ -19,7 +24,7 @@ namespace NodeInspector
 		{
 			EventDescriptor = eventDescriptor;
 			Time = time;
-			Number = Interlocked.Increment(ref NextNumber);
+			Number = NextNumber++;
 		}
 
 		public ListViewItem ToListViewItem()

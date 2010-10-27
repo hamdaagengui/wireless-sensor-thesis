@@ -14,5 +14,14 @@
     <Setting Name="Baudrate" Type="System.String" Scope="User">
       <Value Profile="(Default)">500000</Value>
     </Setting>
+    <Setting Name="RunState" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="TrackNewest" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="DeltaTime" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

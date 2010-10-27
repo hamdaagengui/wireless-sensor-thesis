@@ -12,11 +12,12 @@ namespace NodeInspector
 		public string Subsystem;
 		public string Module;
 		public string Details;
+//		public string Script;
 
 		static public EventDescriptor Parse(string description)
 		{
-			// int;int;string;string;string
-			// id;level;subsystem;module;details
+			// int;int;string;string;string;string
+			// id;level;subsystem;module;details;script
 
 			EventDescriptor ed = new EventDescriptor();
 
@@ -41,6 +42,8 @@ namespace NodeInspector
 			ed.Module = parts[3];
 
 			ed.Details = parts[4];
+
+//			ed.Script = parts[5];
 
 			return ed;
 		}
