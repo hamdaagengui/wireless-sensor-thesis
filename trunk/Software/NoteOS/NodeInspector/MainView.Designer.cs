@@ -29,6 +29,7 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainView));
 			this.checkBoxShowFramework = new System.Windows.Forms.CheckBox();
 			this.imageList1 = new System.Windows.Forms.ImageList(this.components);
 			this.checkBoxShowApplication = new System.Windows.Forms.CheckBox();
@@ -41,6 +42,8 @@
 			this.comboBoxPort = new System.Windows.Forms.ComboBox();
 			this.comboBoxBaudrate = new System.Windows.Forms.ComboBox();
 			this.checkBoxRun = new System.Windows.Forms.CheckBox();
+			this.checkBoxTrackNewest = new System.Windows.Forms.CheckBox();
+			this.checkBoxDeltaTime = new System.Windows.Forms.CheckBox();
 			this.listViewLogs = new NodeInspector.ListViewNoFlicker();
 			this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -88,7 +91,7 @@
 									| System.Windows.Forms.AnchorStyles.Right)));
 			this.textBox1.Location = new System.Drawing.Point(146, 99);
 			this.textBox1.Name = "textBox1";
-			this.textBox1.Size = new System.Drawing.Size(180, 20);
+			this.textBox1.Size = new System.Drawing.Size(328, 20);
 			this.textBox1.TabIndex = 16;
 			this.textBox1.Visible = false;
 			// 
@@ -96,7 +99,7 @@
 			// 
 			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.button1.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-			this.button1.Location = new System.Drawing.Point(332, 97);
+			this.button1.Location = new System.Drawing.Point(480, 97);
 			this.button1.Name = "button1";
 			this.button1.Size = new System.Drawing.Size(39, 23);
 			this.button1.TabIndex = 15;
@@ -155,7 +158,7 @@
 			this.comboBoxPort.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::NodeInspector.Properties.Settings.Default, "Port", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 			this.comboBoxPort.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboBoxPort.FormattingEnabled = true;
-			this.comboBoxPort.Location = new System.Drawing.Point(342, 18);
+			this.comboBoxPort.Location = new System.Drawing.Point(490, 18);
 			this.comboBoxPort.Name = "comboBoxPort";
 			this.comboBoxPort.Size = new System.Drawing.Size(173, 21);
 			this.comboBoxPort.TabIndex = 20;
@@ -174,7 +177,7 @@
             "250000",
             "500000",
             "1000000"});
-			this.comboBoxBaudrate.Location = new System.Drawing.Point(521, 18);
+			this.comboBoxBaudrate.Location = new System.Drawing.Point(669, 18);
 			this.comboBoxBaudrate.Name = "comboBoxBaudrate";
 			this.comboBoxBaudrate.Size = new System.Drawing.Size(121, 21);
 			this.comboBoxBaudrate.TabIndex = 21;
@@ -184,13 +187,42 @@
 			// 
 			this.checkBoxRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.checkBoxRun.AutoSize = true;
-			this.checkBoxRun.Location = new System.Drawing.Point(648, 20);
+			this.checkBoxRun.Checked = global::NodeInspector.Properties.Settings.Default.RunState;
+			this.checkBoxRun.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxRun.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::NodeInspector.Properties.Settings.Default, "RunState", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.checkBoxRun.Location = new System.Drawing.Point(796, 20);
 			this.checkBoxRun.Name = "checkBoxRun";
 			this.checkBoxRun.Size = new System.Drawing.Size(46, 17);
 			this.checkBoxRun.TabIndex = 22;
 			this.checkBoxRun.Text = "Run";
 			this.checkBoxRun.UseVisualStyleBackColor = true;
 			this.checkBoxRun.CheckedChanged += new System.EventHandler(this.checkBoxRun_CheckedChanged);
+			// 
+			// checkBoxTrackNewest
+			// 
+			this.checkBoxTrackNewest.AutoSize = true;
+			this.checkBoxTrackNewest.Checked = global::NodeInspector.Properties.Settings.Default.TrackNewest;
+			this.checkBoxTrackNewest.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxTrackNewest.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::NodeInspector.Properties.Settings.Default, "TrackNewest", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.checkBoxTrackNewest.Location = new System.Drawing.Point(150, 20);
+			this.checkBoxTrackNewest.Name = "checkBoxTrackNewest";
+			this.checkBoxTrackNewest.Size = new System.Drawing.Size(91, 17);
+			this.checkBoxTrackNewest.TabIndex = 23;
+			this.checkBoxTrackNewest.Text = "Track newest";
+			this.checkBoxTrackNewest.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxDeltaTime
+			// 
+			this.checkBoxDeltaTime.AutoSize = true;
+			this.checkBoxDeltaTime.Checked = global::NodeInspector.Properties.Settings.Default.DeltaTime;
+			this.checkBoxDeltaTime.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::NodeInspector.Properties.Settings.Default, "DeltaTime", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.checkBoxDeltaTime.Location = new System.Drawing.Point(247, 20);
+			this.checkBoxDeltaTime.Name = "checkBoxDeltaTime";
+			this.checkBoxDeltaTime.Size = new System.Drawing.Size(73, 17);
+			this.checkBoxDeltaTime.TabIndex = 24;
+			this.checkBoxDeltaTime.Text = "Delta time";
+			this.checkBoxDeltaTime.UseVisualStyleBackColor = true;
+			this.checkBoxDeltaTime.Visible = false;
 			// 
 			// listViewLogs
 			// 
@@ -207,7 +239,7 @@
 			this.listViewLogs.FullRowSelect = true;
 			this.listViewLogs.Location = new System.Drawing.Point(12, 50);
 			this.listViewLogs.Name = "listViewLogs";
-			this.listViewLogs.Size = new System.Drawing.Size(682, 464);
+			this.listViewLogs.Size = new System.Drawing.Size(830, 542);
 			this.listViewLogs.SmallImageList = this.imageList1;
 			this.listViewLogs.TabIndex = 19;
 			this.listViewLogs.UseCompatibleStateImageBehavior = false;
@@ -247,7 +279,9 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(706, 526);
+			this.ClientSize = new System.Drawing.Size(854, 604);
+			this.Controls.Add(this.checkBoxDeltaTime);
+			this.Controls.Add(this.checkBoxTrackNewest);
 			this.Controls.Add(this.checkBoxRun);
 			this.Controls.Add(this.comboBoxBaudrate);
 			this.Controls.Add(this.textBox1);
@@ -261,8 +295,9 @@
 			this.Controls.Add(this.checkBoxShowMessages);
 			this.DataBindings.Add(new System.Windows.Forms.Binding("Location", global::NodeInspector.Properties.Settings.Default, "MainViewLocation", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 			this.DataBindings.Add(new System.Windows.Forms.Binding("WindowState", global::NodeInspector.Properties.Settings.Default, "MainViewWindowState", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Location = global::NodeInspector.Properties.Settings.Default.MainViewLocation;
-			this.MinimumSize = new System.Drawing.Size(403, 260);
+			this.MinimumSize = new System.Drawing.Size(708, 260);
 			this.Name = "MainView";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Node Inspector";
@@ -295,6 +330,8 @@
 		private System.Windows.Forms.ComboBox comboBoxPort;
 		private System.Windows.Forms.ComboBox comboBoxBaudrate;
 		private System.Windows.Forms.CheckBox checkBoxRun;
+		private System.Windows.Forms.CheckBox checkBoxTrackNewest;
+		private System.Windows.Forms.CheckBox checkBoxDeltaTime;
 	}
 }
 

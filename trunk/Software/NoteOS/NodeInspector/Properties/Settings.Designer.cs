@@ -70,5 +70,41 @@ namespace NodeInspector.Properties {
                 this["Baudrate"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool RunState {
+            get {
+                return ((bool)(this["RunState"]));
+            }
+            set {
+                this["RunState"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool TrackNewest {
+            get {
+                return ((bool)(this["TrackNewest"]));
+            }
+            set {
+                this["TrackNewest"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DeltaTime {
+            get {
+                return ((bool)(this["DeltaTime"]));
+            }
+            set {
+                this["DeltaTime"] = value;
+            }
+        }
     }
 }

@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using NodeInspector.Properties;
-using System.IO;
-using System.Threading.Tasks;
-using System.IO.Ports;
-using Coma.Ports;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.IO.Ports;
+using System.Windows.Forms;
+using Coma.Ports;
+using NodeInspector.Properties;
 
 namespace NodeInspector
 {
@@ -50,9 +45,11 @@ namespace NodeInspector
 			{
 				if (p.ToString() == Settings.Default.Port)
 				{
-					comboBoxPort.SelectedItem = p;
+					comboBoxPort.Text = p.ToString();
 				}
 			}
+
+			checkBoxRun_CheckedChanged(null, null);
 		}
 
 		private void MainView_FormClosing(object sender, FormClosingEventArgs e)
@@ -62,17 +59,45 @@ namespace NodeInspector
 
 		void LoadEventDescriptors()
 		{
+			if (File.Exists("EventDescriptors.txt") == false)
+			{
+				MessageBox.Show("No event descriptor file (\"EventDescriptors.txt\") found.", "Node Inspector", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+				return;
+			}
+
+			List<string> badDescriptors = new List<string>();
+
 			foreach (var line in File.ReadAllLines("EventDescriptors.txt"))
 			{
-				var ed = EventDescriptor.Parse(line);
-				if (ed == null)
+				string l = line;
+				if (l.Contains("//"))
 				{
-					// error in descriptor
+					l = line.Remove(l.IndexOf("//"));
 				}
-				else
+				l = l.Trim();
+				if (l.Length > 0)
 				{
-					eventDescriptors[ed.Id] = ed;
+					var ed = EventDescriptor.Parse(line);
+					if (ed == null)
+					{
+						// error in descriptor
+						badDescriptors.Add(line);
+					}
+					else
+					{
+						eventDescriptors[ed.Id] = ed;
+					}
 				}
+			}
+
+			if (badDescriptors.Count > 10)
+			{
+				MessageBox.Show("Many of the event descriptors are bad. Please check EventDescriptors.txt.", "Node Inspector", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+			}
+			else if (badDescriptors.Count > 0)
+			{
+				var s = "The following bad descriptors were incountered:\n" + string.Join("\n", badDescriptors.ToArray());
+				MessageBox.Show(s, "Node Inspector", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 			}
 		}
 
@@ -140,7 +165,22 @@ namespace NodeInspector
 				}
 			}
 
+			bool doScroll = false;
+			//if (listViewLogs.Items.Count > 0)
+			//{
+			//  int y = listViewLogs.Items[listViewLogs.Items.Count - 1].Position.Y;
+			//  if (Math.Abs(listViewLogs.Height - y) < 19)
+			//  {
+			//    doScroll = true;
+			//  }
+			//}
+
 			listViewLogs.Items.AddRange(lvis.ToArray());
+			//			if (doScroll)
+			if (checkBoxTrackNewest.Checked && listViewLogs.Items.Count > 0)
+			{
+				listViewLogs.EnsureVisible(listViewLogs.Items.Count - 1);
+			}
 		}
 
 		void UpdatePortList()
@@ -186,6 +226,7 @@ namespace NodeInspector
 		private void listViewLogs_MouseDoubleClick(object sender, MouseEventArgs e)
 		{
 			logs.Clear();
+			LogEntry.ResetNumbering();
 			UpdateListView();
 		}
 	}
