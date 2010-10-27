@@ -63,6 +63,7 @@ void EventDispatcher_Dispatch()
 		{
 			case TYPE_NOTIFICATION:
 				qe->notification.handler();
+				NodeInspector_Send(NODE_INSPECTOR_NOTIFY_EXECUTED)
 				break;
 
 			case TYPE_PROCESSING:
@@ -72,6 +73,7 @@ void EventDispatcher_Dispatch()
 				{
 					MemoryManager_ReleaseAnyBlock(qe->processing.data);
 				}
+				NodeInspector_Send(NODE_INSPECTOR_PROCESS_EXECUTED)
 				break;
 
 			case TYPE_PUBLICATION:
@@ -91,6 +93,7 @@ void EventDispatcher_Dispatch()
 				{
 					MemoryManager_ReleaseAnyBlock(qe->publication.data);
 				}
+				NodeInspector_Send(NODE_INSPECTOR_PUBLISH_EXECUTED)
 				break;
 		}
 
@@ -127,6 +130,8 @@ void EventDispatcher_Notify(completion_handler handler)
 	qe->notification.handler = handler;
 
 	Queue_AdvanceHead(eventQueue);
+
+	NodeInspector_Send(NODE_INSPECTOR_NOTIFY_QUEUED)
 }
 
 void EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
@@ -152,6 +157,8 @@ void EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 	qe->processing.length = length;
 
 	Queue_AdvanceHead(eventQueue);
+
+	NodeInspector_Send(NODE_INSPECTOR_PROCESS_QUEUED)
 }
 
 void EventDispatcher_Publish(uint8_t event, void* data)
@@ -176,4 +183,6 @@ void EventDispatcher_Publish(uint8_t event, void* data)
 	qe->publication.data = data;
 
 	Queue_AdvanceHead(eventQueue);
+
+	NodeInspector_Send(NODE_INSPECTOR_PUBLISH_QUEUED)
 }

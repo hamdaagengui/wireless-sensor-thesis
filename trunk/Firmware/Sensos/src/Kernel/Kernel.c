@@ -38,28 +38,31 @@ int main()
 	PORTE = 0x3c;
 
 	PORTD = 0b01010101; // Id configuration
-	DDRD =  0b10101010;
+	DDRD = 0b10101010;
 	sn += ReadBit(PIND, 0) ? 0 : 1;
 	sn += ReadBit(PIND, 2) ? 0 : 2;
 	sn += ReadBit(PIND, 4) ? 0 : 4;
 	sn += ReadBit(PIND, 6) ? 0 : 8;
 
-	UCSR0A = (1 << U2X0);
-	UCSR0B = (1 << RXEN0) | (1 << TXEN0);
-	UBRR0H = (3 >> 8);
-	UBRR0L = (3 & 0xff);
+	if (USE_NODE_INSPECTOR > 0)
+	{
+		UCSR0A = (1 << U2X0);
+		UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+		UBRR0H = (3 >> 8);
+		UBRR0L = (3 & 0xff);
+	}
 
-//	RadioDriver_Initialize(Bla);
-//	sei();
-//	uint8_t buf[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-//	while (1)
-//	{
-//		Leds_GreenOn();
-//		RadioDriver_Send(buf, 10);
-//		Leds_GreenOff();
-//		_delay_ms(500);
-//		Leds_YellowToggle();
-//	}
+	//	RadioDriver_Initialize(Bla);
+	//	sei();
+	//	uint8_t buf[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	//	while (1)
+	//	{
+	//		Leds_GreenOn();
+	//		RadioDriver_Send(buf, 10);
+	//		Leds_GreenOff();
+	//		_delay_ms(500);
+	//		Leds_YellowToggle();
+	//	}
 
 	// Initialize sub systems
 	MemoryManager_Initialize();
@@ -82,6 +85,9 @@ int main()
 
 	// Run system
 	sei();
+
+	NodeInspector_Send(NODE_INSPECTOR_EVENT_SYSTEM_INITIALIZED);
+
 	while (true)
 	{
 		// Pump the event sub system
