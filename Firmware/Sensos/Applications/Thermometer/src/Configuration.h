@@ -10,6 +10,8 @@
 
 //#define STATISTICS																									1
 //#define MESSAGE_LEVEL																								2
+#define DIAGNOSTICS																									1
+#define DIAGNOSTICS_LINK_BAUDRATE																		500000
 
 // Configuration of RadioDriver
 #define RADIODRIVER_AUTO_RX

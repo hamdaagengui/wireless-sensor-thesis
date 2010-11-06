@@ -11,7 +11,6 @@
 #include "../SPI.h"
 #include "../../Collections/Queue.h"
 #include "../../EventSubsystem/EventDispatcher.h"
-#include "../../Diagnostics/Message.h"
 #include "../GPIO.h"
 
 static bool enabled;
@@ -157,8 +156,6 @@ void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* in
 		// power up peripheral
 		StartTransfer();
 	}
-
-	Message_FrameworkMessage(PSTR(""));
 }
 
 // Internals

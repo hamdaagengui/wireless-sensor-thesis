@@ -10,10 +10,8 @@
 
 static uint8_t networkPool[Pool_CalculateSize(NETWORK_MAXIMUM_LINK_PACKET_SIZE, NETWORK_LINK_PACKET_POOL_SIZE)];
 static uint8_t sensorPool[Pool_CalculateSize(SENSOR_MAXIMUM_REPORT_SIZE, SENSOR_REPORT_POOL_SIZE)];
-static const void* const networkPoolStart = networkPool;
-static const void* const networkPoolEnd = networkPool + sizeof(networkPool) - 1;
-static const void* const sensorPoolStart = sensorPool;
-static const void* const sensorPoolEnd = sensorPool + sizeof(sensorPool) - 1;
+static const uint8_t* const networkPoolEnd = networkPool + sizeof(networkPool) - 1;
+static const uint8_t* const sensorPoolEnd = sensorPool + sizeof(sensorPool) - 1;
 
 void MemoryManager_Initialize()
 {
@@ -55,11 +53,13 @@ void MemoryManager_ReleaseSensorBlock(void* block)
 
 void MemoryManager_ReleaseAnyBlock(void* block)
 {
-	if (networkPoolStart <= block && block <= networkPoolEnd)
+	uint8_t* b = block;
+
+	if (networkPool <= b && b <= networkPoolEnd)
 	{
 		MemoryManager_ReleaseNetworkBlock(block);
 	}
-	else if (sensorPoolStart <= block && block <= sensorPoolEnd)
+	else if (sensorPool <= b && b <= sensorPoolEnd)
 	{
 		MemoryManager_ReleaseSensorBlock(block);
 	}

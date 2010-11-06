@@ -11,6 +11,7 @@
 #include "../MemorySubsystem/MemoryManager.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../NetworkSubsystem/Network.h"
+#include "../Diagnostics/Diagnostics.h"
 
 #include <util/delay.h>
 
@@ -44,13 +45,7 @@ int main()
 	sn += ReadBit(PIND, 4) ? 0 : 4;
 	sn += ReadBit(PIND, 6) ? 0 : 8;
 
-	if (USE_NODE_INSPECTOR > 0)
-	{
-		UCSR0A = (1 << U2X0);
-		UCSR0B = (1 << RXEN0) | (1 << TXEN0);
-		UBRR0H = (3 >> 8);
-		UBRR0L = (3 & 0xff);
-	}
+	Diagnostics_Initialize();
 
 	//	RadioDriver_Initialize(Bla);
 	//	sei();
