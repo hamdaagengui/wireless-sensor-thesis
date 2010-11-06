@@ -46,6 +46,12 @@ void DiagnosticsLink_Initialize(uint32_t baudrate, block_handler frameReceivedHa
 {
 	frameHandler = frameReceivedHandler;
 
+
+	UCSR0A = (1 << U2X0);
+	UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+	UBRR0H = (3 >> 8);
+	UBRR0L = (3 & 0xff);
+
 	UCSR0A = 1 << U2X0;
 	UCSR0B = 1 << RXCIE0 | 1 << RXEN0 | 1 << TXEN0;
 	UCSR0A = 1 << UCSZ01 | 1 << UCSZ00;
