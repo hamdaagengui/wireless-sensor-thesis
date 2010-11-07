@@ -15,7 +15,10 @@ namespace NodeInspector
 	public partial class MainView : Form
 	{
 		SerialPort port;
-		ConcurrentQueue<PortQueueElement> portQueue = new ConcurrentQueue<PortQueueElement>();
+
+		ConcurrentQueue<EventFrame> eventFrameQueue = new ConcurrentQueue<EventFrame>();
+
+
 		Dictionary<int, EventDescriptor> eventDescriptors = new Dictionary<int, EventDescriptor>();
 		List<LogEntry> logs = new List<LogEntry>();
 		Dictionary<string, DynamicVariable> variables = new Dictionary<string, DynamicVariable>();
@@ -67,7 +70,16 @@ namespace NodeInspector
 
 		void LoadEventDescriptors()
 		{
-			if (File.Exists("EventDescriptors.txt") == false)
+			string path;
+			if (File.Exists("EventDescriptors.txt"))
+			{
+				path = "EventDescriptors.txt";
+			}
+			else 	if (File.Exists("../../EventDescriptors.txt"))
+			{
+				path = "../../EventDescriptors.txt";
+			}
+			else
 			{
 				MessageBox.Show("No event descriptor file (\"EventDescriptors.txt\") found.", "Node Inspector", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 				return;
@@ -156,19 +168,19 @@ namespace NodeInspector
 
 			var lvis = new List<ListViewItem>();
 
-			PortQueueElement pqe;
-			while (portQueue.TryDequeue(out pqe))
+			EventFrame ef;
+			while (eventFrameQueue.TryDequeue(out ef))
 			{
 				LogEntry log = null;
-				if (eventDescriptors.ContainsKey(pqe.Id))
+				if (eventDescriptors.ContainsKey(ef.EventId))
 				{
-					log = new LogEntry(eventDescriptors[pqe.Id], pqe.Time);
+					log = new LogEntry(eventDescriptors[ef.EventId], ef.TimeStamp);
 				}
 				else
 				{
 					if (eventDescriptors.ContainsKey(255))
 					{
-						log = new LogEntry(eventDescriptors[255], pqe.Time);
+						log = new LogEntry(eventDescriptors[255], ef.TimeStamp);
 					}
 				}
 
@@ -239,14 +251,76 @@ namespace NodeInspector
 			}
 		}
 
+		#region Serial port stuff
+
+		const byte ESC = 251;
+		const byte EOF = 252;
+		const byte SOF_STATE = 253;
+		const byte SOF_MESSAGE = 254;
+		const byte SOF_EVENT = 255;
+
+		bool escReceived = false;
+		List<byte> frameData = new List<byte>(200);
+		DateTime frameTimeStamp;
+		enum FrameType
+		{
+			Event,
+			Message,
+			State
+		}
+		FrameType frameType;
+
 		void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
-			var v = port.ReadByte();
+			byte v = (byte)port.ReadByte();
 
-			Console.WriteLine(v);
+			switch (v)
+			{
+				case SOF_EVENT:
+					frameTimeStamp = DateTime.Now;
+					frameType = FrameType.Event;
+					break;
 
-			portQueue.Enqueue(new PortQueueElement { Id = (byte)v, Time = DateTime.Now });
+				case SOF_MESSAGE:
+					frameTimeStamp = DateTime.Now;
+					frameType = FrameType.Message;
+					break;
+
+				case SOF_STATE:
+					frameTimeStamp = DateTime.Now;
+					frameType = FrameType.State;
+					break;
+
+				case ESC:
+					escReceived = true;
+					break;
+
+				case EOF:
+					switch (frameType)
+					{
+						case FrameType.Event:
+							eventFrameQueue.Enqueue(new EventFrame(frameTimeStamp, frameData.ToArray()));
+							break;
+						case FrameType.Message:
+							break;
+						case FrameType.State:
+							break;
+					}
+					frameData.Clear();
+					break;
+
+				default:
+					if (escReceived)
+					{
+						escReceived = false;
+						v |= 0x80;
+					}
+					frameData.Add(v);
+					break;
+			}
 		}
+
+		#endregion
 
 		private void buttonReset_Click(object sender, EventArgs e)
 		{
@@ -264,7 +338,7 @@ namespace NodeInspector
 			}
 			UpdateListView();
 
-			
+
 			port.DtrEnable = false;
 		}
 	}
