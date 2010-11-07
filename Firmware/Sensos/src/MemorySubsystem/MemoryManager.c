@@ -7,6 +7,7 @@
 
 #include "../Collections/Pool.h"
 #include "../DefaultConfiguration.h"
+#include "../Diagnostics/Diagnostics.h"
 
 static uint8_t networkPool[Pool_CalculateSize(NETWORK_MAXIMUM_LINK_PACKET_SIZE, NETWORK_LINK_PACKET_POOL_SIZE)];
 static uint8_t sensorPool[Pool_CalculateSize(SENSOR_MAXIMUM_REPORT_SIZE, SENSOR_REPORT_POOL_SIZE)];
@@ -25,11 +26,11 @@ void* MemoryManager_AllocateNetworkBlock()
 
 	if (b == NULL)
 	{
-		NodeInspector_Send(NODE_INSPECTOR_FAILED_TO_ALLOCATE_NETWORK_BLOCK);
+		Diagnostics_SendEvent(DIAGNOSTICS_FAILED_TO_ALLOCATE_NETWORK_BLOCK);
 	}
 	else
 	{
-		NodeInspector_Send(NODE_INSPECTOR_ALLOCATED_NETWORK_BLOCK);
+		Diagnostics_SendEvent(DIAGNOSTICS_ALLOCATED_NETWORK_BLOCK);
 	}
 
 	return b;
@@ -37,7 +38,7 @@ void* MemoryManager_AllocateNetworkBlock()
 
 void MemoryManager_ReleaseNetworkBlock(void* block)
 {
-	NodeInspector_Send(NODE_INSPECTOR_RELEASED_NETWORK_BLOCK);
+	Diagnostics_SendEvent(DIAGNOSTICS_RELEASED_NETWORK_BLOCK);
 	Pool_ReleaseBlock(networkPool, block);
 }
 

@@ -8,6 +8,7 @@
 #include "EventDispatcher.h"
 #include "../Collections/Queue.h"
 #include "../MemorySubsystem/MemoryManager.h"
+#include "../Diagnostics/Diagnostics.h"
 
 // TODO EVENTDISPATCHER_HIGHEST_EVENT_ID should be replaced by EVENT_LAST_ID or something like that so the user shouldn't explicitly define it.
 static event_handler subscribers[EVENTDISPATCHER_HIGHEST_EVENT_ID][EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS];
@@ -63,7 +64,7 @@ void EventDispatcher_Dispatch()
 		{
 			case TYPE_NOTIFICATION:
 				qe->notification.handler();
-				NodeInspector_Send(NODE_INSPECTOR_NOTIFY_EXECUTED)
+				Diagnostics_SendEvent(DIAGNOSTICS_NOTIFY_EXECUTED);
 				break;
 
 			case TYPE_PROCESSING:
@@ -73,7 +74,7 @@ void EventDispatcher_Dispatch()
 				{
 					MemoryManager_ReleaseAnyBlock(qe->processing.data);
 				}
-				NodeInspector_Send(NODE_INSPECTOR_PROCESS_EXECUTED)
+				Diagnostics_SendEvent(DIAGNOSTICS_PROCESS_EXECUTED);
 				break;
 
 			case TYPE_PUBLICATION:
@@ -93,7 +94,7 @@ void EventDispatcher_Dispatch()
 				{
 					MemoryManager_ReleaseAnyBlock(qe->publication.data);
 				}
-				NodeInspector_Send(NODE_INSPECTOR_PUBLISH_EXECUTED)
+				Diagnostics_SendEvent(DIAGNOSTICS_PUBLISH_EXECUTED);
 				break;
 		}
 
@@ -131,7 +132,7 @@ void EventDispatcher_Notify(completion_handler handler)
 
 	Queue_AdvanceHead(eventQueue);
 
-	NodeInspector_Send(NODE_INSPECTOR_NOTIFY_QUEUED)
+	Diagnostics_SendEvent(DIAGNOSTICS_NOTIFY_QUEUED);
 }
 
 void EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
@@ -158,7 +159,7 @@ void EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 
 	Queue_AdvanceHead(eventQueue);
 
-	NodeInspector_Send(NODE_INSPECTOR_PROCESS_QUEUED)
+	Diagnostics_SendEvent(DIAGNOSTICS_PROCESS_QUEUED);
 }
 
 void EventDispatcher_Publish(uint8_t event, void* data)
@@ -184,5 +185,5 @@ void EventDispatcher_Publish(uint8_t event, void* data)
 
 	Queue_AdvanceHead(eventQueue);
 
-	NodeInspector_Send(NODE_INSPECTOR_PUBLISH_QUEUED)
+	Diagnostics_SendEvent(DIAGNOSTICS_PUBLISH_QUEUED);
 }

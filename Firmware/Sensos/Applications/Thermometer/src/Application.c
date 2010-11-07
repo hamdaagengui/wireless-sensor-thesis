@@ -8,6 +8,11 @@
 #include <SensorSubsystem/SensorManager.h>
 #include <SensorSubsystem/Sensors/HeartRateVariability.h>
 
+void Initialize()
+{
+
+}
+
 void Start()
 {
 	//	sensor_interface hrv;
