@@ -13,6 +13,7 @@
 #include "../Collections/Queue.h"
 #include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
 #include "../MemorySubsystem/MemoryManager.h"
+#include "../Diagnostics/Diagnostics.h"
 
 //  Constants
 #define RTS_DELAY_SLOT_DURATION																			100
@@ -41,15 +42,15 @@ uint8_t linkPacketQueue[Queue_CalculateSize(sizeof(linkPacketQueueElement), NETW
 
 typedef struct
 {
-	uint8_t destination ; // set by the network layer (routing)
-	uint8_t source ;
+	uint8_t destination; // set by the network layer (routing)
+	uint8_t source;
 	uint8_t type;
 } link_header;
 
 typedef struct
 {
-	uint8_t receiver ;
-	uint8_t sender ;
+	uint8_t receiver;
+	uint8_t sender;
 } network_header;
 
 typedef struct
@@ -247,7 +248,7 @@ bool Network_SendData(uint8_t receiver, void* data, uint8_t length)
 	if (Queue_IsFull(linkPacketQueue))
 	{
 		NonCritical();
-		NodeInspector_Send(NODE_INSPECTOR_DATA_NOT_QUEUED)
+		Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
 		return false;
 	}
 
@@ -258,7 +259,7 @@ bool Network_SendData(uint8_t receiver, void* data, uint8_t length)
 		// no free network buffer objects
 		NonCritical();
 
-		NodeInspector_Send(NODE_INSPECTOR_DATA_NOT_QUEUED)
+		Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
 		return false;
 	}
 
@@ -276,7 +277,7 @@ bool Network_SendData(uint8_t receiver, void* data, uint8_t length)
 
 	NonCritical();
 
-	NodeInspector_Send(NODE_INSPECTOR_DATA_QUEUED)
+	Diagnostics_SendEvent(DIAGNOSTICS_DATA_QUEUED);
 
 	return true;
 }
@@ -326,14 +327,12 @@ static void InitiateSynchronization()
  */
 void Network_TimerEvent()
 {
-	LA(1);
-
 	if (state == STATE_UNSYNCHRONIZED)
 	{
 		return;
 	}
 
-	NodeInspector_Send(NODE_INSPECTOR_NETWORK_TICK)
+	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_TICK);
 
 	UpdateCca();
 
@@ -358,8 +357,6 @@ void Network_TimerEvent()
 
 	state = STATE_IDLE;
 
-	LA(2);
-
 	if (Queue_IsEmpty(linkPacketQueue) == false) // frames to send
 	{
 		//uint8_t slot = rand_r(&randomContext) & 0x3; // if this is a high priority node or packet choose an earlier slot
@@ -373,8 +370,6 @@ void Network_TimerEvent()
 			_delay_us(RTS_DELAY_SLOT_DURATION);
 		}
 
-		LA(3);
-
 		if (IsChannelClear())
 		{
 			currentPacket = Queue_Tail(linkPacketQueue);
@@ -382,17 +377,13 @@ void Network_TimerEvent()
 			currentLink = FindNext(lnh->network.receiver);
 			lnh->link.destination = currentLink;
 
-			LA(4);
-
 			if (IsChannelClear())
 			{
-				LA(5);
-
 				rtsPacketTemplate.link.destination = currentLink;
 				rtsPacketTemplate.slot = slot;
 				RadioDriver_Send(&rtsPacketTemplate, sizeof(rtsPacketTemplate));
 
-				NodeInspector_Send(NODE_INSPECTOR_TX_RTS)
+				Diagnostics_SendEvent(DIAGNOSTICS_TX_RTS);
 
 				state = STATE_EXPECTING_CTS;
 			}
@@ -406,7 +397,6 @@ void Network_TimerEvent()
 	}
 	else // nothing to send => receive
 	{
-		LA(6);
 
 		state = STATE_EXPECTING_PACKET;
 		//RadioDriver_EnableReceiveMode();
@@ -445,23 +435,20 @@ static void FrameReceived(void* data, uint8_t length)
 {
 	Leds_YellowToggle();
 
-	LA(8);
 
-//	uint8_t* d = data;
-//	com(0x12);
-//	for(uint8_t i = 0; i<length;i++)
-//	{
-//		com(d[i]);
-//	}
-//	com(assignedNodeId);
+	//	uint8_t* d = data;
+	//	com(0x12);
+	//	for(uint8_t i = 0; i<length;i++)
+	//	{
+	//		com(d[i]);
+	//	}
+	//	com(assignedNodeId);
 
 	link_header* lh = data;
 	link_network_header* lnh = data;
 
-	LA(9);
 	if (lh->destination == assignedNodeId || lh->destination == BROADCAST_ID)
 	{
-		LA(10);
 		switch (lh->type)
 		{
 			// Non broadcast and non routable
@@ -476,8 +463,6 @@ static void FrameReceived(void* data, uint8_t length)
 						NetworkTimer_SetTimerValue(20);
 					}
 
-					LA(11);
-
 					if (state == STATE_EXPECTING_PACKET || state == STATE_UNSYNCHRONIZED)
 					{
 						ctsPacketTemplate.link.destination = lh->source;
@@ -487,9 +472,7 @@ static void FrameReceived(void* data, uint8_t length)
 
 						state = STATE_EXPECTING_DATA;
 
-						NodeInspector_Send(NODE_INSPECTOR_RX_RTS)
-
-						LA(12);
+						Diagnostics_SendEvent(DIAGNOSTICS_RX_RTS);
 					}
 
 					MemoryManager_ReleaseAnyBlock(data);
@@ -504,8 +487,7 @@ static void FrameReceived(void* data, uint8_t length)
 
 						state = STATE_EXPECTING_ACK;
 
-						NodeInspector_Send(NODE_INSPECTOR_RX_CTS)
-						LA(13);
+						Diagnostics_SendEvent(DIAGNOSTICS_RX_CTS);
 					}
 					else
 					{
@@ -523,8 +505,7 @@ static void FrameReceived(void* data, uint8_t length)
 						Queue_AdvanceTail(linkPacketQueue); // remove it from the queue
 						MemoryManager_ReleaseAnyBlock(currentPacket);
 
-						NodeInspector_Send(NODE_INSPECTOR_RX_ACK)
-						LA(14);
+						Diagnostics_SendEvent(DIAGNOSTICS_RX_ACK);
 					}
 
 					MemoryManager_ReleaseAnyBlock(data);
@@ -538,7 +519,6 @@ static void FrameReceived(void* data, uint8_t length)
 
 			case TYPE_DATA:
 				{
-					LA(15);
 					if (state == STATE_EXPECTING_DATA && currentLink == lh->source)
 					{
 						ackPacketTemplate.link.destination = lh->source;
@@ -552,16 +532,17 @@ static void FrameReceived(void* data, uint8_t length)
 
 							// dummy release since its not handled here yet
 							MemoryManager_ReleaseAnyBlock(data);
-							NodeInspector_Send(NODE_INSPECTOR_RX_DATA)
+							Diagnostics_SendEvent(DIAGNOSTICS_RX_DATA);
 						}
 						else // forward data
+
 						{
-//							lnh->link.source = assignedNodeId; // change source to indicate that we are the new link layer source
-//							ForwardPacket(data, length);
+							//							lnh->link.source = assignedNodeId; // change source to indicate that we are the new link layer source
+							//							ForwardPacket(data, length);
 
 							// dummy release since its not handled here yet
 							MemoryManager_ReleaseAnyBlock(data);
-							NodeInspector_Send(NODE_INSPECTOR_NETWORK_FORWARDING)
+							Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_FORWARDING);
 						}
 					}
 					else
@@ -663,9 +644,9 @@ static void UpdateCca()
 
 static bool IsChannelClear()
 {
-//	com(0x11);
-//	com(ccaThreshold);
-//	com(RadioDriver_GetRssi());
+	//	com(0x11);
+	//	com(ccaThreshold);
+	//	com(RadioDriver_GetRssi());
 
 	uint8_t outliers = 0;
 
@@ -680,12 +661,12 @@ static bool IsChannelClear()
 
 	if (outliers > 0)
 	{
-//		com(1);
+		//		com(1);
 		return true;
 	}
 	else
 	{
-//		com(0);
+		//		com(0);
 		return false;
 	}
 }

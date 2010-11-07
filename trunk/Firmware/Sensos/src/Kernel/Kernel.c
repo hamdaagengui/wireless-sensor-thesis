@@ -16,17 +16,15 @@
 #include <util/delay.h>
 
 // Entry point to user code.
+extern void Initialize();
 extern void Start();
 
 uint32_t sn = 0;
 
-void Bla(void* data, uint8_t length)
-{
-
-}
-
 int main()
 {
+	Initialize(); // => Platform_Initialize() ?
+
 	PORTF = 0x00;
 	DDRF = 0xff;
 
@@ -45,7 +43,8 @@ int main()
 	sn += ReadBit(PIND, 4) ? 0 : 4;
 	sn += ReadBit(PIND, 6) ? 0 : 8;
 
-	Diagnostics_Initialize();
+	Diagnostics_Initialize(sn);
+
 
 	//	RadioDriver_Initialize(Bla);
 	//	sei();
@@ -61,7 +60,7 @@ int main()
 
 	// Initialize sub systems
 	MemoryManager_Initialize();
-	Network_Initialize(sn == 8 ? true : false);
+	Network_Initialize(sn == 8 ? true : false); // set as master node if sn == 8
 	Network_SetId(sn);
 	//	PowerManager_Initialize();
 	EventDispatcher_Initialize();
@@ -81,7 +80,7 @@ int main()
 	// Run system
 	sei();
 
-	NodeInspector_Send(NODE_INSPECTOR_EVENT_SYSTEM_INITIALIZED);
+	Diagnostics_SendEvent(DIAGNOSTICS_SYSTEM_INITIALIZED);
 
 	while (true)
 	{
