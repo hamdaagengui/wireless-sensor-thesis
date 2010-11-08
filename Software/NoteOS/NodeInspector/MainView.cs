@@ -9,6 +9,7 @@ using Coma.Ports;
 using NodeInspector.Properties;
 using System.ComponentModel;
 using System.Threading;
+using System.Diagnostics;
 
 namespace NodeInspector
 {
@@ -75,7 +76,7 @@ namespace NodeInspector
 			{
 				path = "EventDescriptors.txt";
 			}
-			else 	if (File.Exists("../../EventDescriptors.txt"))
+			else if (File.Exists("../../EventDescriptors.txt"))
 			{
 				path = "../../EventDescriptors.txt";
 			}
@@ -87,7 +88,7 @@ namespace NodeInspector
 
 			List<string> badDescriptors = new List<string>();
 
-			foreach (var line in File.ReadAllLines("EventDescriptors.txt"))
+			foreach (var line in File.ReadAllLines(path))
 			{
 				string l = line;
 				if (l.Contains("//"))
@@ -161,6 +162,8 @@ namespace NodeInspector
 
 		private void timer1_Tick(object sender, EventArgs e)
 		{
+			bool changes = false;
+
 			bool[] levels = new bool[3];
 			levels[0] = checkBoxShowMessages.Checked;
 			levels[1] = checkBoxShowWarnings.Checked;
@@ -171,6 +174,7 @@ namespace NodeInspector
 			EventFrame ef;
 			while (eventFrameQueue.TryDequeue(out ef))
 			{
+				changes = true;
 				LogEntry log = null;
 				if (eventDescriptors.ContainsKey(ef.EventId))
 				{
@@ -197,21 +201,24 @@ namespace NodeInspector
 				}
 			}
 
-			bool doScroll = false;
-			//if (listViewLogs.Items.Count > 0)
-			//{
-			//  int y = listViewLogs.Items[listViewLogs.Items.Count - 1].Position.Y;
-			//  if (Math.Abs(listViewLogs.Height - y) < 19)
-			//  {
-			//    doScroll = true;
-			//  }
-			//}
-
-			listViewLogs.Items.AddRange(lvis.ToArray());
-			//			if (doScroll)
-			if (checkBoxTrackNewest.Checked && listViewLogs.Items.Count > 0)
+			if (changes)
 			{
-				listViewLogs.EnsureVisible(listViewLogs.Items.Count - 1);
+				bool doScroll = false;
+				//if (listViewLogs.Items.Count > 0)
+				//{
+				//  int y = listViewLogs.Items[listViewLogs.Items.Count - 1].Position.Y;
+				//  if (Math.Abs(listViewLogs.Height - y) < 19)
+				//  {
+				//    doScroll = true;
+				//  }
+				//}
+
+				listViewLogs.Items.AddRange(lvis.ToArray());
+				//			if (doScroll)
+				if (checkBoxTrackNewest.Checked && listViewLogs.Items.Count > 0)
+				{
+					listViewLogs.EnsureVisible(listViewLogs.Items.Count - 1);
+				}
 			}
 		}
 
@@ -229,9 +236,10 @@ namespace NodeInspector
 				{
 					var spi = (SerialPortInfo)comboBoxPort.SelectedItem;
 					port = new SerialPort(spi.Name, int.Parse(comboBoxBaudrate.Text));
+					port.ReceivedBytesThreshold = 1;
 					port.Open();
-					port.DiscardInBuffer();
 					port.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
+					Reset();
 				}
 				catch
 				{
@@ -259,6 +267,7 @@ namespace NodeInspector
 		const byte SOF_MESSAGE = 254;
 		const byte SOF_EVENT = 255;
 
+		DateTime startTime = DateTime.Now;
 		bool escReceived = false;
 		List<byte> frameData = new List<byte>(200);
 		DateTime frameTimeStamp;
@@ -269,54 +278,72 @@ namespace NodeInspector
 			State
 		}
 		FrameType frameType;
+		bool portActive = false;
 
 		void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
-			byte v = (byte)port.ReadByte();
-
-			switch (v)
+			if (portActive == false)
 			{
-				case SOF_EVENT:
-					frameTimeStamp = DateTime.Now;
-					frameType = FrameType.Event;
-					break;
+				if (port != null)
+				{
+					port.DiscardInBuffer();
+				}
+				return;
+			}
 
-				case SOF_MESSAGE:
-					frameTimeStamp = DateTime.Now;
-					frameType = FrameType.Message;
-					break;
+			while (port.BytesToRead > 0)
+			{
+				byte v = (byte)port.ReadByte();
 
-				case SOF_STATE:
-					frameTimeStamp = DateTime.Now;
-					frameType = FrameType.State;
-					break;
+				switch (v)
+				{
+					case SOF_EVENT:
+						frameTimeStamp = new DateTime(DateTime.Now.Ticks - startTime.Ticks);
+						frameType = FrameType.Event;
+						break;
 
-				case ESC:
-					escReceived = true;
-					break;
+					case SOF_MESSAGE:
+						frameTimeStamp = DateTime.Now;
+						frameType = FrameType.Message;
+						break;
 
-				case EOF:
-					switch (frameType)
-					{
-						case FrameType.Event:
-							eventFrameQueue.Enqueue(new EventFrame(frameTimeStamp, frameData.ToArray()));
-							break;
-						case FrameType.Message:
-							break;
-						case FrameType.State:
-							break;
-					}
-					frameData.Clear();
-					break;
+					case SOF_STATE:
+						frameTimeStamp = DateTime.Now;
+						frameType = FrameType.State;
+						break;
 
-				default:
-					if (escReceived)
-					{
-						escReceived = false;
-						v |= 0x80;
-					}
-					frameData.Add(v);
-					break;
+					case ESC:
+						escReceived = true;
+						break;
+
+					case EOF:
+						try
+						{
+							switch (frameType)
+							{
+								case FrameType.Event:
+									eventFrameQueue.Enqueue(new EventFrame(frameTimeStamp, frameData.ToArray()));
+									break;
+								case FrameType.Message:
+									break;
+								case FrameType.State:
+									break;
+							}
+						}
+						catch
+						{ }
+						frameData.Clear();
+						break;
+
+					default:
+						if (escReceived)
+						{
+							escReceived = false;
+							v |= 0x80;
+						}
+						frameData.Add(v);
+						break;
+				}
 			}
 		}
 
@@ -324,12 +351,20 @@ namespace NodeInspector
 
 		private void buttonReset_Click(object sender, EventArgs e)
 		{
+			Reset();
+		}
+
+		void Reset()
+		{
+			portActive = false;
+
 			port.DtrEnable = true;
 
-			Thread.Sleep(300);
+			Thread.Sleep(500);
 
 			port.DiscardInBuffer();
-
+			EventFrame ef;
+			while (eventFrameQueue.TryDequeue(out ef)) ;
 			logs.Clear();
 			LogEntry.ResetNumbering();
 			foreach (var v in variables.Values)
@@ -338,8 +373,10 @@ namespace NodeInspector
 			}
 			UpdateListView();
 
-
 			port.DtrEnable = false;
+
+			startTime = DateTime.Now;
+			portActive = true;
 		}
 	}
 }
