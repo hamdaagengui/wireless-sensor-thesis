@@ -38,8 +38,14 @@ void* MemoryManager_AllocateNetworkBlock()
 
 void MemoryManager_ReleaseNetworkBlock(void* block)
 {
-	Diagnostics_SendEvent(DIAGNOSTICS_RELEASED_NETWORK_BLOCK);
-	Pool_ReleaseBlock(networkPool, block);
+	if (Pool_ReleaseBlock(networkPool, block))
+	{
+		Diagnostics_SendEvent(DIAGNOSTICS_RELEASED_NETWORK_BLOCK);
+	}
+	else
+	{
+		Diagnostics_SendEvent(DIAGNOSTICS_FAILED_TO_RELEASE_NETWORK_BLOCK);
+	}
 }
 
 void* MemoryManager_AllocateSensorBlock()

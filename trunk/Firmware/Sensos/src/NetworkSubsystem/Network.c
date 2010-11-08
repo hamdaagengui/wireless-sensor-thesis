@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <util/delay.h>
+#include <util/atomic.h>
 #include "Network.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../Collections/Queue.h"
@@ -187,7 +188,7 @@ static block_handler dataHandler;
 
 static void ForwardPacket(link_network_header* packet, uint8_t length);
 static void PreparePreloadedPackets();
-static void FrameReceived(void* data, uint8_t length);
+static void* FrameReceived(void* data, uint8_t length);
 static uint8_t FindNext(uint8_t destination);
 static void UpdateCca();
 static bool IsChannelClear();
@@ -243,41 +244,45 @@ void Network_SetDataHandler(block_handler handler)
 
 bool Network_SendData(uint8_t receiver, void* data, uint8_t length)
 {
-	Critical();
+	//Critical();
 
-	if (Queue_IsFull(linkPacketQueue))
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 	{
-		NonCritical();
-		Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
-		return false;
+		if (Queue_IsFull(linkPacketQueue))
+		{
+			//	NonCritical();
+			Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
+			return false;
+		}
+
+		data_packet* p = MemoryManager_AllocateNetworkBlock();
+
+		if (p == NULL)
+		{
+			// no free network buffer objects
+			//	NonCritical();
+
+			Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
+			return false;
+		}
+
+		p->link.source = assignedNodeId;
+		p->link.type = TYPE_DATA;
+		p->network.receiver = receiver;
+		p->network.sender = assignedNodeId;
+		p->length = length;
+		memcpy(p->data, data, length);
+
+		linkPacketQueueElement* e = Queue_Head(linkPacketQueue);
+		e->object = p;
+		e->size = sizeof(data_packet) + length;
+		Queue_AdvanceHead(linkPacketQueue);
+
+
+		//NonCritical();
+
+		Diagnostics_SendEvent(DIAGNOSTICS_DATA_QUEUED);
 	}
-
-	data_packet* p = MemoryManager_AllocateNetworkBlock();
-
-	if (p == NULL)
-	{
-		// no free network buffer objects
-		NonCritical();
-
-		Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
-		return false;
-	}
-
-	p->link.source = assignedNodeId;
-	p->link.type = TYPE_DATA;
-	p->network.receiver = receiver;
-	p->network.sender = assignedNodeId;
-	p->length = length;
-	memcpy(p->data, data, length);
-
-	linkPacketQueueElement* e = Queue_Head(linkPacketQueue);
-	e->object = p;
-	e->size = sizeof(data_packet) + length;
-	Queue_AdvanceHead(linkPacketQueue);
-
-	NonCritical();
-
-	Diagnostics_SendEvent(DIAGNOSTICS_DATA_QUEUED);
 
 	return true;
 }
@@ -332,7 +337,7 @@ void Network_TimerEvent()
 		return;
 	}
 
-	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_TICK);
+	//Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_TICK);
 
 	UpdateCca();
 
@@ -357,7 +362,7 @@ void Network_TimerEvent()
 
 	state = STATE_IDLE;
 
-	if (Queue_IsEmpty(linkPacketQueue) == false) // frames to send
+	if (Queue_IsEmpty(linkPacketQueue) == false) // frames to send?
 	{
 		//uint8_t slot = rand_r(&randomContext) & 0x3; // if this is a high priority node or packet choose an earlier slot
 		uint8_t slot = 0;
@@ -406,21 +411,29 @@ void Network_TimerEvent()
 			{
 				state = STATE_EXPECTING_PACKET;
 				//	RadioDriver_EnableReceiveMode();
-				Leds_RedToggle();
 				break;
 			}
 			_delay_us(RTS_DELAY_SLOT_DURATION);
 		}
 	}
 
-	static uint8_t timer;
-	static uint8_t ticker;
+	static uint8_t timer = 0;
+	static uint8_t ticker = 0;
 
 	if (assignedNodeId == 0)
 	{
 		if (++timer >= (20 + assignedNodeId * 2))
 		{
 			timer = 0;
+
+			if (ticker & 1)
+			{
+				Leds_GreenOn();
+			}
+			else
+			{
+				Leds_GreenOff();
+			}
 
 			Network_SendData(2, &ticker, 1);
 			ticker++;
@@ -431,18 +444,9 @@ void Network_TimerEvent()
 	// process low resolution, high precision timers
 }
 
-static void FrameReceived(void* data, uint8_t length)
+static void* FrameReceived(void* data, uint8_t length)
 {
-	Leds_YellowToggle();
-
-
-	//	uint8_t* d = data;
-	//	com(0x12);
-	//	for(uint8_t i = 0; i<length;i++)
-	//	{
-	//		com(d[i]);
-	//	}
-	//	com(assignedNodeId);
+	bool reuseNetworkBlock = false;
 
 	link_header* lh = data;
 	link_network_header* lnh = data;
@@ -454,7 +458,6 @@ static void FrameReceived(void* data, uint8_t length)
 			// Non broadcast and non routable
 			case TYPE_RTS: // RTS is never broadcasted
 				{
-					Leds_RedToggle();
 					if (state == STATE_UNSYNCHRONIZED) // TODO Not for MasterNode
 					{
 						rts_packet* p = data;
@@ -474,8 +477,6 @@ static void FrameReceived(void* data, uint8_t length)
 
 						Diagnostics_SendEvent(DIAGNOSTICS_RX_RTS);
 					}
-
-					MemoryManager_ReleaseAnyBlock(data);
 				}
 				break;
 
@@ -483,18 +484,18 @@ static void FrameReceived(void* data, uint8_t length)
 				{
 					if (state == STATE_EXPECTING_CTS && currentLink == lh->source)
 					{
+						Diagnostics_SendEvent(DIAGNOSTICS_RX_CTS);
+
 						RadioDriver_Send(currentPacket->object, currentPacket->size);
 
 						state = STATE_EXPECTING_ACK;
 
-						Diagnostics_SendEvent(DIAGNOSTICS_RX_CTS);
+						Diagnostics_SendEvent(DIAGNOSTICS_TX_DATA);
 					}
 					else
 					{
 						state = STATE_IDLE;
 					}
-
-					MemoryManager_ReleaseAnyBlock(data);
 				}
 				break;
 
@@ -502,13 +503,11 @@ static void FrameReceived(void* data, uint8_t length)
 				{
 					if (state == STATE_EXPECTING_ACK && currentLink == lh->source)
 					{
-						Queue_AdvanceTail(linkPacketQueue); // remove it from the queue
-						MemoryManager_ReleaseAnyBlock(currentPacket);
-
 						Diagnostics_SendEvent(DIAGNOSTICS_RX_ACK);
-					}
 
-					MemoryManager_ReleaseAnyBlock(data);
+						Queue_AdvanceTail(linkPacketQueue); // remove it from the queue
+						MemoryManager_ReleaseAnyBlock(currentPacket->object);
+					}
 
 					state = STATE_IDLE;
 				}
@@ -526,34 +525,52 @@ static void FrameReceived(void* data, uint8_t length)
 
 						if (lnh->network.receiver == assignedNodeId)
 						{
-							// data_packet* p = data;
+							Diagnostics_SendEvent(DIAGNOSTICS_RX_DATA);
+
+							data_packet* p = data;
+
+							if (p->data[0] & 1)
+							{
+								Leds_GreenOn();
+							}
+							else
+							{
+								Leds_GreenOff();
+							}
+
+
 							// pass on data up the stack
 							//		EventDispatcher_Process(dataHandler, )
 
 							// dummy release since its not handled here yet
-							MemoryManager_ReleaseAnyBlock(data);
-							Diagnostics_SendEvent(DIAGNOSTICS_RX_DATA);
+							//networkBlockReused = true; // reused if sent up the stack...
 						}
 						else // forward data
-
 						{
+							Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_FORWARDING);
+
+
 							//							lnh->link.source = assignedNodeId; // change source to indicate that we are the new link layer source
 							//							ForwardPacket(data, length);
 
 							// dummy release since its not handled here yet
-							MemoryManager_ReleaseAnyBlock(data);
-							Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_FORWARDING);
+							//networkBlockReused = true; // reused if sent up the stack...
 						}
-					}
-					else
-					{
-						MemoryManager_ReleaseAnyBlock(data);
 					}
 
 					state = STATE_IDLE;
 				}
 				break;
 		}
+	}
+
+	if (reuseNetworkBlock)
+	{
+		return NULL;
+	}
+	else
+	{
+		return data;
 	}
 }
 

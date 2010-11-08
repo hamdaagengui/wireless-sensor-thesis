@@ -31,8 +31,14 @@ typedef uint8_t bool;
 #define MemoryBarrier()													__asm__ volatile ("" : : : "memory")
 
 typedef void (*block_handler)(void* data, uint8_t length);
+typedef void* (*bidirectional_block_handler)(void* data, uint8_t length);
 typedef void (*notification_handler)();
-
+typedef void (*result_handler)(bool succes);
+enum
+{
+	RESULT_OK,
+	RESULT_ERROR
+};
 //#define LA(x) {uint8_t r=0; r |= x&(1<<0)?(1<<0):0; r |= x&(1<<1)?(1<<2):0; r |= x&(1<<2)?(1<<4):0; r |= x&(1<<3)?(1<<6):0; PORTB = r;}
 
 //#define com(x) if(USE_COM > 0) { while(!(UCSR0A & (1<<UDRE0))); UDR0 = x; }

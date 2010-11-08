@@ -33,19 +33,19 @@ void Diagnostics_Initialize(uint32_t serialNumber)
 
 void Diagnostics_SendEvent(uint8_t eventId)
 {
-	if (sn > 3)
+	if (sn < 4)
 	{
 		return;
 	}
 
-	uint8_t buffer[1 + 2 + 1];
-	uint8_t position = 1; // SOF never need stuffing so skip it
+	uint8_t buffer[10];
+	uint8_t position = 0; // SOF never need stuffing so skip it
 
-	buffer[0] = SOF_EVENT;
+	buffer[position++] = SOF_EVENT;
 	position += AddData(eventId, buffer, position);
-	buffer[position] = EOF;
+	buffer[position++] = EOF;
 
-	DiagnosticsLink_Send(buffer, position + 1);
+	DiagnosticsLink_Send(buffer, position);
 }
 
 void Diagnostics_SendMessage(uint8_t messageId, void* message, uint8_t messageLength)
