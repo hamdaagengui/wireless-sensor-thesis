@@ -11,7 +11,7 @@
 // Network subssystem
 #define NETWORK_CAN_ROUTE																						1
 #define NETWORK_MAXIMUM_LINK_PACKET_SIZE														64
-#define NETWORK_LINK_PACKET_POOL_SIZE																14
+#define NETWORK_LINK_PACKET_POOL_SIZE																10
 
 // Sensor subsystem
 #define SENSOR_MAXIMUM_REPORT_SIZE																	8
@@ -23,8 +23,8 @@
 #define EVENTDISPATCHER_QUEUE_SIZE																	8
 
 // Diagnostics
-#define DIAGNOSTICS_LINK_TRANSMISSION_BUFFER_SIZE										200
-#define DIAGNOSTICS_LINK_RECEPTION_BUFFER_SIZE											200
+#define DIAGNOSTICS_LINK_TRANSMISSION_BUFFER_SIZE										100
+#define DIAGNOSTICS_LINK_RECEPTION_BUFFER_SIZE											50
 
 // Peripherals
 

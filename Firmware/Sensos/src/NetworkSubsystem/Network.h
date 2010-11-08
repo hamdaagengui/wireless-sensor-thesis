@@ -17,4 +17,10 @@ extern bool Network_SendData(uint8_t receiver, void* data, uint8_t length);
 
 extern void Network_TimerEvent();
 
+extern bool Network_SetProperty(uint8_t node, uint8_t sensor, uint8_t property, void* data, uint8_t length, result_handler resultHandler);
+extern bool Network_GetProperty(uint8_t node, uint8_t sensor, uint8_t property, void* data, uint8_t length, result_handler resultHandler);
+
+extern bool Network_Load(char* name, void* data, uint8_t length, result_handler resultHandler);
+extern bool Network_Store(char* name, void* data, uint8_t length, result_handler resultHandler);
+
 #endif /* NETWORK_H_ */

@@ -52,7 +52,7 @@ enum
 #define WaitWhileStatus(s)											while ((TRX_STATUS & TRX_STATUS_MASK) == s);
 #define ReadStatus()														(TRX_STATUS & TRX_STATUS_MASK)
 
-static block_handler frameHandler;
+static bidirectional_block_handler frameHandler;
 static notification_handler rxStartHandler;
 static volatile bool transmitting;
 static volatile uint8_t rssi;
@@ -62,7 +62,7 @@ static uint8_t* frameBufferObject;
 radiodriver_statistics radioDriverStatistics;
 #endif
 
-void RadioDriver_Initialize(block_handler frameReceived)
+void RadioDriver_Initialize(bidirectional_block_handler frameReceived)
 {
 #ifdef STATISTICS
 	radioDriverStatistics.framesReceived = 0;
@@ -231,7 +231,7 @@ void RadioDriver_DisableReceiveMode()
 //{
 //}
 
-ISR( TRX24_TX_END_vect)
+ISR(TRX24_TX_END_vect)
 {
 	// Maybe this can be done immediately after starting the transmission (data sheet page 40).
 #if defined(RADIODRIVER_AUTO_RX)
@@ -256,11 +256,10 @@ ISR( TRX24_TX_END_vect)
 //{
 //}
 
-ISR( TRX24_RX_END_vect)
+ISR(TRX24_RX_END_vect)
 {
 #if defined(RADIODRIVER_USE_CRC)
 	if (ReadBit(PHY_RSSI, RX_CRC_VALID) == 0) // CRC error in frame => dump it
-
 	{
 #ifdef STATISTICS
 		radioDriverStatistics.framesDiscarded++;
@@ -278,8 +277,18 @@ ISR( TRX24_RX_END_vect)
 
 	if (length > NETWORK_MAXIMUM_LINK_PACKET_SIZE)
 	{
-		//error oversize link layer packet
+		//error over size link layer packet
 		return;
+	}
+
+	if (frameBufferObject == NULL)
+	{
+		frameBufferObject = MemoryManager_AllocateNetworkBlock();
+
+		if (frameBufferObject == NULL)
+		{
+			return;
+		}
 	}
 
 	for (uint8_t i = 0; i < length; ++i)
@@ -293,13 +302,16 @@ ISR( TRX24_RX_END_vect)
 
 	if (frameHandler)
 	{
-		frameHandler(frameBufferObject, length);
+		frameBufferObject = frameHandler(frameBufferObject, length);
 	}
 
-	frameBufferObject = MemoryManager_AllocateNetworkBlock();
+	if (frameBufferObject == NULL)
+	{
+		frameBufferObject = MemoryManager_AllocateNetworkBlock();
+	}
 }
 
-ISR( TRX24_RX_START_vect)
+ISR(TRX24_RX_START_vect)
 {
 	rssi = PHY_RSSI;
 	//

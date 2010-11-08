@@ -22,7 +22,4 @@
 
 #define NETWORK_MASTER_NODE
 
-#define USE_NODE_INSPECTOR																					1
-#define USE_COM																											0
-
 #endif /* CONFIGURATION_H_ */

@@ -31,6 +31,6 @@ typedef struct
 extern void Pool_Initialize(void* p, uint8_t blockSize, uint8_t blockCount);
 extern bool Pool_IsExhausted(void* p);
 extern void* Pool_AllocateBlock(void* p);
-extern void Pool_ReleaseBlock(void* p, void* block);
+extern bool Pool_ReleaseBlock(void* p, void* block);
 
 #endif /* POOL_H_ */

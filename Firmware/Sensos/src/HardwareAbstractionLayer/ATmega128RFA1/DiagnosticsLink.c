@@ -5,9 +5,11 @@
  *      Author: Coma
  */
 
+#include <util/atomic.h>
 #include "../DiagnosticsLink.h"
 #include "../../EventSubsystem/EventDispatcher.h"
 #include "../../Collections/FIFO.h"
+#include "../../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
 
 static uint8_t txFifo[sizeof(fifo) + DIAGNOSTICS_LINK_TRANSMISSION_BUFFER_SIZE];
 static uint8_t rxFifo[sizeof(fifo) + DIAGNOSTICS_LINK_RECEPTION_BUFFER_SIZE];
@@ -18,6 +20,9 @@ void DiagnosticsLink_Initialize(block_handler frameReceivedHandler)
 {
 	frameHandler = frameReceivedHandler;
 
+	FIFO_Initialize(txFifo, DIAGNOSTICS_LINK_TRANSMISSION_BUFFER_SIZE);
+	FIFO_Initialize(rxFifo, DIAGNOSTICS_LINK_RECEPTION_BUFFER_SIZE);
+
 	UCSR0A = 1 << U2X0;
 	UCSR0B = 1 << RXCIE0 | 1 << RXEN0 | 1 << TXEN0;
 	UCSR0C = 1 << UCSZ01 | 1 << UCSZ00;
@@ -26,13 +31,12 @@ void DiagnosticsLink_Initialize(block_handler frameReceivedHandler)
 
 void DiagnosticsLink_Send(void* data, uint8_t length)
 {
-	Critical();
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
+		FIFO_Write(txFifo, data, length);
 
-	FIFO_Write(txFifo, data, length);
-	// activate/reactivate
-	UCSR0B |= 1 << UDRE0;
-
-	NonCritical();
+		SetBit(UCSR0B, UDRIE0);
+	}
 }
 
 ISR(USART0_RX_vect)
@@ -43,8 +47,9 @@ ISR(USART0_RX_vect)
 ISR(USART0_UDRE_vect)
 {
 	if (FIFO_IsEmpty(txFifo))
+	//if (FIFO_GetUsedSpace(txFifo) == 0)
 	{
-		UCSR0B &= ~(1 << UDRE0);
+		ClearBit(UCSR0B, UDRIE0);
 	}
 	else
 	{

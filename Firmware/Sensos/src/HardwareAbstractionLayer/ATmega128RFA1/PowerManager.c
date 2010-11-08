@@ -18,8 +18,6 @@ void PowerManager_Initialize()
 
 void PowerManager_PowerDown()
 {
-	return;
-
 	set_sleep_mode(SLEEP_MODE_IDLE); // TODO Could this be more aggressive e.g. using standby?
 	cli();
 	sleep_enable();

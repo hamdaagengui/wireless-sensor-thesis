@@ -26,12 +26,13 @@ typedef struct
 extern void FIFO_Initialize(void* f, uint8_t byteCount);
 extern bool FIFO_IsEmpty(void* f);
 extern uint8_t FIFO_GetFreeSpace(void* f);
+extern uint8_t FIFO_GetUsedSpace(void* f);
 extern uint8_t FIFO_PeekByte(void* f);
 extern bool FIFO_Peek(void* f, void* buffer, uint8_t length);
 extern bool FIFO_Skip(void* f, uint8_t length);
 extern bool FIFO_WriteByte(void* f, uint8_t value);
 extern bool FIFO_Write(void* f, void* buffer, uint8_t length);
-extern bool FIFO_Read(void* f, void* buffer, uint8_t length);
 extern uint8_t FIFO_ReadByte(void* f);
+extern bool FIFO_Read(void* f, void* buffer, uint8_t length);
 
 #endif /* FIFO_H_ */

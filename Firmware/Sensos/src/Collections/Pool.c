@@ -64,7 +64,7 @@ void* Pool_AllocateBlock(void* p)
 }
 
 // TODO Maybe use 'next' to reverse to specified block faster
-void Pool_ReleaseBlock(void* p, void* block)
+bool Pool_ReleaseBlock(void* p, void* block)
 {
 	pool* _p = p;
 
@@ -77,8 +77,10 @@ void Pool_ReleaseBlock(void* p, void* block)
 		if (&pb->data == block)
 		{
 			pb->used = false;
-			return;
+			return true;
 		}
 		buf += size;
 	}
+
+	return false;
 }
