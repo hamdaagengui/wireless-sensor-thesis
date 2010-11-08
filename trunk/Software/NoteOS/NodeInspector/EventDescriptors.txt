@@ -1,31 +1,35 @@
+// event id ; event level ; subsystem ; module ; message [; script]
+
 // This event id can not be used. It is reserved for internal use (all unknown events are mapped to this).
 255;1;;;Unknown event
 
-0;0;Kernel;Kernel;NoteOS initialized
+0;0;Kernel;Kernel;System initialized
 
 1;0;Memory;MemoryManager;Network block allocated;network_pool --
 2;2;Memory;MemoryManager;Failed to allocate network block (pool exhausted)
 3;0;Memory;MemoryManager;Network block released;network_pool ++
-4;0;Memory;MemoryManager;Sensor block allocated;sensor_pool --
-5;2;Memory;MemoryManager;Failed to allocate sensor block (pool exhausted)
-6;0;Memory;MemoryManager;Sensor block released;sensor_pool ++
+4;2;Memory;MemoryManager;Failed to release network block
+5;0;Memory;MemoryManager;Sensor block allocated;sensor_pool --
+6;2;Memory;MemoryManager;Failed to allocate sensor block (pool exhausted)
+7;0;Memory;MemoryManager;Sensor block released;sensor_pool ++
+8;2;Memory;MemoryManager;Failed to release sensor block
 
-7;0;Event;EventDispatcher;Notification queued;notification ++
-8;0;Event;EventDispatcher;Notification executed;notification ++
-9;0;Event;EventDispatcher;Processing queued;processing ++
-10;0;Event;EventDispatcher;Processing executed;processing ++
-11;0;Event;EventDispatcher;Publication queued;publication ++
-12;0;Event;EventDispatcher;Publication executed;publication ++
+9;0;Event;EventDispatcher;Notification queued;notification ++
+10;0;Event;EventDispatcher;Notification executed;notification ++
+11;0;Event;EventDispatcher;Processing queued;processing ++
+12;0;Event;EventDispatcher;Processing executed;processing ++
+13;0;Event;EventDispatcher;Publication queued;publication ++
+14;0;Event;EventDispatcher;Publication executed;publication ++
 
-13;0;Network;Network;Received RTS;rx_rts ++
-14;0;Network;Network;Received CTS;rx_cts ++
-15;0;Network;Network;Received Data;rx_data ++
-16;0;Network;Network;Received Acknowledge;rx_ack ++
-17;0;Network;Network;Sent RTS;tx_rts ++
-18;0;Network;Network;Sent CTS;tx_cts ++
-19;0;Network;Network;Sent Data;tx_data ++
-20;0;Network;Network;Sent Acknowledge;tx_ack ++
-21;0;Network;Network;Data queued
-22;0;Network;Network;Could not queue data
-23;2;Network;Network;Network tick
-24;0;Network;Network;Forwarding packet
+15;0;Network;Network;Received RTS;rx_rts ++
+16;0;Network;Network;Received CTS;rx_cts ++
+17;0;Network;Network;Received Data;rx_data ++
+18;0;Network;Network;Received Acknowledge;rx_ack ++
+19;0;Network;Network;Sent RTS;tx_rts ++
+20;0;Network;Network;Sent CTS;tx_cts ++
+21;0;Network;Network;Sent Data;tx_data ++
+22;0;Network;Network;Sent Acknowledge;tx_ack ++
+23;0;Network;Network;Data queued
+24;2;Network;Network;Could not queue data
+25;0;Network;Network;Network tick
+26;0;Network;Network;Forwarding packet
