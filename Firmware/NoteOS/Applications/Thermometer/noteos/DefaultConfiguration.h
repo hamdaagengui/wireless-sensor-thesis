@@ -22,6 +22,16 @@
 #define EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS								8
 #define EVENTDISPATCHER_QUEUE_SIZE																	8
 
+// Memory subsystem
+#define POOL_1_ALLOCATION_SIZE																			8
+#define POOL_1_ALLOCATION_COUNT																			10
+#define POOL_2_ALLOCATION_SIZE																			16
+#define POOL_2_ALLOCATION_COUNT																			10
+#define POOL_3_ALLOCATION_SIZE																			32
+#define POOL_3_ALLOCATION_COUNT																			10
+#define POOL_4_ALLOCATION_SIZE																			64
+#define POOL_4_ALLOCATION_COUNT																			10
+
 // Diagnostics
 #define DIAGNOSTICS_LINK_TRANSMISSION_BUFFER_SIZE										100
 #define DIAGNOSTICS_LINK_RECEPTION_BUFFER_SIZE											50

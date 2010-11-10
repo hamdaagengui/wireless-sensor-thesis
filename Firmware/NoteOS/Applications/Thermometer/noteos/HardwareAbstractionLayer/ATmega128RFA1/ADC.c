@@ -30,7 +30,7 @@ void ADC_Start()
 	{
 		// calculate timer settings
 
-		eventData = MemoryManager_AllocateSensorBlock();
+		eventData = MemoryManager_Allocate(sizeof(sensor_event_report) + sizeof(uint16_t));
 
 
 		// kick off sampling
@@ -49,7 +49,7 @@ ISR( ADC_vect)
 	// TODO Wtf to do about event id allocation???
 	uint8_t event = 0;// PERIPHERAL_EVENT_ADC_CHANNEL_0 + currentChannel;
 	EventDispatcher_Publish(event, eventData);
-	eventData = MemoryManager_AllocateSensorBlock();
+	eventData = MemoryManager_Allocate(sizeof(sensor_event_report) + sizeof(uint16_t));
 
 
 	// set channel = nextChannel

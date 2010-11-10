@@ -10,8 +10,8 @@
 
 #include "../Globals.h"
 
-extern void Network_Initialize(bool master);
-extern void Network_SetId(uint8_t id);
+extern void Network_Initialize();
+extern void Network_SetAddress(uint8_t id);
 extern void Network_SetDataHandler(block_handler handler);
 extern bool Network_SendData(uint8_t receiver, void* data, uint8_t length);
 

@@ -50,10 +50,6 @@ void EventDispatcher_Initialize()
 	Queue_Initialize(eventQueue, sizeof(queue_element), EVENTDISPATCHER_QUEUE_SIZE);
 }
 
-void EventDispatcher_Start()
-{
-}
-
 void EventDispatcher_Dispatch()
 {
 	while (Queue_IsEmpty(eventQueue) == false)
@@ -64,36 +60,31 @@ void EventDispatcher_Dispatch()
 		{
 			case TYPE_NOTIFICATION:
 				qe->notification.handler();
+
 				Diagnostics_SendEvent(DIAGNOSTICS_NOTIFY_EXECUTED);
 				break;
 
 			case TYPE_PROCESSING:
 				qe->processing.handler(qe->processing.data, qe->processing.length);
 
-				if (qe->processing.data != NULL)
-				{
-					MemoryManager_ReleaseAnyBlock(qe->processing.data);
-				}
+				MemoryManager_Release(qe->processing.data);
+
 				Diagnostics_SendEvent(DIAGNOSTICS_PROCESS_EXECUTED);
 				break;
 
 			case TYPE_PUBLICATION:
 				for (uint8_t i = 0; i < EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS; i++)
 				{
-					if (subscribers[qe->publication.event][i] != NULL)
+					if (subscribers[qe->publication.event][i] == NULL)
 					{
-						subscribers[qe->publication.event][i](qe->publication.data);
+						break; // no more subscribers
 					}
-					else // no more subscribers
-					{
-						break;
-					}
+
+					subscribers[qe->publication.event][i](qe->publication.data);
 				}
 
-				if (qe->publication.data != NULL)
-				{
-					MemoryManager_ReleaseAnyBlock(qe->publication.data);
-				}
+				MemoryManager_Release(qe->publication.data);
+
 				Diagnostics_SendEvent(DIAGNOSTICS_PUBLISH_EXECUTED);
 				break;
 		}
@@ -113,15 +104,19 @@ void EventDispatcher_Subscribe(uint8_t event, event_handler handler)
 		}
 	}
 
-
-	// full => error
+	Diagnostics_SendEvent(DIAGNOSTICS_TOO_MANY_EVENT_SUBSCRIBERS);
 }
 
 void EventDispatcher_Notify(completion_handler handler)
 {
+	if (handler == NULL)
+	{
+		return;
+	}
+
 	if (Queue_IsFull(eventQueue)) // queue full ?
 	{
-		// error
+		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
 		return;
 	}
 
@@ -137,18 +132,16 @@ void EventDispatcher_Notify(completion_handler handler)
 
 void EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 {
-	if (Queue_IsFull(eventQueue)) // queue full ?
+	if (handler == NULL || data == NULL || length == 0)
 	{
-		// error
 		return;
 	}
 
-#ifdef DEBUG
-	if (event >= EVENTDISPATCHER_HIGHEST_EVENT_ID)
+	if (Queue_IsFull(eventQueue)) // queue full ?
 	{
-
+		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
+		return;
 	}
-#endif
 
 	queue_element* qe = Queue_Head(eventQueue);
 
@@ -164,18 +157,16 @@ void EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 
 void EventDispatcher_Publish(uint8_t event, void* data)
 {
-	if (Queue_IsFull(eventQueue)) // queue full ?
+	if (data == NULL)
 	{
-		// error
 		return;
 	}
 
-#ifdef DEBUG
-	if (event >= EVENTDISPATCHER_HIGHEST_EVENT_ID)
+	if (Queue_IsFull(eventQueue)) // queue full ?
 	{
-
+		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
+		return;
 	}
-#endif
 
 	queue_element* qe = Queue_Head(eventQueue);
 

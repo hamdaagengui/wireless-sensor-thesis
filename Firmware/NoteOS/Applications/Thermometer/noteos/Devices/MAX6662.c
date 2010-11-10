@@ -23,7 +23,7 @@ void MAX6662_Initialize(uint16_t interval)
 	uint32_t intervalMillisecond = (uint32_t) interval * 1000L;
 	Timer_CreateConfiguration(&timerConfig, intervalMillisecond, TIMER_MODE_CONTINUES, TimerTick);
 	SPI_CreateConfiguration(&spiConfig, 2500000, SPI_DATA_MODE_LEADING_RISING, SPI_DATA_ORDER_LSB_FIRST, GPIOD2, ComDone);
-	data = MemoryManager_AllocateSensorBlock();
+	data = MemoryManager_Allocate(2);
 }
 
 enum
@@ -42,6 +42,6 @@ static void TimerTick()
 static void ComDone()
 {
 	*((int16_t*) data) = ((replyBuffer[2] << 8) + replyBuffer[1]) & 0xfff8;
-	EventDispatcher_Publish(EVENT_SENSOR_MAX6662, data);
-	data = MemoryManager_AllocateSensorBlock();
+	//	EventDispatcher_Publish(EVENT_SENSOR_MAX6662, data);
+	data = MemoryManager_Allocate(2);
 }
