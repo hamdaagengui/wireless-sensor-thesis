@@ -17,10 +17,16 @@ extern bool Network_SendData(uint8_t receiver, void* data, uint8_t length);
 
 extern void Network_TimerEvent();
 
+// Interface to sensor properties
 extern bool Network_SetProperty(uint8_t node, uint8_t sensor, uint8_t property, void* data, uint8_t length, result_handler resultHandler);
 extern bool Network_GetProperty(uint8_t node, uint8_t sensor, uint8_t property, void* data, uint8_t length, result_handler resultHandler);
 
+// Interface to non-volatile node user information
 extern bool Network_Load(char* name, void* data, uint8_t length, result_handler resultHandler);
 extern bool Network_Store(char* name, void* data, uint8_t length, result_handler resultHandler);
+
+// Interface to raw data memory access
+extern bool Network_Read(uint16_t address, void* data, uint8_t length, result_handler resultHandler);
+extern bool Network_Write(uint16_t address, void* data, uint8_t length, result_handler resultHandler);
 
 #endif /* NETWORK_H_ */
