@@ -23,7 +23,7 @@ uint32_t sn = 0;
 
 int main()
 {
-//	Initialize(); // => Platform_Initialize() ?
+	//	Initialize(); // => Platform_Initialize() ?
 
 	PORTF = 0x00;
 	DDRF = 0xff;
@@ -41,7 +41,7 @@ int main()
 	sn += ReadBit(PIND, 0) ? 0 : 1;
 	sn += ReadBit(PIND, 2) ? 0 : 2;
 	sn += ReadBit(PIND, 4) ? 0 : 4;
-	sn += ReadBit(PIND, 6) ? 0 : 8;
+//	sn += ReadBit(PIND, 6) ? 0 : 8;
 
 	Diagnostics_Initialize(sn);
 
@@ -60,8 +60,8 @@ int main()
 
 	// Initialize sub systems
 	MemoryManager_Initialize();
-	Network_Initialize(sn == 8 ? true : false); // set as master node if sn == 8
-	Network_SetId(sn);
+	Network_Initialize(sn == 0); // set as master node if sn == 0
+	Network_SetAddress(sn);
 	//	PowerManager_Initialize();
 	EventDispatcher_Initialize();
 	// Initialize peripherals
@@ -73,7 +73,7 @@ int main()
 
 
 	// Start sub systems
-	EventDispatcher_Start();
+
 	// Start peripherals
 	//	HardwareAbstractionLayer_Start();
 
@@ -89,7 +89,7 @@ int main()
 
 
 		// Sleep
-	//	PowerManager_PowerDown();
+		//	PowerManager_PowerDown();
 	}
 
 	return 0;

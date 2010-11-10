@@ -7,7 +7,6 @@
 
 #include <util/atomic.h>
 #include "../DiagnosticsLink.h"
-#include "../../EventSubsystem/EventDispatcher.h"
 #include "../../Collections/FIFO.h"
 #include "../../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
 
@@ -42,12 +41,13 @@ void DiagnosticsLink_Send(void* data, uint8_t length)
 ISR(USART0_RX_vect)
 {
 	FIFO_WriteByte(rxFifo, UDR0);
+	//	uint8_t data = UDR0;
+	//	frameHandler(&data, 1);
 }
 
 ISR(USART0_UDRE_vect)
 {
 	if (FIFO_IsEmpty(txFifo))
-	//if (FIFO_GetUsedSpace(txFifo) == 0)
 	{
 		ClearBit(UCSR0B, UDRIE0);
 	}

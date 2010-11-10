@@ -18,7 +18,7 @@
 
 //  Constants
 #define RTS_DELAY_SLOT_DURATION																			100
-#define BROADCAST_ID																								15
+#define BROADCAST_ADDRESS																						15
 
 enum
 {
@@ -176,7 +176,7 @@ typedef struct
 	uint8_t data[];
 } read_complete_packet;
 
-static uint8_t assignedNodeId;
+static uint8_t address;
 
 static unsigned long randomContext;
 
@@ -194,12 +194,8 @@ static void UpdateCca();
 static bool IsChannelClear();
 static void InitiateSynchronization();
 
-static bool isMaster;
-
-void Network_Initialize(bool master)
+void Network_Initialize()
 {
-	isMaster = master;
-
 	Queue_Initialize(linkPacketQueue, sizeof(linkPacketQueueElement), NETWORK_LINK_PACKET_POOL_SIZE);
 
 	RadioDriver_Initialize(FrameReceived);
@@ -207,33 +203,21 @@ void Network_Initialize(bool master)
 	srand(RadioDriver_GetRandomNumber());
 
 
-	//#ifdef NETWORK_MASTER_NODE
-	if (isMaster)
-	{
-		PreparePreloadedPackets(); // uses default id (0) and does not need synchronization
-		state = STATE_IDLE;
-	}
-	else
-	{
-		//#else
-	}
-	//#endif
+#ifdef MASTER_NODE
+	PreparePreloadedPackets(); // uses default id (0) and does not need synchronization
+	state = STATE_IDLE;
+#else
+	state = STATE_UNSYNCHRONIZED;
+#endif
 
 	NetworkTimer_Initialize(0);
 	NetworkTimer_SetTimerPeriod(205 * 8);
 	NetworkTimer_SetTimerValue(0);
 }
 
-void Network_SetId(uint8_t id)
+void Network_SetAddress(uint8_t adr)
 {
-	if (id == 8)
-	{
-		assignedNodeId = 0;
-	}
-	else
-	{
-		assignedNodeId = id;
-	}
+	address = adr;
 	PreparePreloadedPackets();
 }
 
@@ -244,42 +228,33 @@ void Network_SetDataHandler(block_handler handler)
 
 bool Network_SendData(uint8_t receiver, void* data, uint8_t length)
 {
-	//Critical();
-
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 	{
 		if (Queue_IsFull(linkPacketQueue))
 		{
-			//	NonCritical();
 			Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
 			return false;
 		}
-
-		data_packet* p = MemoryManager_AllocateNetworkBlock();
-
-		if (p == NULL)
-		{
-			// no free network buffer objects
-			//	NonCritical();
-
-			Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
-			return false;
-		}
-
-		p->link.source = assignedNodeId;
-		p->link.type = TYPE_DATA;
-		p->network.receiver = receiver;
-		p->network.sender = assignedNodeId;
-		p->length = length;
-		memcpy(p->data, data, length);
-
 		linkPacketQueueElement* e = Queue_Head(linkPacketQueue);
-		e->object = p;
+
 		e->size = sizeof(data_packet) + length;
+		e->object = MemoryManager_Allocate(e->size);
+
+		if (e->object == NULL)
+		{
+			Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
+			return false;
+		}
+
+		data_packet* dp = e->object;
+		dp->link.source = address;
+		dp->link.type = TYPE_DATA;
+		dp->network.receiver = receiver;
+		dp->network.sender = address;
+		dp->length = length;
+		memcpy(dp->data, data, length);
+
 		Queue_AdvanceHead(linkPacketQueue);
-
-
-		//NonCritical();
 
 		Diagnostics_SendEvent(DIAGNOSTICS_DATA_QUEUED);
 	}
@@ -311,11 +286,11 @@ bool Network_SendData(uint8_t receiver, void* data, uint8_t length)
 
 static void PreparePreloadedPackets()
 {
-	rtsPacketTemplate.link.source = assignedNodeId;
+	rtsPacketTemplate.link.source = address;
 	rtsPacketTemplate.link.type = TYPE_RTS;
-	ctsPacketTemplate.link.source = assignedNodeId;
+	ctsPacketTemplate.link.source = address;
 	ctsPacketTemplate.link.type = TYPE_CTS;
-	ackPacketTemplate.link.source = assignedNodeId;
+	ackPacketTemplate.link.source = address;
 	ackPacketTemplate.link.type = TYPE_ACK;
 }
 
@@ -393,52 +368,48 @@ void Network_TimerEvent()
 				state = STATE_EXPECTING_CTS;
 			}
 		}
-
-		if (state != STATE_EXPECTING_CTS) // receive the packet that's coming
-		{
-			state = STATE_EXPECTING_PACKET;
-			//RadioDriver_EnableReceiveMode();
-		}
 	}
-	else // nothing to send => receive
-	{
 
-		state = STATE_EXPECTING_PACKET;
-		//RadioDriver_EnableReceiveMode();
-		for (uint8_t i = 0; i < 10; i++)
+	if (state == STATE_IDLE) // nothing to send => receive maybe
+	{
+		// RadioDriver_EnableReceiveMode();
+		for (uint8_t i = 0; i < 4; i++)
 		{
-			if (IsChannelClear() == false)
+			if (IsChannelClear() == false) // transmission in progress
 			{
 				state = STATE_EXPECTING_PACKET;
-				//	RadioDriver_EnableReceiveMode();
 				break;
 			}
 			_delay_us(RTS_DELAY_SLOT_DURATION);
 		}
+
+		if (state == STATE_IDLE) // channel clear => noone's sending
+		{
+			// RadioDriver_DisableReceiveMode();
+		}
 	}
 
+#ifdef MASTER_NODE
 	static uint8_t timer = 0;
 	static uint8_t ticker = 0;
 
-	if (assignedNodeId == 0)
+	if (++timer >= (20 + address * 2))
 	{
-		if (++timer >= (20 + assignedNodeId * 2))
+		timer = 0;
+
+		if (ticker & 1)
 		{
-			timer = 0;
-
-			if (ticker & 1)
-			{
-				Leds_GreenOn();
-			}
-			else
-			{
-				Leds_GreenOff();
-			}
-
-			Network_SendData(2, &ticker, 1);
-			ticker++;
+			Leds_YellowOn();
 		}
+		else
+		{
+			Leds_YellowOff();
+		}
+
+		Network_SendData(2, &ticker, 1);
+		ticker++;
 	}
+#endif
 
 
 	// process low resolution, high precision timers
@@ -451,31 +422,48 @@ static void* FrameReceived(void* data, uint8_t length)
 	link_header* lh = data;
 	link_network_header* lnh = data;
 
-	if (lh->destination == assignedNodeId || lh->destination == BROADCAST_ID)
+	if (lh->destination == address || lh->destination == BROADCAST_ADDRESS)
 	{
 		switch (lh->type)
 		{
 			// Non broadcast and non routable
 			case TYPE_RTS: // RTS is never broadcasted
 				{
+					rts_packet* p = data;
+
+
+#ifndef MASTER_NODE
 					if (state == STATE_UNSYNCHRONIZED) // TODO Not for MasterNode
 					{
-						rts_packet* p = data;
 						uint8_t slot = p->slot;
 						// set timer
 						NetworkTimer_SetTimerValue(20);
 					}
+#endif
 
 					if (state == STATE_EXPECTING_PACKET || state == STATE_UNSYNCHRONIZED)
 					{
-						ctsPacketTemplate.link.destination = lh->source;
-						RadioDriver_Send(&ctsPacketTemplate, sizeof(ctsPacketTemplate));
+						if (address == lh->destination)
+						{
+							ctsPacketTemplate.link.destination = lh->source;
+							RadioDriver_Send(&ctsPacketTemplate, sizeof(ctsPacketTemplate));
 
-						currentLink = lh->source;
+							currentLink = lh->source;
 
-						state = STATE_EXPECTING_DATA;
+							state = STATE_EXPECTING_DATA;
 
-						Diagnostics_SendEvent(DIAGNOSTICS_RX_RTS);
+							Diagnostics_SendEvent(DIAGNOSTICS_RX_RTS);
+						}
+						else
+						{
+							// sleep until next tick
+							state = STATE_IDLE;
+						}
+					}
+					else
+					{
+						// sleep until next tick
+						state = STATE_IDLE;
 					}
 				}
 				break;
@@ -506,7 +494,7 @@ static void* FrameReceived(void* data, uint8_t length)
 						Diagnostics_SendEvent(DIAGNOSTICS_RX_ACK);
 
 						Queue_AdvanceTail(linkPacketQueue); // remove it from the queue
-						MemoryManager_ReleaseAnyBlock(currentPacket->object);
+						MemoryManager_Release(currentPacket->object);
 					}
 
 					state = STATE_IDLE;
@@ -523,7 +511,7 @@ static void* FrameReceived(void* data, uint8_t length)
 						ackPacketTemplate.link.destination = lh->source;
 						RadioDriver_Send(&ackPacketTemplate, sizeof(ackPacketTemplate));
 
-						if (lnh->network.receiver == assignedNodeId)
+						if (lnh->network.receiver == address)
 						{
 							Diagnostics_SendEvent(DIAGNOSTICS_RX_DATA);
 
@@ -661,10 +649,6 @@ static void UpdateCca()
 
 static bool IsChannelClear()
 {
-	//	com(0x11);
-	//	com(ccaThreshold);
-	//	com(RadioDriver_GetRssi());
-
 	uint8_t outliers = 0;
 
 	for (uint8_t i = 0; i < RSSI_OUTLIER_COUNT; i++)
@@ -678,12 +662,10 @@ static bool IsChannelClear()
 
 	if (outliers > 0)
 	{
-		//		com(1);
 		return true;
 	}
 	else
 	{
-		//		com(0);
 		return false;
 	}
 }

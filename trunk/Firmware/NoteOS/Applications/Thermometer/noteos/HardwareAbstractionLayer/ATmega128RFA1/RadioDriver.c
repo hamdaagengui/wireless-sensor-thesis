@@ -72,7 +72,7 @@ void RadioDriver_Initialize(bidirectional_block_handler frameReceived)
 	radioDriverStatistics.minimumRawRssi = 0;
 #endif
 
-	frameBufferObject = MemoryManager_AllocateNetworkBlock();
+	frameBufferObject = MemoryManager_Allocate(NETWORK_MAXIMUM_LINK_PACKET_SIZE);
 
 	frameHandler = frameReceived;
 
@@ -231,7 +231,7 @@ void RadioDriver_DisableReceiveMode()
 //{
 //}
 
-ISR(TRX24_TX_END_vect)
+ISR( TRX24_TX_END_vect)
 {
 	// Maybe this can be done immediately after starting the transmission (data sheet page 40).
 #if defined(RADIODRIVER_AUTO_RX)
@@ -256,7 +256,7 @@ ISR(TRX24_TX_END_vect)
 //{
 //}
 
-ISR(TRX24_RX_END_vect)
+ISR( TRX24_RX_END_vect)
 {
 #if defined(RADIODRIVER_USE_CRC)
 	if (ReadBit(PHY_RSSI, RX_CRC_VALID) == 0) // CRC error in frame => dump it
@@ -281,13 +281,13 @@ ISR(TRX24_RX_END_vect)
 		return;
 	}
 
-	if (frameBufferObject == NULL)
+	if (frameBufferObject == NULL) // last allocate failed? try again then
 	{
-		frameBufferObject = MemoryManager_AllocateNetworkBlock();
+		frameBufferObject = MemoryManager_Allocate(NETWORK_MAXIMUM_LINK_PACKET_SIZE);
 
-		if (frameBufferObject == NULL)
+		if (frameBufferObject == NULL) // still no luck?
 		{
-			return;
+			return; // drop frame
 		}
 	}
 
@@ -305,13 +305,13 @@ ISR(TRX24_RX_END_vect)
 		frameBufferObject = frameHandler(frameBufferObject, length);
 	}
 
-	if (frameBufferObject == NULL)
+	if (frameBufferObject == NULL) // acquire new block if the frame handler kept the previous one
 	{
-		frameBufferObject = MemoryManager_AllocateNetworkBlock();
+		frameBufferObject = MemoryManager_Allocate(NETWORK_MAXIMUM_LINK_PACKET_SIZE);
 	}
 }
 
-ISR(TRX24_RX_START_vect)
+ISR( TRX24_RX_START_vect)
 {
 	rssi = PHY_RSSI;
 	//

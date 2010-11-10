@@ -23,6 +23,7 @@ static uint8_t AddData(uint8_t value, uint8_t* buffer, uint8_t position);
 static void FrameHandler(void* data, uint8_t length);
 
 static uint32_t sn;
+static uint32_t activeSn = 0xffffffff;
 
 void Diagnostics_Initialize(uint32_t serialNumber)
 {
@@ -33,7 +34,11 @@ void Diagnostics_Initialize(uint32_t serialNumber)
 
 void Diagnostics_SendEvent(uint8_t eventId)
 {
-	if (sn < 4)
+	//	if (sn != activeSn)
+	//	{
+	//		return;
+	//	}
+	if (ReadBit(PIND, 6) != 0)
 	{
 		return;
 	}
@@ -75,7 +80,7 @@ static uint8_t AddData(uint8_t value, uint8_t* buffer, uint8_t position)
 
 static void FrameHandler(void* data, uint8_t length)
 {
-
+	activeSn = ((uint8_t*) data)[0];
 }
 
 #else

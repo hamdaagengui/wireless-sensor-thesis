@@ -9,69 +9,176 @@
 #include "../DefaultConfiguration.h"
 #include "../Diagnostics/Diagnostics.h"
 
-static uint8_t networkPool[Pool_CalculateSize(NETWORK_MAXIMUM_LINK_PACKET_SIZE, NETWORK_LINK_PACKET_POOL_SIZE)];
-static uint8_t sensorPool[Pool_CalculateSize(SENSOR_MAXIMUM_REPORT_SIZE, SENSOR_REPORT_POOL_SIZE)];
-static const uint8_t* const networkPoolEnd = networkPool + sizeof(networkPool) - 1;
-static const uint8_t* const sensorPoolEnd = sensorPool + sizeof(sensorPool) - 1;
+static uint8_t pool1[Pool_CalculateSize(POOL_1_ALLOCATION_SIZE, POOL_1_ALLOCATION_COUNT)];
+static uint8_t pool2[Pool_CalculateSize(POOL_2_ALLOCATION_SIZE, POOL_2_ALLOCATION_COUNT)];
+static uint8_t pool3[Pool_CalculateSize(POOL_3_ALLOCATION_SIZE, POOL_3_ALLOCATION_COUNT)];
+static uint8_t pool4[Pool_CalculateSize(POOL_4_ALLOCATION_SIZE, POOL_4_ALLOCATION_COUNT)];
+static const uint8_t* const pool1End = pool1 + sizeof(pool1) - 1;
+static const uint8_t* const pool2End = pool2 + sizeof(pool2) - 1;
+static const uint8_t* const pool3End = pool3 + sizeof(pool3) - 1;
+static const uint8_t* const pool4End = pool4 + sizeof(pool4) - 1;
+
+//static uint8_t networkPool[Pool_CalculateSize(NETWORK_MAXIMUM_LINK_PACKET_SIZE, NETWORK_LINK_PACKET_POOL_SIZE)];
+//static uint8_t sensorPool[Pool_CalculateSize(SENSOR_MAXIMUM_REPORT_SIZE, SENSOR_REPORT_POOL_SIZE)];
+//static const uint8_t* const networkPoolEnd = networkPool + sizeof(networkPool) - 1;
+//static const uint8_t* const sensorPoolEnd = sensorPool + sizeof(sensorPool) - 1;
 
 void MemoryManager_Initialize()
 {
-	Pool_Initialize(networkPool, NETWORK_LINK_PACKET_POOL_SIZE, NETWORK_LINK_PACKET_POOL_SIZE);
-	Pool_Initialize(sensorPool, SENSOR_MAXIMUM_REPORT_SIZE, SENSOR_REPORT_POOL_SIZE);
+	Pool_Initialize(pool1, POOL_1_ALLOCATION_SIZE, POOL_1_ALLOCATION_COUNT);
+	Pool_Initialize(pool2, POOL_2_ALLOCATION_SIZE, POOL_2_ALLOCATION_COUNT);
+	Pool_Initialize(pool3, POOL_3_ALLOCATION_SIZE, POOL_3_ALLOCATION_COUNT);
+	Pool_Initialize(pool4, POOL_4_ALLOCATION_SIZE, POOL_4_ALLOCATION_COUNT);
+
+
+	//	Pool_Initialize(networkPool, NETWORK_LINK_PACKET_POOL_SIZE, NETWORK_LINK_PACKET_POOL_SIZE);
+	//	Pool_Initialize(sensorPool, SENSOR_MAXIMUM_REPORT_SIZE, SENSOR_REPORT_POOL_SIZE);
 }
 
-void* MemoryManager_AllocateNetworkBlock()
+void* MemoryManager_Allocate(uint8_t size)
 {
-	void* b = Pool_AllocateBlock(networkPool);
-
-	if (b == NULL)
+	if (size <= POOL_1_ALLOCATION_SIZE)
 	{
-		Diagnostics_SendEvent(DIAGNOSTICS_FAILED_TO_ALLOCATE_NETWORK_BLOCK);
-	}
-	else
-	{
-		Diagnostics_SendEvent(DIAGNOSTICS_ALLOCATED_NETWORK_BLOCK);
+		void* block = Pool_AllocateBlock(pool1);
+		if (block != NULL)
+		{
+			Diagnostics_SendEvent(DIAGNOSTICS_POOL_1_ALLOCATION);
+			return block;
+		}
+		Diagnostics_SendEvent(DIAGNOSTICS_POOL_1_EXHAUSTED);
 	}
 
-	return b;
+	if (size <= POOL_2_ALLOCATION_SIZE)
+	{
+		void* block = Pool_AllocateBlock(pool2);
+		if (block != NULL)
+		{
+			Diagnostics_SendEvent(DIAGNOSTICS_POOL_2_ALLOCATION);
+			return block;
+		}
+		Diagnostics_SendEvent(DIAGNOSTICS_POOL_2_EXHAUSTED);
+	}
+
+	if (size <= POOL_3_ALLOCATION_SIZE)
+	{
+		void* block = Pool_AllocateBlock(pool3);
+		if (block != NULL)
+		{
+			Diagnostics_SendEvent(DIAGNOSTICS_POOL_3_ALLOCATION);
+			return block;
+		}
+		Diagnostics_SendEvent(DIAGNOSTICS_POOL_3_EXHAUSTED);
+	}
+
+	if (size <= POOL_4_ALLOCATION_SIZE)
+	{
+		void* block = Pool_AllocateBlock(pool4);
+		if (block != NULL)
+		{
+			Diagnostics_SendEvent(DIAGNOSTICS_POOL_4_ALLOCATION);
+			return block;
+		}
+		Diagnostics_SendEvent(DIAGNOSTICS_POOL_4_EXHAUSTED);
+	}
+
+	Diagnostics_SendEvent(DIAGNOSTICS_MEMORY_ALLOCATION_FAILED);
+
+	return NULL;
 }
 
-void MemoryManager_ReleaseNetworkBlock(void* block)
-{
-	if (Pool_ReleaseBlock(networkPool, block))
-	{
-		Diagnostics_SendEvent(DIAGNOSTICS_RELEASED_NETWORK_BLOCK);
-	}
-	else
-	{
-		Diagnostics_SendEvent(DIAGNOSTICS_FAILED_TO_RELEASE_NETWORK_BLOCK);
-	}
-}
-
-void* MemoryManager_AllocateSensorBlock()
-{
-	return Pool_AllocateBlock(sensorPool);
-}
-
-void MemoryManager_ReleaseSensorBlock(void* block)
-{
-	Pool_ReleaseBlock(sensorPool, block);
-}
-
-void MemoryManager_ReleaseAnyBlock(void* block)
+void MemoryManager_Release(void* block)
 {
 	uint8_t* b = block;
 
-	if (networkPool <= b && b <= networkPoolEnd)
+	if (pool1 <= b && b <= pool1End)
 	{
-		MemoryManager_ReleaseNetworkBlock(block);
+		if (Pool_ReleaseBlock(pool1, block))
+		{
+			Diagnostics_SendEvent(DIAGNOSTICS_POOL_1_RELEASE);
+			return;
+		}
 	}
-	else if (sensorPool <= b && b <= sensorPoolEnd)
+	else if (pool2 <= b && b <= pool2End)
 	{
-		MemoryManager_ReleaseSensorBlock(block);
+		if (Pool_ReleaseBlock(pool2, block))
+		{
+			Diagnostics_SendEvent(DIAGNOSTICS_POOL_2_RELEASE);
+			return;
+		}
 	}
-	else
+	else if (pool3 <= b && b <= pool3End)
 	{
-		// error - invalid release
+		if (Pool_ReleaseBlock(pool3, block))
+		{
+			Diagnostics_SendEvent(DIAGNOSTICS_POOL_3_RELEASE);
+			return;
+		}
 	}
+	else if (pool4 <= b && b <= pool4End)
+	{
+		if (Pool_ReleaseBlock(pool4, block))
+		{
+			Diagnostics_SendEvent(DIAGNOSTICS_POOL_4_RELEASE);
+			return;
+		}
+	}
+
+	Diagnostics_SendEvent(DIAGNOSTICS_MEMORY_RELEASE_FAILED);
 }
+/*
+ void* MemoryManager_AllocateNetworkBlock()
+ {
+ void* b = Pool_AllocateBlock(networkPool);
+
+ if (b == NULL)
+ {
+ Diagnostics_SendEvent(DIAGNOSTICS_FAILED_TO_ALLOCATE_NETWORK_BLOCK);
+ }
+ else
+ {
+ Diagnostics_SendEvent(DIAGNOSTICS_ALLOCATED_NETWORK_BLOCK);
+ }
+
+ return b;
+ }
+
+ void MemoryManager_ReleaseNetworkBlock(void* block)
+ {
+ if (Pool_ReleaseBlock(networkPool, block))
+ {
+ Diagnostics_SendEvent(DIAGNOSTICS_RELEASED_NETWORK_BLOCK);
+ }
+ else
+ {
+ Diagnostics_SendEvent(DIAGNOSTICS_FAILED_TO_RELEASE_NETWORK_BLOCK);
+ }
+ }
+
+ void* MemoryManager_AllocateSensorBlock()
+ {
+ return Pool_AllocateBlock(sensorPool);
+ }
+
+ void MemoryManager_ReleaseSensorBlock(void* block)
+ {
+ Pool_ReleaseBlock(sensorPool, block);
+ }
+
+ void MemoryManager_ReleaseAnyBlock(void* block)
+ {
+ uint8_t* b = block;
+
+ if (networkPool <= b && b <= networkPoolEnd)
+ {
+ MemoryManager_ReleaseNetworkBlock(block);
+ }
+ else if (sensorPool <= b && b <= sensorPoolEnd)
+ {
+ MemoryManager_ReleaseSensorBlock(block);
+ }
+ else
+ {
+ // error - invalid release
+ }
+ }
+ */
