@@ -7,18 +7,14 @@
 
 #if defined(__AVR_ATmega128RFA1__)
 
-#include <avr/power.h>
+//#include <avr/power.h>
 #include "../NetworkTimer.h"
 #include "../../NetworkSubsystem/Network.h"
 
 #define PRESCALER_VALUE																							8
 
-static notification_handler hnd;
-
-void NetworkTimer_Initialize(notification_handler handler)
+void NetworkTimer_Initialize()
 {
-	hnd = handler;
-
 	ASSR = (1 << AS2);
 
 	TCCR2A = (1 << WGM21);
@@ -28,15 +24,16 @@ void NetworkTimer_Initialize(notification_handler handler)
 	TIMSK2 = (1 << OCIE2A);
 }
 
+void NetworkTimer_SetTimerPeriod(uint16_t value)
+{
+	value += PRESCALER_VALUE; // for rounding
+	OCR2A = value / PRESCALER_VALUE;
+}
+
 void NetworkTimer_SetTimerValue(uint16_t value)
 {
 	GTCCR |= (1 << PSRASY); // reset prescaler
 	TCNT2 = value / PRESCALER_VALUE;
-}
-
-void NetworkTimer_SetTimerPeriod(uint16_t value)
-{
-	OCR2A = value / PRESCALER_VALUE;
 }
 
 // Internals

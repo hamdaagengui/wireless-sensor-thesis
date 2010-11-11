@@ -58,20 +58,8 @@ static volatile bool transmitting;
 static volatile uint8_t rssi;
 static uint8_t* frameBufferObject;
 
-#ifdef STATISTICS
-radiodriver_statistics radioDriverStatistics;
-#endif
-
 void RadioDriver_Initialize(bidirectional_block_handler frameReceived)
 {
-#ifdef STATISTICS
-	radioDriverStatistics.framesReceived = 0;
-	radioDriverStatistics.framesDiscarded = 0;
-	radioDriverStatistics.framesSent = 0;
-	radioDriverStatistics.maximumRawRssi = 0;
-	radioDriverStatistics.minimumRawRssi = 0;
-#endif
-
 	frameBufferObject = MemoryManager_Allocate(NETWORK_MAXIMUM_LINK_PACKET_SIZE);
 
 	frameHandler = frameReceived;
@@ -241,11 +229,6 @@ ISR( TRX24_TX_END_vect)
 #endif
 
 	transmitting = false;
-
-
-#ifdef STATISTICS
-	radioDriverStatistics.framesSent++;
-#endif
 }
 
 //ISR(TRX24_XAH_AMI_vect)
@@ -261,9 +244,6 @@ ISR( TRX24_RX_END_vect)
 #if defined(RADIODRIVER_USE_CRC)
 	if (ReadBit(PHY_RSSI, RX_CRC_VALID) == 0) // CRC error in frame => dump it
 	{
-#ifdef STATISTICS
-		radioDriverStatistics.framesDiscarded++;
-#endif
 		return;
 	}
 #endif
@@ -296,10 +276,6 @@ ISR( TRX24_RX_END_vect)
 		frameBufferObject[i] = TRX_BUF(i);
 	}
 
-#ifdef STATISTICS
-	radioDriverStatistics.framesReceived++;
-#endif
-
 	if (frameHandler)
 	{
 		frameBufferObject = frameHandler(frameBufferObject, length);
@@ -319,18 +295,6 @@ ISR( TRX24_RX_START_vect)
 	//	{
 	//		rxStartHandler();
 	//	}
-	//
-	//
-	//#ifdef STATISTICS
-	//	if (rssi > radioDriverStatistics.maximumRawRssi)
-	//	{
-	//		radioDriverStatistics.maximumRawRssi = rssi;
-	//	}
-	//	else if (rssi < radioDriverStatistics.minimumRawRssi)
-	//	{
-	//		radioDriverStatistics.minimumRawRssi = rssi;
-	//	}
-	//#endif
 }
 
 //ISR(TRX24_PLL_UNLOCK_vect)

@@ -210,8 +210,8 @@ void Network_Initialize()
 	state = STATE_UNSYNCHRONIZED;
 #endif
 
-	NetworkTimer_Initialize(0);
-	NetworkTimer_SetTimerPeriod(205 * 8);
+	NetworkTimer_Initialize();
+	NetworkTimer_SetTimerPeriod(NETWORK_TIMER_FREQUENCY / NETWORK_TRANSFER_WINDOW_FREQUENCY);
 	NetworkTimer_SetTimerValue(0);
 }
 
@@ -303,12 +303,13 @@ static void InitiateSynchronization()
 }
 
 /**
- * Called directly from the timer interrupt and so it atomic.
+ * Called directly from the timer interrupt and so it is atomic.
  */
 void Network_TimerEvent()
 {
 	if (state == STATE_UNSYNCHRONIZED)
 	{
+		RadioDriver_EnableReceiveMode();
 		return;
 	}
 
@@ -337,11 +338,12 @@ void Network_TimerEvent()
 
 	state = STATE_IDLE;
 
+	uint8_t currentSlot = 0;
 	if (Queue_IsEmpty(linkPacketQueue) == false) // frames to send?
 	{
 		//uint8_t slot = rand_r(&randomContext) & 0x3; // if this is a high priority node or packet choose an earlier slot
 		uint8_t slot = 0;
-		for (uint8_t i = 0; i < slot; i++)
+		for (; currentSlot < slot; currentSlot++)
 		{
 			if (IsChannelClear() == false)
 			{
@@ -357,23 +359,23 @@ void Network_TimerEvent()
 			currentLink = FindNext(lnh->network.receiver);
 			lnh->link.destination = currentLink;
 
-			if (IsChannelClear())
-			{
-				rtsPacketTemplate.link.destination = currentLink;
-				rtsPacketTemplate.slot = slot;
-				RadioDriver_Send(&rtsPacketTemplate, sizeof(rtsPacketTemplate));
 
-				Diagnostics_SendEvent(DIAGNOSTICS_TX_RTS);
+			// Send RTS
+			rtsPacketTemplate.link.destination = currentLink;
+			rtsPacketTemplate.slot = slot;
+			RadioDriver_Send(&rtsPacketTemplate, sizeof(rtsPacketTemplate));
 
-				state = STATE_EXPECTING_CTS;
-			}
+			Diagnostics_SendEvent(DIAGNOSTICS_TX_RTS);
+
+			state = STATE_EXPECTING_CTS;
 		}
 	}
 
 	if (state == STATE_IDLE) // nothing to send => receive maybe
 	{
-		// RadioDriver_EnableReceiveMode();
-		for (uint8_t i = 0; i < 4; i++)
+		RadioDriver_EnableReceiveMode();
+
+		for (uint8_t i = currentSlot; i < NETWORK_NUMBER_OF_RTS_SLOTS; i++)
 		{
 			if (IsChannelClear() == false) // transmission in progress
 			{
@@ -383,17 +385,18 @@ void Network_TimerEvent()
 			_delay_us(RTS_DELAY_SLOT_DURATION);
 		}
 
-		if (state == STATE_IDLE) // channel clear => noone's sending
+		if (state == STATE_IDLE) // channel clear => no one is sending
 		{
-			// RadioDriver_DisableReceiveMode();
+			RadioDriver_DisableReceiveMode();
 		}
 	}
+
 
 #ifdef MASTER_NODE
 	static uint8_t timer = 0;
 	static uint8_t ticker = 0;
 
-	if (++timer >= (20 + address * 2))
+	if (++timer >= 20)
 	{
 		timer = 0;
 
@@ -437,7 +440,7 @@ static void* FrameReceived(void* data, uint8_t length)
 					{
 						uint8_t slot = p->slot;
 						// set timer
-						NetworkTimer_SetTimerValue(20);
+						NetworkTimer_SetTimerValue(2);
 					}
 #endif
 
