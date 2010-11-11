@@ -12,6 +12,9 @@
 #define NETWORK_CAN_ROUTE																						1
 #define NETWORK_MAXIMUM_LINK_PACKET_SIZE														64
 #define NETWORK_LINK_PACKET_POOL_SIZE																10
+#define NETWORK_TIMER_FREQUENCY																			32768 // In Hz
+#define NETWORK_TRANSFER_WINDOW_FREQUENCY														20 // Number of transfer windows per second (i.e. RTS+CTS+DATA+ACK)
+#define NETWORK_NUMBER_OF_RTS_SLOTS																	6
 
 // Sensor subsystem
 #define SENSOR_MAXIMUM_REPORT_SIZE																	8

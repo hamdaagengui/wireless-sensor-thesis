@@ -14,7 +14,7 @@
 #define DIAGNOSTICS_LINK_BAUDRATE																		3
 
 // Configuration of RadioDriver
-#define RADIODRIVER_AUTO_RX
+//#define RADIODRIVER_AUTO_RX
 #define RADIODRIVER_USE_CRC
 
 //#undef NETWORK_CAN_ROUTE

@@ -16,8 +16,8 @@
 #error "No network timer found for the selected processor!"
 #endif
 
-extern void NetworkTimer_Initialize(notification_handler handler);
-extern void NetworkTimer_SetTimerValue(uint16_t value);
+extern void NetworkTimer_Initialize();
 extern void NetworkTimer_SetTimerPeriod(uint16_t value);
+extern void NetworkTimer_SetTimerValue(uint16_t value);
 
 #endif /* NETWORKTIMER_H_ */
