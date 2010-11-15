@@ -7,7 +7,6 @@
 
 #if defined(__AVR_ATmega128RFA1__)
 
-//#include <avr/power.h>
 #include "../NetworkTimer.h"
 #include "../../NetworkSubsystem/Network.h"
 
