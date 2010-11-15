@@ -25,7 +25,6 @@ typedef struct
 typedef struct
 {
 	uint8_t sensor;
-	uint8_t length;
 	uint8_t data[];
 } sensor_event_report;
 
