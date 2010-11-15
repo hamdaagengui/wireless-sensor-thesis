@@ -11,10 +11,5 @@
 extern void MemoryManager_Initialize();
 extern void* MemoryManager_Allocate(uint8_t size);
 extern void MemoryManager_Release(void* block);
-//extern void* MemoryManager_AllocateNetworkBlock();
-//extern void MemoryManager_ReleaseNetworkBlock(void* block);
-//extern void* MemoryManager_AllocateSensorBlock();
-//extern void MemoryManager_ReleaseSensorBlock(void* block);
-//extern void MemoryManager_ReleaseAnyBlock(void* block);
 
 #endif /* MEMORYMANAGER_H_ */
