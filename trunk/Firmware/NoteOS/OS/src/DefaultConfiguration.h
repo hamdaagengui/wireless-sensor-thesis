@@ -41,6 +41,7 @@
 // Diagnostics
 #define DIAGNOSTICS_LINK_TRANSMISSION_BUFFER_SIZE										150
 #define DIAGNOSTICS_LINK_RECEPTION_BUFFER_SIZE											30
+#define DIAGNOSTICS_LINK_BAUDRATE																		500000
 
 // Peripherals
 

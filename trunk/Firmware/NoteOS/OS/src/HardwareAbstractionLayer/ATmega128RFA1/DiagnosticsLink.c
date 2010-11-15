@@ -25,7 +25,7 @@ void DiagnosticsLink_Initialize(block_handler frameReceivedHandler)
 	UCSR0A = 1 << U2X0;
 	UCSR0B = 1 << RXCIE0 | 1 << RXEN0 | 1 << TXEN0;
 	UCSR0C = 1 << UCSZ01 | 1 << UCSZ00;
-	UBRR0 = DIAGNOSTICS_LINK_BAUDRATE;
+	UBRR0 = ((F_CPU / (8L * (DIAGNOSTICS_LINK_BAUDRATE))) - 1L);
 }
 
 void DiagnosticsLink_Send(void* data, uint8_t length)
