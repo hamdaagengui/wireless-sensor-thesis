@@ -23,7 +23,7 @@ uint32_t sn = 0;
 
 int main()
 {
-	//	Initialize(); // => Platform_Initialize() ?
+	Initialize(); // => Platform_Initialize() ?
 
 	PORTF = 0x00;
 	DDRF = 0xff;

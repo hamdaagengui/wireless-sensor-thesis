@@ -24,7 +24,7 @@ typedef struct
 
 typedef struct
 {
-	uint8_t sensorId;
+	uint8_t sensor;
 	uint8_t length;
 	uint8_t data[];
 } sensor_event_report;
@@ -34,9 +34,9 @@ typedef void (*completion_handler)();
 
 extern void EventDispatcher_Initialize();
 extern void EventDispatcher_Dispatch();
-extern void EventDispatcher_Subscribe(uint8_t event, event_handler handler);
-extern void EventDispatcher_Notify(completion_handler handler);
-extern void EventDispatcher_Process(block_handler handler, void* data, uint8_t length);
-extern void EventDispatcher_Publish(uint8_t event, void* data);
+extern void EventDispatcher_Subscribe(uint8_t eventId, event_handler handler);
+extern bool EventDispatcher_Notify(completion_handler handler);
+extern bool EventDispatcher_Process(block_handler handler, void* data, uint8_t length);
+extern bool EventDispatcher_Publish(uint8_t eventId, void* data);
 
 #endif /* EVENTDISPATCHER_H_ */

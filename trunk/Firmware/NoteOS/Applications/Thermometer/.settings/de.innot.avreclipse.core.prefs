@@ -1,8 +1,9 @@
-#Thu Sep 09 23:11:52 CEST 2010
+#Sun Nov 14 13:29:37 CET 2010
 avrtarget/ClockFrequency=16000000
 avrtarget/ExtRAMSize=0
 avrtarget/ExtendedRAM=false
 avrtarget/MCUType=atmega128rfa1
 avrtarget/UseEEPROM=false
 avrtarget/UseExtendedRAMforHeap=true
+avrtarget/perConfig=false
 eclipse.preferences.version=1
