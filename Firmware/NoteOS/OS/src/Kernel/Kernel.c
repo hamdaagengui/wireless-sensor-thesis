@@ -23,7 +23,9 @@ uint32_t sn = 0;
 
 int main()
 {
+#ifdef CONFIGURATION_H_
 	Initialize(); // => Platform_Initialize() ?
+#endif
 
 	PORTF = 0x00;
 	DDRF = 0xff;
@@ -59,8 +61,9 @@ int main()
 
 
 	// Start user application
+#ifdef CONFIGURATION_H_
 	Start();
-
+#endif
 
 	// Start sub systems
 

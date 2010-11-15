@@ -8,7 +8,7 @@
 #ifndef POWERMANAGER_H_
 #define POWERMANAGER_H_
 
-#include <Globals.h>
+#include "../Globals.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../DefaultConfiguration.h"
 

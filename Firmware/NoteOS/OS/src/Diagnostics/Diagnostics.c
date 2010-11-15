@@ -85,7 +85,7 @@ static void FrameHandler(void* data, uint8_t length)
 
 #else
 
-void Diagnostics_Initialize()
+void Diagnostics_Initialize(uint32_t serialNumber)
 {
 }
 
