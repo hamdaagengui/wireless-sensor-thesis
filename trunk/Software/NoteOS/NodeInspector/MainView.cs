@@ -377,6 +377,20 @@ namespace NodeInspector
 
 			startTime = DateTime.Now;
 			portActive = true;
+
+			Thread.Sleep(200);
+
+			numericUpDownActiveNode_ValueChanged(null, null);
+		}
+
+		private void numericUpDownActiveNode_ValueChanged(object sender, EventArgs e)
+		{
+			if (port != null && port.IsOpen)
+			{
+				byte[] b = new byte[1];
+				b[0] = Convert.ToByte(numericUpDownActiveNode.Value);
+				port.Write(b, 0, 1);
+			}
 		}
 	}
 }

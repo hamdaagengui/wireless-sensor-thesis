@@ -50,11 +50,13 @@
 			this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.dataGridView1 = new System.Windows.Forms.DataGridView();
 			this.buttonReset = new System.Windows.Forms.Button();
+			this.numericUpDownActiveNode = new System.Windows.Forms.NumericUpDown();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
 			this.splitContainer1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDownActiveNode)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// imageList1
@@ -279,11 +281,20 @@
 			this.buttonReset.UseVisualStyleBackColor = true;
 			this.buttonReset.Click += new System.EventHandler(this.buttonReset_Click);
 			// 
+			// numericUpDownActiveNode
+			// 
+			this.numericUpDownActiveNode.Location = new System.Drawing.Point(378, 17);
+			this.numericUpDownActiveNode.Name = "numericUpDownActiveNode";
+			this.numericUpDownActiveNode.Size = new System.Drawing.Size(66, 20);
+			this.numericUpDownActiveNode.TabIndex = 27;
+			this.numericUpDownActiveNode.ValueChanged += new System.EventHandler(this.numericUpDownActiveNode_ValueChanged);
+			// 
 			// MainView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(854, 604);
+			this.Controls.Add(this.numericUpDownActiveNode);
 			this.Controls.Add(this.buttonReset);
 			this.Controls.Add(this.splitContainer1);
 			this.Controls.Add(this.checkBoxDeltaTime);
@@ -308,6 +319,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
 			this.splitContainer1.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDownActiveNode)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -335,6 +347,7 @@
 		private System.Windows.Forms.ColumnHeader columnHeader4;
 		private System.Windows.Forms.DataGridView dataGridView1;
 		private System.Windows.Forms.Button buttonReset;
+		private System.Windows.Forms.NumericUpDown numericUpDownActiveNode;
 	}
 }
 

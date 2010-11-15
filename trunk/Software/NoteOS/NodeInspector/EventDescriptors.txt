@@ -33,3 +33,23 @@
 24;2;Network;Network;Could not queue data
 25;0;Network;Network;Network tick
 26;0;Network;Network;Forwarding packet
+
+
+27;2;Event;EventDispatcher;Event queue overflowed
+28;2;Event;EventDispatcher;Too many subscribers of event
+
+// Memory subsystem
+29;0;Memory;MemoryManager;Block allocated from pool 1;pool1 ++
+30;0;Memory;MemoryManager;Block released from pool 1;pool1 --
+31;2;Memory;MemoryManager;Pool 1 was exhausted and allocation failed
+32;0;Memory;MemoryManager;Block allocated from pool 2;pool2 ++
+33;0;Memory;MemoryManager;Block released from pool 2;pool2 --
+34;2;Memory;MemoryManager;Pool 2 was exhausted and allocation failed
+35;0;Memory;MemoryManager;Block allocated from pool 3;pool3 ++
+36;0;Memory;MemoryManager;Block released from pool 3;pool3 --
+37;2;Memory;MemoryManager;Pool 3 was exhausted and allocation failed
+38;0;Memory;MemoryManager;Block allocated from pool 4;pool4 ++
+39;0;Memory;MemoryManager;Block released from pool 4;pool4 --
+40;2;Memory;MemoryManager;Pool 4 was exhausted and allocation failed
+41;2;Memory;MemoryManager;Allocation failed
+42;2;Memory;MemoryManager;Release failed
