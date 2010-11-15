@@ -11,10 +11,13 @@
 // Network subssystem
 #define NETWORK_CAN_ROUTE																						1
 #define NETWORK_MAXIMUM_LINK_PACKET_SIZE														64
-#define NETWORK_LINK_PACKET_POOL_SIZE																10
+#define NETWORK_LINK_QUEUE_SIZE																			10
+#define NETWORK_TRANSPORT_QUEUE_SIZE																10
+#define NETWORK_TRANSPORT_TIMEOUT																		64 // in units of: 1 / (NETWORK_TIMER_FREQUENCY / NETWORK_COMMUNICATION_SLOT_FREQUENCY) (default = 500 ms)
 #define NETWORK_TIMER_FREQUENCY																			32768 // In Hz
-#define NETWORK_TRANSFER_WINDOW_FREQUENCY														20 // Number of transfer windows per second (i.e. RTS+CTS+DATA+ACK)
+#define NETWORK_COMMUNICATION_SLOT_FREQUENCY												128 // Number of transfers per second (i.e. RTS+CTS+DATA+ACK)
 #define NETWORK_NUMBER_OF_RTS_SLOTS																	6
+#define NETWORK_RTS_SLOT_DURATION																		100 // Duration of an RTS slot in micro seconds)
 
 // Sensor subsystem
 #define SENSOR_MAXIMUM_REPORT_SIZE																	8
@@ -36,8 +39,8 @@
 #define POOL_4_ALLOCATION_COUNT																			10
 
 // Diagnostics
-#define DIAGNOSTICS_LINK_TRANSMISSION_BUFFER_SIZE										100
-#define DIAGNOSTICS_LINK_RECEPTION_BUFFER_SIZE											50
+#define DIAGNOSTICS_LINK_TRANSMISSION_BUFFER_SIZE										150
+#define DIAGNOSTICS_LINK_RECEPTION_BUFFER_SIZE											30
 
 // Peripherals
 

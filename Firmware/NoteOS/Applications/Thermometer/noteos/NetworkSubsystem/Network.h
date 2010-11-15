@@ -12,8 +12,8 @@
 
 extern void Network_Initialize();
 extern void Network_SetAddress(uint8_t id);
-extern void Network_SetDataHandler(block_handler handler);
-extern bool Network_SendData(uint8_t receiver, void* data, uint8_t length);
+extern void Network_Handlers(block_handler sensorDataHandler);
+extern bool Network_SendSensorData(uint8_t sensor, void* data, uint8_t length);
 
 extern void Network_TimerEvent();
 

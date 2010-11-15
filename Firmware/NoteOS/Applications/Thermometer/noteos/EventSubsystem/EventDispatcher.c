@@ -41,33 +41,33 @@ typedef struct
 			void* data;
 		} publication;
 	};
-} queue_element;
+} event;
 
-static uint8_t eventQueue[Queue_CalculateSize(sizeof(queue_element), EVENTDISPATCHER_QUEUE_SIZE)];
+static uint8_t eventQueue[Queue_CalculateSize(sizeof(event), EVENTDISPATCHER_QUEUE_SIZE)];
 
 void EventDispatcher_Initialize()
 {
-	Queue_Initialize(eventQueue, sizeof(queue_element), EVENTDISPATCHER_QUEUE_SIZE);
+	Queue_Initialize(eventQueue, sizeof(event), EVENTDISPATCHER_QUEUE_SIZE);
 }
 
 void EventDispatcher_Dispatch()
 {
 	while (Queue_IsEmpty(eventQueue) == false)
 	{
-		queue_element* qe = Queue_Tail(eventQueue);
+		event* e = Queue_Tail(eventQueue);
 
-		switch (qe->type)
+		switch (e->type)
 		{
 			case TYPE_NOTIFICATION:
-				qe->notification.handler();
+				e->notification.handler();
 
 				Diagnostics_SendEvent(DIAGNOSTICS_NOTIFY_EXECUTED);
 				break;
 
 			case TYPE_PROCESSING:
-				qe->processing.handler(qe->processing.data, qe->processing.length);
+				e->processing.handler(e->processing.data, e->processing.length);
 
-				MemoryManager_Release(qe->processing.data);
+				MemoryManager_Release(e->processing.data);
 
 				Diagnostics_SendEvent(DIAGNOSTICS_PROCESS_EXECUTED);
 				break;
@@ -75,15 +75,15 @@ void EventDispatcher_Dispatch()
 			case TYPE_PUBLICATION:
 				for (uint8_t i = 0; i < EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS; i++)
 				{
-					if (subscribers[qe->publication.event][i] == NULL)
+					if (subscribers[e->publication.event][i] == NULL)
 					{
 						break; // no more subscribers
 					}
 
-					subscribers[qe->publication.event][i](qe->publication.data);
+					subscribers[e->publication.event][i](e->publication.data);
 				}
 
-				MemoryManager_Release(qe->publication.data);
+				MemoryManager_Release(e->publication.data);
 
 				Diagnostics_SendEvent(DIAGNOSTICS_PUBLISH_EXECUTED);
 				break;
@@ -93,13 +93,13 @@ void EventDispatcher_Dispatch()
 	}
 }
 
-void EventDispatcher_Subscribe(uint8_t event, event_handler handler)
+void EventDispatcher_Subscribe(uint8_t eventId, event_handler handler)
 {
 	for (uint8_t i = 0; i < EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS; i++)
 	{
-		if (subscribers[event][i] == NULL)
+		if (subscribers[eventId][i] == NULL)
 		{
-			subscribers[event][i] = handler;
+			subscribers[eventId][i] = handler;
 			return;
 		}
 	}
@@ -107,74 +107,86 @@ void EventDispatcher_Subscribe(uint8_t event, event_handler handler)
 	Diagnostics_SendEvent(DIAGNOSTICS_TOO_MANY_EVENT_SUBSCRIBERS);
 }
 
-void EventDispatcher_Notify(completion_handler handler)
+bool EventDispatcher_Notify(completion_handler handler)
 {
 	if (handler == NULL)
 	{
-		return;
+		return false;
 	}
 
 	if (Queue_IsFull(eventQueue)) // queue full ?
 	{
 		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
-		return;
+		return false;
 	}
 
-	queue_element* qe = Queue_Head(eventQueue);
+	event* e = Queue_Head(eventQueue);
 
-	qe->type = TYPE_NOTIFICATION;
-	qe->notification.handler = handler;
+	e->type = TYPE_NOTIFICATION;
+	e->notification.handler = handler;
 
 	Queue_AdvanceHead(eventQueue);
 
 	Diagnostics_SendEvent(DIAGNOSTICS_NOTIFY_QUEUED);
+
+	return true;
 }
 
-void EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
+/**
+ * Enqueues data for deferred processing.
+ * @param handler The processing function.
+ * @param data The data to be processed.
+ * @param length The length of the data.
+ */
+bool EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 {
 	if (handler == NULL || data == NULL || length == 0)
 	{
-		return;
+		return false;
 	}
 
 	if (Queue_IsFull(eventQueue)) // queue full ?
 	{
 		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
-		return;
+		return false;
 	}
 
-	queue_element* qe = Queue_Head(eventQueue);
+	event* e = Queue_Head(eventQueue);
 
-	qe->type = TYPE_PROCESSING;
-	qe->processing.handler = handler;
-	qe->processing.data = data;
-	qe->processing.length = length;
+	e->type = TYPE_PROCESSING;
+	e->processing.handler = handler;
+	e->processing.data = data;
+	e->processing.length = length;
 
 	Queue_AdvanceHead(eventQueue);
 
 	Diagnostics_SendEvent(DIAGNOSTICS_PROCESS_QUEUED);
+
+	return true;
 }
 
-void EventDispatcher_Publish(uint8_t event, void* data)
+bool EventDispatcher_Publish(uint8_t eventId, void* data)
 {
 	if (data == NULL)
 	{
-		return;
+		return false;
 	}
 
 	if (Queue_IsFull(eventQueue)) // queue full ?
 	{
 		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
-		return;
+		return false;
 	}
 
-	queue_element* qe = Queue_Head(eventQueue);
+	event* e = Queue_Head(eventQueue);
 
-	qe->type = TYPE_PUBLICATION;
-	qe->publication.event = event;
-	qe->publication.data = data;
+	e->type = TYPE_PUBLICATION;
+	e->publication.event = eventId;
+	e->publication.data = data;
 
 	Queue_AdvanceHead(eventQueue);
 
 	Diagnostics_SendEvent(DIAGNOSTICS_PUBLISH_QUEUED);
+
+	return true;
 }

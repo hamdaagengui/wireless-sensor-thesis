@@ -14,8 +14,13 @@
 
 #define Modify(var, mask, value)								(var = ((var & ~mask) | (value & mask)))
 
-#define false																		(0)
-#define true																		(1)
+enum
+{
+	false,
+	true
+};
+//#define false																		(0)
+//#define true																		(1)
 typedef uint8_t bool;
 
 //#define NULL																		(0)
@@ -42,5 +47,10 @@ enum
 //#define LA(x) {uint8_t r=0; r |= x&(1<<0)?(1<<0):0; r |= x&(1<<1)?(1<<2):0; r |= x&(1<<2)?(1<<4):0; r |= x&(1<<3)?(1<<6):0; PORTB = r;}
 
 //#define com(x) if(USE_COM > 0) { while(!(UCSR0A & (1<<UDRE0))); UDR0 = x; }
+
+///#define inline __attribute__ ((__always_inline__))
+///#define a  flatten
+
+#include <avr/pgmspace.h>
 
 #endif /* GLOBALS_H_ */

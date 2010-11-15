@@ -20,6 +20,13 @@ typedef struct
 	uint8_t buffer[];
 } queue;
 
+// if the queue does not hold a specific type of objects the general element type can be used to point to any type
+typedef struct
+{
+	void* object;
+	uint8_t size;
+} queue_element;
+
 #define Queue_CalculateSize(elementSize, elementCount) (sizeof(queue) + ((elementSize) * (elementCount)))
 
 extern void Queue_Initialize(void* q, uint8_t elementSize, uint8_t elementCount);
