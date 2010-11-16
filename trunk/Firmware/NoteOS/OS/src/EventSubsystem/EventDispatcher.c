@@ -13,6 +13,7 @@
 // TODO EVENTDISPATCHER_HIGHEST_EVENT_ID should be replaced by EVENT_LAST_ID or something like that so the user shouldn't explicitly define it.
 static event_handler subscribers[EVENTDISPATCHER_HIGHEST_EVENT_ID][EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS];
 
+
 enum
 {
 	TYPE_NOTIFICATION,
@@ -132,12 +133,6 @@ bool EventDispatcher_Notify(completion_handler handler)
 	return true;
 }
 
-/**
- * Enqueues data for deferred processing.
- * @param handler The processing function.
- * @param data The data to be processed.
- * @param length The length of the data.
- */
 bool EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 {
 	if (handler == NULL || data == NULL || length == 0)

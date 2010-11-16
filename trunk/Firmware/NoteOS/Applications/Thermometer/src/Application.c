@@ -7,10 +7,11 @@
 
 #include <SensorSubsystem/SensorManager.h>
 #include <SensorSubsystem/Sensors/HeartRateVariability.h>
+#include <Kernel/Timer.h>
 
 void Initialize()
 {
-
+	int i = TIMER_RESOLUTION;
 }
 
 void Start()

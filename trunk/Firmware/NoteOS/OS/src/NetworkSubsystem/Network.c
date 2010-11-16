@@ -197,8 +197,8 @@ typedef struct
 static void PreparePreloadedPackets();
 static void TransportTimeoutHandler();
 static void* FrameReceived(void* data, uint8_t length);
-static bool Transport_VerifyHeader(void** data, uint8_t length);
-static uint8_t Network_FindNextInRoute(uint8_t destination);
+static bool VerifyTransportHeader(void** data, uint8_t length);
+static uint8_t FindNextNodeInRoute(uint8_t destination);
 static void UpdateCca();
 static bool IsChannelClear();
 static void InitiateSynchronization();
@@ -263,92 +263,12 @@ void Network_Handlers(block_handler sensorDataHandler)
 	sensorDataProcessor = sensorDataHandler;
 }
 
-bool Network_SendSensorData(uint8_t sensor, void* data, uint8_t length)
+void Network_SendPacket()
 {
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-	{
-		if (Queue_IsFull(transportQueue))
-		{
-			Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
-			return false;
-		}
-		queue_element* qe = Queue_Head(transportQueue);
-
-		qe->size = sizeof(application_sensor_data_packet) + length;
-		qe->object = MemoryManager_Allocate(qe->size);
-
-		if (qe->object == NULL)
-		{
-			Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
-			return false;
-		}
-
-		application_sensor_data_packet* p = qe->object;
-		p->link.source = address;
-		p->link.type = TYPE_APPLICATION_SENSOR_DATA;
-		p->network.receiver = 0; // always send sensor data to gateway
-		p->network.sender = address;
-		p->transport.sequenceNumber = nextSequenceNumber++;
-		p->sensor = sensor;
-		memcpy(p->data, data, length);
-
-		Queue_AdvanceHead(transportQueue);
-
-		Diagnostics_SendEvent(DIAGNOSTICS_DATA_QUEUED);
-
-
-		// start transfer
-	}
-
-	return true;
+	Queue_AdvanceHead(transportQueue);
 }
 
-bool Network_SendTransportPacket(uint8_t receiver, void* data, uint8_t length)
-{
-	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-	{
-		if (Queue_IsFull(transportQueue))
-		{
-			Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
-			return false;
-		}
-		queue_element* qe = Queue_Head(transportQueue);
-
-		qe->size = sizeof(link_network_transport_header) + length;
-		qe->object = MemoryManager_Allocate(qe->size);
-
-		if (qe->object == NULL)
-		{
-			Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
-			return false;
-		}
-
-		link_network_transport_header* p = qe->object;
-		p->link.source = address;
-		p->link.type = TYPE_APPLICATION_SENSOR_DATA;
-		p->network.receiver = 0; // always send sensor data to gateway
-		p->network.sender = address;
-		p->transport.sequenceNumber = nextSequenceNumber++;
-		memcpy(p->payload, data, length);
-
-		Queue_AdvanceHead(transportQueue);
-
-		Diagnostics_SendEvent(DIAGNOSTICS_DATA_QUEUED);
-
-
-		// start transfer
-	}
-
-	return true;
-}
-
-bool Network_SendSens()
-{
-
-	return Network_SendTransportPacket(0, 0, 0);
-}
-
-void* CreateTransportPacket(uint8_t receiver, uint8_t type, uint8_t size)
+void* Network_CreateTransportPacket(uint8_t receiver, uint8_t type, uint8_t size)
 {
 	if (Queue_IsFull(transportQueue))
 	{
@@ -376,32 +296,13 @@ void* CreateTransportPacket(uint8_t receiver, uint8_t type, uint8_t size)
 	return qe->object;
 }
 
-void SendTransportPacket()
+void* Network_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t dataSize)
 {
-	Queue_AdvanceHead(transportQueue);
-}
-
-void* CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t dataSize)
-{
-	application_sensor_data_packet* p = CreateTransportPacket(receiver, TYPE_APPLICATION_SENSOR_DATA, sizeof(application_sensor_data_packet) + dataSize);
+	application_sensor_data_packet* p = Network_CreateTransportPacket(receiver, TYPE_APPLICATION_SENSOR_DATA, sizeof(application_sensor_data_packet) + dataSize);
 
 	p->sensor = sensor;
 
 	return p->data;
-}
-
-void SendSensorDataPacket()
-{
-	SendTransportPacket();
-}
-
-void Bla()
-{
-	uint16_t* value = CreateSensorDataPacket(0, 123, sizeof(uint16_t));
-
-	*value = 1234;
-
-	SendTransportPacket();
 }
 
 // Internal
@@ -487,7 +388,7 @@ void Network_TimerEvent()
 			queue_element* qe = Queue_Tail(linkQueue);
 			currentLinkPacket = qe->object;
 			currentLinkPacketLength = qe->size;
-			currentLinkPacket->link.destination = Network_FindNextInRoute(currentLinkPacket->network.receiver);
+			currentLinkPacket->link.destination = FindNextNodeInRoute(currentLinkPacket->network.receiver);
 
 
 			// Send RTS
@@ -564,7 +465,7 @@ static void TransportTimeoutHandler()
 
 }
 
-static void Transport_AcknowledgePacket(link_network_transport_header* packet)
+static void AcknowledgeTransportPacket(link_network_transport_header* packet)
 {
 	transport_acknowledge_packet p;
 	p.link;
@@ -694,11 +595,11 @@ static void* FrameReceived(void* data, uint8_t length)
 
 		case TYPE_APPLICATION_SENSOR_DATA:
 			{
-				if (Transport_VerifyHeader(&data, length)) // an application layer packet for this node?
+				if (VerifyTransportHeader(&data, length)) // an application layer packet for this node?
 				{
 					if (EventDispatcher_Process(sensorDataProcessor, data, length)) // add to event queue
 					{
-						Transport_AcknowledgePacket(data); // acknowledge packet if it could be added to queue
+						AcknowledgeTransportPacket(data); // acknowledge packet if it could be added to queue
 
 						data = NULL; // keep the allocated memory
 
@@ -715,7 +616,7 @@ static void* FrameReceived(void* data, uint8_t length)
 	return data;
 }
 
-static bool Transport_VerifyHeader(void** data, uint8_t length)
+static bool VerifyTransportHeader(void** data, uint8_t length)
 {
 	link_header* lh = *data;
 	link_network_header* lnh = *data;
@@ -759,7 +660,7 @@ static bool Transport_VerifyHeader(void** data, uint8_t length)
 
 // Routing functionality
 
-static uint8_t Network_FindNextInRoute(uint8_t destination)
+static uint8_t FindNextNodeInRoute(uint8_t destination)
 {
 	return destination;
 }

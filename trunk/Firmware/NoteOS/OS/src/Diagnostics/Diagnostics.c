@@ -32,7 +32,7 @@ void Diagnostics_Initialize(uint32_t serialNumber)
 	sn = serialNumber;
 }
 
-void Diagnostics_SendEvent(uint8_t eventId)
+void Diagnostics_SendEvent(uint8_t event)
 {
 	//	if (sn != activeSn)
 	//	{
@@ -47,7 +47,7 @@ void Diagnostics_SendEvent(uint8_t eventId)
 	uint8_t position = 0; // SOF never need stuffing so skip it
 
 	buffer[position++] = SOF_EVENT;
-	position += AddData(eventId, buffer, position);
+	position += AddData(event, buffer, position);
 	buffer[position++] = EOF;
 
 	DiagnosticsLink_Send(buffer, position);

@@ -7,7 +7,7 @@
 
 #include "../HardwareAbstractionLayer/SPI.h"
 #include "../HardwareAbstractionLayer/GPIO.h"
-#include "../HardwareAbstractionLayer/Timer.h"
+#include "../Kernel/Timer.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../MemorySubsystem/MemoryManager.h"
 
@@ -21,7 +21,7 @@ static uint8_t* data;
 void MAX6662_Initialize(uint16_t interval)
 {
 	uint32_t intervalMillisecond = (uint32_t) interval * 1000L;
-	Timer_CreateConfiguration(&timerConfig, intervalMillisecond, TIMER_MODE_CONTINUES, TimerTick);
+	Timer_CreateConfiguration(&timerConfig, intervalMillisecond, TIMER_MODE_PRECISION_CONTINUES, TimerTick);
 	SPI_CreateConfiguration(&spiConfig, 2500000, SPI_DATA_MODE_LEADING_RISING, SPI_DATA_ORDER_LSB_FIRST, GPIOD2, ComDone);
 	data = MemoryManager_Allocate(2);
 }

@@ -59,7 +59,10 @@ void Queue_AdvanceHead(void* q)
 		_q->head = 0;
 	}
 
-	atomic(_q->free--);
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
+		_q->free--;
+	}
 }
 
 void Queue_AdvanceTail(void* q)
@@ -71,5 +74,8 @@ void Queue_AdvanceTail(void* q)
 		_q->tail = 0;
 	}
 
-	atomic(_q->free++);
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+	{
+		_q->free++;
+	}
 }
