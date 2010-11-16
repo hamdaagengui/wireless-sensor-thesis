@@ -21,7 +21,7 @@ typedef struct
 
 typedef struct
 {
-	uint32_t interval;
+	uint32_t period;
 	uint8_t channel;
 	void (*handler)(adcEvent* event);
 } adc_configuration;

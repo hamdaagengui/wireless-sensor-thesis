@@ -14,14 +14,14 @@ static void RemoveTimer(uint8_t index);
 
 static timer_configuration* timers[TIMER_MAXIMUM_NUMBER_OF_TIMERS];
 static uint8_t timerCount;
-static uint16_t period;
+static uint16_t interval;
 
-void Timer_CreateConfiguration(timer_configuration* configuration, uint32_t interval, timer_mode mode, completion_handler completed)
+void Timer_CreateConfiguration(timer_configuration* configuration, uint32_t period, timer_mode mode, completion_handler completed)
 {
 	interval /= TIMER_RESOLUTION;
 
-	configuration->interval = interval;
-	configuration->timer = interval;
+	configuration->period = period;
+	configuration->timer = period;
 	configuration->mode = mode;
 	configuration->completed = completed;
 }
@@ -35,7 +35,7 @@ void Timer_Start(timer_configuration* configuration)
 			return;
 		}
 
-		period = SystemTimer_Reset();
+		interval = SystemTimer_Reset();
 		UpdateTimers();
 
 		timers[timerCount] = configuration;
@@ -55,10 +55,10 @@ void Timer_Restart(timer_configuration* configuration)
 		{
 			if (timers[i] == configuration)
 			{
-				period = SystemTimer_Reset();
+				interval = SystemTimer_Reset();
 				UpdateTimers();
 
-				timers[i]->timer = timers[i]->interval;
+				timers[i]->timer = timers[i]->period;
 
 				CalculatePeriod();
 
@@ -76,7 +76,7 @@ void Timer_Stop(timer_configuration* configuration)
 		{
 			if (timers[i] == configuration)
 			{
-				period = SystemTimer_Reset();
+				interval = SystemTimer_Reset();
 				UpdateTimers();
 
 				RemoveTimer(i);
@@ -99,7 +99,7 @@ static void UpdateTimers()
 {
 	for (uint8_t i = 0; i < timerCount; i++)
 	{
-		timers[i]->timer -= period;
+		timers[i]->timer -= interval;
 		if (timers[i]->timer == 0)
 		{
 			switch (timers[i]->mode)
@@ -110,7 +110,7 @@ static void UpdateTimers()
 					break;
 				case TIMER_MODE_PRECISION_CONTINUES:
 					timers[i]->completed();
-					timers[i]->timer = timers[i]->interval;
+					timers[i]->timer = timers[i]->period;
 					break;
 				case TIMER_MODE_RELAXED_ONE_SHOT:
 					EventDispatcher_Notify(timers[i]->completed);
@@ -118,7 +118,7 @@ static void UpdateTimers()
 					break;
 				case TIMER_MODE_RELAXED_CONTINUES:
 					EventDispatcher_Notify(timers[i]->completed);
-					timers[i]->timer = timers[i]->interval;
+					timers[i]->timer = timers[i]->period;
 					break;
 			}
 		}
@@ -133,17 +133,17 @@ static void CalculatePeriod()
 	}
 	else
 	{
-		period = 0xfff0;
+		interval = 0xfff0;
 
 		for (uint8_t i = 0; i < timerCount; i++)
 		{
-			if (timers[i]->timer < period)
+			if (timers[i]->timer < interval)
 			{
-				period = timers[i]->timer;
+				interval = timers[i]->timer;
 			}
 		}
 
-		SystemTimer_SetPeriod(period);
+		SystemTimer_SetPeriod(interval);
 	}
 }
 
