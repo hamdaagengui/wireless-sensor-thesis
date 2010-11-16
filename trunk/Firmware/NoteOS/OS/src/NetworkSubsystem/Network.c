@@ -423,29 +423,6 @@ void Network_TimerEvent()
 	}
 
 
-#ifdef MASTER_NODE
-	static uint8_t timer = 0;
-	static uint8_t ticker = 0;
-
-	if (++timer >= 20)
-	{
-		timer = 0;
-
-		if (ticker & 1)
-		{
-			Leds_YellowOn();
-		}
-		else
-		{
-			Leds_YellowOff();
-		}
-
-		Network_SendData(2, &ticker, 1);
-		ticker++;
-	}
-#endif
-
-
 	// transport timer
 	if (transportTimer > 0)
 	{
@@ -714,14 +691,7 @@ static bool IsChannelClear()
 		_delay_us(CCA_RSSI_CHECK_INTERVAL);
 	}
 
-	if (outliers > 0)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return outliers > 0;
 }
 
 /*

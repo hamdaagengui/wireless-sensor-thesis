@@ -25,7 +25,7 @@ typedef uint8_t bool;
 #define Critical()															cli()
 #define NonCritical()														sei()
 #define Nop()																		__asm__ volatile("nop")
-//#define lengthof(x)															( sizeof(x) / sizeof(x[0]) )
+#define lengthof(x)															( sizeof(x) / sizeof(x[0]) )
 
 #define MemoryBarrier()													__asm__ volatile ("" : : : "memory")
 

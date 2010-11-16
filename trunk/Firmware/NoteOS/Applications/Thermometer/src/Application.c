@@ -8,10 +8,34 @@
 #include <SensorSubsystem/SensorManager.h>
 #include <SensorSubsystem/Sensors/HeartRateVariability.h>
 #include <Kernel/Timer.h>
+#include <NetworkSubsystem/Network.h>
+#include <HardwareAbstractionLayer/HardwareAbstractionLayer.h>
+
+#ifdef MASTER_NODE
+timer_configuration tickerTimer;
+
+void Ticker()
+{
+	static uint8_t ticker = 0;
+
+//	Network_SendData(2, &ticker, 1);
+
+	if (ticker & 1)
+	{
+		Leds_YellowOn();
+	}
+	else
+	{
+		Leds_YellowOff();
+	}
+
+	ticker++;
+}
+#endif
 
 void Initialize()
 {
-	int i = TIMER_RESOLUTION;
+
 }
 
 void Start()
@@ -19,6 +43,11 @@ void Start()
 	//	sensor_interface hrv;
 	//	HeartRateVariability_Create(&hrv);
 	//	SensorManager_InstallSensor(&hrv);
+
+#ifdef MASTER_NODE
+	Timer_CreateConfiguration(&tickerTimer, 1000000, TIMER_MODE_RELAXED_CONTINUES, Ticker);
+	Timer_Start(&tickerTimer);
+#endif
 }
 
 //#define yieldable																static uint8_t state = 0; uint8_t step = 0;

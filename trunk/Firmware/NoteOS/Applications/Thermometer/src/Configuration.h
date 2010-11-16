@@ -19,6 +19,6 @@
 //#undef NETWORK_CAN_ROUTE
 //#define NETWORK_CAN_ROUTE																						0
 
-//#define MASTER_NODE
+#define MASTER_NODE
 
 #endif /* CONFIGURATION_H_ */
