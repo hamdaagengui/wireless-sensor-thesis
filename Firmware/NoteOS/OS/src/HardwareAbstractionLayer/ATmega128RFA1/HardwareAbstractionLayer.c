@@ -21,6 +21,8 @@ void HardwareAbstractionLayer_Initialize()
 	// SRAM DR p 163
 	// PM p 503
 	//SPI_Initialize();
+
+
 }
 
 void HardwareAbstractionLayer_Start()

@@ -10,7 +10,7 @@
 
 #include "../Globals.h"
 
-enum
+typedef enum
 {
 	DIAGNOSTICS_SYSTEM_INITIALIZED,
 	DIAGNOSTICS_ALLOCATED_NETWORK_BLOCK,
@@ -56,10 +56,10 @@ enum
 	DIAGNOSTICS_POOL_4_EXHAUSTED,
 	DIAGNOSTICS_MEMORY_ALLOCATION_FAILED,
 	DIAGNOSTICS_MEMORY_RELEASE_FAILED,
-};
+} diagnostics_event;
 
 extern void Diagnostics_Initialize(uint32_t serialNumber);
-extern void Diagnostics_SendEvent(uint8_t eventId);
+extern void Diagnostics_SendEvent(uint8_t event);
 extern void Diagnostics_SendMessage(uint8_t messageId, void* message, uint8_t messageLength);
 extern void Diagnostics_SendState(uint8_t stateMachineId, uint8_t newState);
 

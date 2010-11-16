@@ -10,6 +10,8 @@
 #include "../NetworkTimer.h"
 #include "../../NetworkSubsystem/Network.h"
 
+extern void Network_TimerEvent();
+
 #define PRESCALER_VALUE																							8
 
 void NetworkTimer_Initialize()

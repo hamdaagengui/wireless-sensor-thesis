@@ -17,7 +17,6 @@
 #include "DiagnosticsLink.h"
 #include "NetworkTimer.h"
 #include "NonVolatileStorage.h"
-#include "Timer.h"
 #include "Leds.h"
 
 extern void HardwareAbstractionLayer_Initialize();

@@ -8,6 +8,7 @@
 #include "../Globals.h"
 #include "../DefaultConfiguration.h"
 #include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
+#include "../HardwareAbstractionLayer/SystemTimer.h"
 #include "../MemorySubsystem/MemoryManager.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../NetworkSubsystem/Network.h"
@@ -49,6 +50,8 @@ int main()
 
 
 	// Initialize sub systems
+	HardwareAbstractionLayer_Initialize();
+	SystemTimer_Initialize();
 	MemoryManager_Initialize();
 	Network_Initialize();
 	Network_SetAddress(sn);
@@ -64,6 +67,7 @@ int main()
 #ifdef CONFIGURATION_H_
 	Start();
 #endif
+
 
 	// Start sub systems
 

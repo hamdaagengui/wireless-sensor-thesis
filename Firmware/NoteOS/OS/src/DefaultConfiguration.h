@@ -8,6 +8,9 @@
 #ifndef DEFAULTCONFIGURATION_H_
 #define DEFAULTCONFIGURATION_H_
 
+// Kernel
+#define TIMER_MAXIMUM_NUMBER_OF_TIMERS															10
+
 // Network subssystem
 #define NETWORK_CAN_ROUTE																						1
 #define NETWORK_MAXIMUM_LINK_PACKET_SIZE														64
