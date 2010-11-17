@@ -1,5 +1,5 @@
 /*
- * SPI.c
+ * Timer.c
  *
  *  Created on: 16/09/2010
  *      Author: Coma
@@ -7,9 +7,10 @@
 
 #include "Timer.h"
 #include "../HardwareAbstractionLayer/SystemTimer.h"
+#include "../Diagnostics/Diagnostics.h"
 
-static void UpdateTimers();
-static void CalculatePeriod();
+static void TickAllTimers();
+static void FindAndSetShortestInterval();
 static void RemoveTimer(uint8_t index);
 
 static timer_configuration* timers[TIMER_MAXIMUM_NUMBER_OF_TIMERS];
@@ -18,12 +19,13 @@ static uint16_t interval;
 
 void Timer_CreateConfiguration(timer_configuration* configuration, uint32_t period, timer_mode mode, completion_handler completed)
 {
-	interval /= TIMER_RESOLUTION;
+	period /= TIMER_RESOLUTION;
 
 	configuration->period = period;
-	configuration->timer = period;
 	configuration->mode = mode;
 	configuration->completed = completed;
+
+	Diagnostics_SendEvent(DIAGNOSTICS_TIMER_CREATED);
 }
 
 void Timer_Start(timer_configuration* configuration)
@@ -32,19 +34,22 @@ void Timer_Start(timer_configuration* configuration)
 	{
 		if (timerCount == TIMER_MAXIMUM_NUMBER_OF_TIMERS)
 		{
+			Diagnostics_SendEvent(DIAGNOSTICS_TIMER_NOT_STARTED);
 			return;
 		}
 
 		interval = SystemTimer_Reset();
-		UpdateTimers();
+		TickAllTimers();
 
-		timers[timerCount] = configuration;
-		timerCount++;
+		configuration->timer = configuration->period;
+		timers[timerCount++] = configuration;
 
-		CalculatePeriod();
+		FindAndSetShortestInterval();
 	}
 
 	SystemTimer_Enable();
+
+	Diagnostics_SendEvent(DIAGNOSTICS_TIMER_STARTED);
 }
 
 void Timer_Restart(timer_configuration* configuration)
@@ -56,11 +61,16 @@ void Timer_Restart(timer_configuration* configuration)
 			if (timers[i] == configuration)
 			{
 				interval = SystemTimer_Reset();
-				UpdateTimers();
+
+				timers[i]->timer = 0xffffffff;
+
+				TickAllTimers();
 
 				timers[i]->timer = timers[i]->period;
 
-				CalculatePeriod();
+				FindAndSetShortestInterval();
+
+				Diagnostics_SendEvent(DIAGNOSTICS_TIMER_RESTARTED);
 
 				return;
 			}
@@ -76,12 +86,14 @@ void Timer_Stop(timer_configuration* configuration)
 		{
 			if (timers[i] == configuration)
 			{
-				interval = SystemTimer_Reset();
-				UpdateTimers();
-
 				RemoveTimer(i);
 
-				CalculatePeriod();
+				interval = SystemTimer_Reset();
+				TickAllTimers();
+
+				FindAndSetShortestInterval();
+
+				Diagnostics_SendEvent(DIAGNOSTICS_TIMER_STOPPED);
 
 				return;
 			}
@@ -91,32 +103,38 @@ void Timer_Stop(timer_configuration* configuration)
 
 void Timer_Tick()
 {
-	UpdateTimers();
-	CalculatePeriod();
+	Diagnostics_SendEvent(DIAGNOSTICS_TIMER_TICK);
+	TickAllTimers();
+	FindAndSetShortestInterval();
 }
 
-static void UpdateTimers()
+static void TickAllTimers()
 {
 	for (uint8_t i = 0; i < timerCount; i++)
 	{
 		timers[i]->timer -= interval;
+
 		if (timers[i]->timer == 0)
 		{
 			switch (timers[i]->mode)
 			{
 				case TIMER_MODE_PRECISION_ONE_SHOT:
+					Diagnostics_SendEvent(DIAGNOSTICS_TIMER_FIRED_AND_STOPPED);
 					timers[i]->completed();
 					RemoveTimer(i--);
 					break;
 				case TIMER_MODE_PRECISION_CONTINUES:
+					Diagnostics_SendEvent(DIAGNOSTICS_TIMER_FIRED_AND_CONTINUED);
 					timers[i]->completed();
 					timers[i]->timer = timers[i]->period;
 					break;
 				case TIMER_MODE_RELAXED_ONE_SHOT:
+					Diagnostics_SendEvent(DIAGNOSTICS_TIMER_FIRED_AND_STOPPED);
 					EventDispatcher_Notify(timers[i]->completed);
 					RemoveTimer(i--);
 					break;
 				case TIMER_MODE_RELAXED_CONTINUES:
+					Diagnostics_SendEvent(DIAGNOSTICS_TIMER_FIRED_AND_CONTINUED);
 					EventDispatcher_Notify(timers[i]->completed);
 					timers[i]->timer = timers[i]->period;
 					break;
@@ -125,7 +143,7 @@ static void UpdateTimers()
 	}
 }
 
-static void CalculatePeriod()
+static void FindAndSetShortestInterval()
 {
 	if (timerCount == 0)
 	{
@@ -149,9 +167,10 @@ static void CalculatePeriod()
 
 static void RemoveTimer(uint8_t index)
 {
-	if (index < (timerCount - 1))
-	{
-		timers[index] = timers[timerCount - 1];
-	}
 	timerCount--;
+
+	if (index < timerCount)
+	{
+		timers[index] = timers[timerCount];
+	}
 }

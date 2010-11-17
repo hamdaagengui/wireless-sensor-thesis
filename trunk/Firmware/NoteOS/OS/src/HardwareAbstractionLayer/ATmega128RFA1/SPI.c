@@ -95,6 +95,7 @@ void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate,
 	}
 	else if ((F_CPU / 4) <= bitrate)
 	{
+		// use default
 	}
 	else if ((F_CPU / 8) <= bitrate)
 	{
