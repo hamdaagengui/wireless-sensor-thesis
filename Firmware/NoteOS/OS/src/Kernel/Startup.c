@@ -1,5 +1,5 @@
 /*
- * Kernel.c
+ * Startup.c
  *
  *  Created on: 12/09/2010
  *      Author: coma
@@ -8,7 +8,6 @@
 #include "../Globals.h"
 #include "../DefaultConfiguration.h"
 #include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
-#include "../HardwareAbstractionLayer/SystemTimer.h"
 #include "../MemorySubsystem/MemoryManager.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../NetworkSubsystem/Network.h"
@@ -17,8 +16,10 @@
 #include <util/delay.h>
 
 // Entry points to user code.
+#ifdef CONFIGURATION_H_
 extern void Initialize();
 extern void Start();
+#endif
 
 uint32_t sn = 0;
 
@@ -51,7 +52,6 @@ int main()
 
 	// Initialize sub systems
 	HardwareAbstractionLayer_Initialize();
-	SystemTimer_Initialize();
 	MemoryManager_Initialize();
 	Network_Initialize();
 	Network_SetAddress(sn);

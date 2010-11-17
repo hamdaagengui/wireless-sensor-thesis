@@ -22,7 +22,7 @@ void HardwareAbstractionLayer_Initialize()
 	// PM p 503
 	//SPI_Initialize();
 
-
+	SystemTimer_Initialize();
 }
 
 void HardwareAbstractionLayer_Start()
