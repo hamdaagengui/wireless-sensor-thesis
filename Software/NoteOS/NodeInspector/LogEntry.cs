@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading;
+using System.Globalization;
 
 namespace NodeInspector
 {
@@ -29,7 +30,7 @@ namespace NodeInspector
 
 		public ListViewItem ToListViewItem()
 		{
-			return new ListViewItem(new string[] { "", Number.ToString(), Time.TimeOfDay.ToString(), EventDescriptor.Subsystem, EventDescriptor.Module, EventDescriptor.Details }, EventDescriptor.Level);
+			return new ListViewItem(new string[] { "", Number.ToString(), Time.ToString("HH:mm:ss.ffffff"), EventDescriptor.Subsystem, EventDescriptor.Module, EventDescriptor.Details }, EventDescriptor.Level);
 		}
 	}
 }

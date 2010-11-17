@@ -3,53 +3,58 @@
 // This event id can not be used. It is reserved for internal use (all unknown events are mapped to this).
 255;1;;;Unknown event
 
-0;0;Kernel;Kernel;System initialized
+// Kernel
+0;0;Kernel;Kernel;System is now running		
 
-1;0;Memory;MemoryManager;Network block allocated;network_pool --
-2;2;Memory;MemoryManager;Failed to allocate network block (pool exhausted)
-3;0;Memory;MemoryManager;Network block released;network_pool ++
-4;2;Memory;MemoryManager;Failed to release network block
-5;0;Memory;MemoryManager;Sensor block allocated;sensor_pool --
-6;2;Memory;MemoryManager;Failed to allocate sensor block (pool exhausted)
-7;0;Memory;MemoryManager;Sensor block released;sensor_pool ++
-8;2;Memory;MemoryManager;Failed to release sensor block
+// Event dispatcher
+1;0;Event;EventDispatcher;Notification queued;notification_q ++
+2;0;Event;EventDispatcher;Notification executed;notification_x ++
+3;0;Event;EventDispatcher;Processing queued;processing_q ++
+4;0;Event;EventDispatcher;Processing executed;processing_x ++
+5;0;Event;EventDispatcher;Publication queued;publication_q ++
+6;0;Event;EventDispatcher;Publication executed;publication_x ++
+7;2;Event;EventDispatcher;Event queue overflowed
+8;2;Event;EventDispatcher;Too many subscribers of event
 
-9;0;Event;EventDispatcher;Notification queued;notification ++
-10;0;Event;EventDispatcher;Notification executed;notification ++
-11;0;Event;EventDispatcher;Processing queued;processing ++
-12;0;Event;EventDispatcher;Processing executed;processing ++
-13;0;Event;EventDispatcher;Publication queued;publication ++
-14;0;Event;EventDispatcher;Publication executed;publication ++
-
-15;0;Network;Network;Received RTS;rx_rts ++
-16;0;Network;Network;Received CTS;rx_cts ++
-17;0;Network;Network;Received Data;rx_data ++
-18;0;Network;Network;Received Acknowledge;rx_ack ++
-19;0;Network;Network;Sent RTS;tx_rts ++
-20;0;Network;Network;Sent CTS;tx_cts ++
-21;0;Network;Network;Sent Data;tx_data ++
-22;0;Network;Network;Sent Acknowledge;tx_ack ++
-23;0;Network;Network;Data queued
-24;2;Network;Network;Could not queue data
-25;0;Network;Network;Network tick
-26;0;Network;Network;Forwarding packet
-
-
-27;2;Event;EventDispatcher;Event queue overflowed
-28;2;Event;EventDispatcher;Too many subscribers of event
+// Timer
+9;0;Kernel;Timer;Timer created
+10;0;Kernel;Timer;Timer started;active_timers ++
+11;3;Kernel;Timer;Timer could not be started (timer list exhausted)
+12;0;Kernel;Timer;Timer restarted
+13;0;Kernel;Timer;Timer stopped;active_timers --
+14;0;Kernel;Timer;Timer fired and continued
+15;0;Kernel;Timer;Timer fired and stopped;active_timers --
 
 // Memory subsystem
-29;0;Memory;MemoryManager;Block allocated from pool 1;pool1 ++
-30;0;Memory;MemoryManager;Block released from pool 1;pool1 --
-31;2;Memory;MemoryManager;Pool 1 was exhausted and allocation failed
-32;0;Memory;MemoryManager;Block allocated from pool 2;pool2 ++
-33;0;Memory;MemoryManager;Block released from pool 2;pool2 --
-34;2;Memory;MemoryManager;Pool 2 was exhausted and allocation failed
-35;0;Memory;MemoryManager;Block allocated from pool 3;pool3 ++
-36;0;Memory;MemoryManager;Block released from pool 3;pool3 --
-37;2;Memory;MemoryManager;Pool 3 was exhausted and allocation failed
-38;0;Memory;MemoryManager;Block allocated from pool 4;pool4 ++
-39;0;Memory;MemoryManager;Block released from pool 4;pool4 --
-40;2;Memory;MemoryManager;Pool 4 was exhausted and allocation failed
-41;2;Memory;MemoryManager;Allocation failed
-42;2;Memory;MemoryManager;Release failed
+16;0;Memory;MemoryManager;Block allocated from pool 1;pool1 ++
+17;0;Memory;MemoryManager;Block released from pool 1;pool1 --
+18;2;Memory;MemoryManager;Pool 1 was exhausted and allocation failed
+19;0;Memory;MemoryManager;Block allocated from pool 2;pool2 ++
+20;0;Memory;MemoryManager;Block released from pool 2;pool2 --
+21;2;Memory;MemoryManager;Pool 2 was exhausted and allocation failed
+22;0;Memory;MemoryManager;Block allocated from pool 3;pool3 ++
+23;0;Memory;MemoryManager;Block released from pool 3;pool3 --
+24;2;Memory;MemoryManager;Pool 3 was exhausted and allocation failed
+25;0;Memory;MemoryManager;Block allocated from pool 4;pool4 ++
+26;0;Memory;MemoryManager;Block released from pool 4;pool4 --
+27;2;Memory;MemoryManager;Pool 4 was exhausted and allocation failed
+28;2;Memory;MemoryManager;Allocation failed
+29;2;Memory;MemoryManager;Release failed
+
+// Network
+30;0;Network;Network;Received RTS;rx_rts ++
+31;0;Network;Network;Received CTS;rx_cts ++
+32;0;Network;Network;Received Data;rx_data ++
+33;0;Network;Network;Received Acknowledge;rx_ack ++
+34;0;Network;Network;Sent RTS;tx_rts ++
+35;0;Network;Network;Sent CTS;tx_cts ++
+36;0;Network;Network;Sent Data;tx_data ++
+37;0;Network;Network;Sent Acknowledge;tx_ack ++
+38;0;Network;Network;Data queued
+39;2;Network;Network;Could not queue data
+40;0;Network;Network;Network tick
+41;0;Network;Network;Forwarding packet
+
+
+// NEW
+42;0;Kernel;Timer;Timer tick

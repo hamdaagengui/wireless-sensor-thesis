@@ -279,9 +279,16 @@ namespace NodeInspector
 		}
 		FrameType frameType;
 		bool portActive = false;
+		bool timeSet = false;
 
 		void port_DataReceived(object sender, SerialDataReceivedEventArgs e)
 		{
+			if (timeSet == false)
+			{
+				startTime = DateTime.Now;
+				timeSet = true;
+			}
+
 			if (portActive == false)
 			{
 				if (port != null)
@@ -375,7 +382,8 @@ namespace NodeInspector
 
 			port.DtrEnable = false;
 
-			startTime = DateTime.Now;
+			timeSet = false;
+
 			portActive = true;
 
 			Thread.Sleep(200);
@@ -385,12 +393,12 @@ namespace NodeInspector
 
 		private void numericUpDownActiveNode_ValueChanged(object sender, EventArgs e)
 		{
-			if (port != null && port.IsOpen)
-			{
-				byte[] b = new byte[1];
-				b[0] = Convert.ToByte(numericUpDownActiveNode.Value);
-				port.Write(b, 0, 1);
-			}
+			//if (port != null && port.IsOpen)
+			//{
+			//  byte[] b = new byte[1];
+			//  b[0] = Convert.ToByte(numericUpDownActiveNode.Value);
+			//  port.Write(b, 0, 1);
+			//}
 		}
 	}
 }
