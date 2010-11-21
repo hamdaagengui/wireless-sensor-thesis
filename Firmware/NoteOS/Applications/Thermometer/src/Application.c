@@ -10,6 +10,7 @@
 #include <Kernel/Timer.h>
 #include <NetworkSubsystem/Network.h>
 #include <HardwareAbstractionLayer/HardwareAbstractionLayer.h>
+#include <PlatformAbstractionLayer/PlatformAbstractionLayer.h>
 
 #ifdef MASTER_NODE
 timer_configuration tickerTimer;
