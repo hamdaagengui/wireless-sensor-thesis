@@ -8,6 +8,8 @@
 #ifndef CONFIGURATION_H_
 #define CONFIGURATION_H_
 
+#define PLATFORM_STK600_ATMEGA128RFA1
+
 //#define STATISTICS																									1
 //#define MESSAGE_LEVEL																								2
 #define DIAGNOSTICS																									1
