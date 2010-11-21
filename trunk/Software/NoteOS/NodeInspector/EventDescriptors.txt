@@ -58,3 +58,9 @@
 
 // NEW
 42;0;Kernel;Timer;Timer tick
+// NEW ADC
+43;0;HAL;ADC;Configuration created
+44;0;HAL;ADC;Conversion queued
+45;2;HAL;ADC;Failed to queue conversion
+46;0;HAL;ADC;Conversion started
+47;0;HAL;ADC;Conversion completed
