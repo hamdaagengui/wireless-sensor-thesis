@@ -5,6 +5,8 @@
  *      Author: Coma
  */
 
+#if defined(__AVR_ATmega128RFA1__)
+
 #include <avr/eeprom.h>
 #include "../NonVolatileStorage.h"
 
@@ -17,3 +19,5 @@ void NonVolatileStorage_Write(void* object, const void* buffer, uint8_t length)
 {
 	eeprom_write_block(buffer, object, length);
 }
+
+#endif

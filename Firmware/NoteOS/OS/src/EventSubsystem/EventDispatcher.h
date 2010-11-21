@@ -56,6 +56,14 @@ extern void EventDispatcher_Subscribe(uint8_t eventId, event_handler handler);
 
 /**
  *
+ * @param eventId
+ * @param data
+ * @return
+ */
+extern bool EventDispatcher_Publish(uint8_t eventId, void* data);
+
+/**
+ *
  * @param handler
  * @return Returns true if the notification was successfully queued.
  */
@@ -68,13 +76,5 @@ extern bool EventDispatcher_Notify(completion_handler handler);
  * @param length The length of the data.
  */
 extern bool EventDispatcher_Process(block_handler handler, void* data, uint8_t length);
-
-/**
- *
- * @param eventId
- * @param data
- * @return
- */
-extern bool EventDispatcher_Publish(uint8_t eventId, void* data);
 
 #endif /* EVENTDISPATCHER_H_ */

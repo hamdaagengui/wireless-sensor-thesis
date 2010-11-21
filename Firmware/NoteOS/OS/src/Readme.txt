@@ -35,7 +35,7 @@ Processor peripherals
 		Analog comparator
 
 
-	
+
 Connecting
 
 	1. Register QR on GW
@@ -52,30 +52,3 @@ Routing
 	1. Find the desired route in the routing table
 	2. Determine the tx power needed to reach the first node in the route
 	3. Send frame
-	
-	
-//static uint16_t step[4];
-//
-//void TimerInterrupt() // timer int @ maybe 2 kHz or more
-//{
-//	static uint16_t acc[4];
-//
-//	// tick all oscillators
-//	for (uint8_t i = 0; i < 4; i++)
-//	{
-//		acc[i] += step[i];
-//	}
-//
-//	// output oscillator 0
-//	if (acc[0] & (1 << 15)) // we only need square signal so just take MSb
-//	{
-//		SetBit(PORTA, 0);
-//	}
-//	else
-//	{
-//		ClearBit(PORTA, 0);
-//	}
-//
-//	// output rest of osc.
-//}
-	

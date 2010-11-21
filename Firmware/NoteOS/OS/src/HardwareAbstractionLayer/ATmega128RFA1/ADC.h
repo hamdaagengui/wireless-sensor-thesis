@@ -5,9 +5,6 @@
  *      Author: coma
  */
 
-#ifndef ADC_H_
-#define ADC_H_
-
 #include "../../Globals.h"
 
 #define PERIPHERAL_ADC_CONSUMPTION_IDLE					3
@@ -29,5 +26,3 @@ typedef struct
 extern void ADC_Initialize();
 extern void ADC_Subscribe(adc_configuration* configuration);
 extern void ADC_Start();
-
-#endif /* ADC_H_ */

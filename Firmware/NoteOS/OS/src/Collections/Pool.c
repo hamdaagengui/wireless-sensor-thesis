@@ -47,7 +47,7 @@ void* Pool_AllocateBlock(void* p)
 	}
 
 	uint8_t size = sizeof(pool_block) + _p->blockSize;
-	void* buf = &_p->buffer;
+	void* buf = _p->buffer;
 
 	for (uint8_t i = 0; i < _p->blockCount; i++)
 	{
@@ -55,7 +55,7 @@ void* Pool_AllocateBlock(void* p)
 		if (pb->used == false)
 		{
 			pb->used = true;
-			return &pb->data;
+			return pb->data;
 		}
 		buf += size;
 	}
@@ -69,12 +69,12 @@ bool Pool_ReleaseBlock(void* p, void* block)
 	pool* _p = p;
 
 	uint8_t size = sizeof(pool_block) + _p->blockSize;
-	void* buf = &_p->buffer;
+	void* buf = _p->buffer;
 
 	for (uint8_t i = 0; i < _p->blockCount; i++)
 	{
 		pool_block* pb = buf;
-		if (&pb->data == block)
+		if (pb->data == block)
 		{
 			pb->used = false;
 			return true;

@@ -18,13 +18,6 @@
 #define PERIPHERAL_ADC_CONSUMPTION_IDLE					3
 #define PERIPHERAL_ADC_CONSUMPTION_ACTIVE				550
 
-typedef struct
-{
-	uint32_t interval;
-	uint8_t channel;
-	completion_handler completed;
-} adc_configuration;
-
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/ADC.h"
 #else

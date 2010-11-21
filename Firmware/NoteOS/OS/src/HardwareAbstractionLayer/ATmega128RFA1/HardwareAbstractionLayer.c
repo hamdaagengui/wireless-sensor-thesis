@@ -5,6 +5,8 @@
  *      Author: coma
  */
 
+#if defined(__AVR_ATmega128RFA1__)
+
 #include "../HardwareAbstractionLayer.h"
 
 void HardwareAbstractionLayer_Initialize()
@@ -29,3 +31,5 @@ void HardwareAbstractionLayer_Start()
 {
 	SPI_Start();
 }
+
+#endif
