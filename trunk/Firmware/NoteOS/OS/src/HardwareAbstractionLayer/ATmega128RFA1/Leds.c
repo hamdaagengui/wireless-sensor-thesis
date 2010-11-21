@@ -5,6 +5,8 @@
  *      Author: coma
  */
 
+#if defined(__AVR_ATmega128RFA1__)
+
 #include "../../Globals.h"
 
 void Leds_Initialize()
@@ -56,3 +58,5 @@ void Leds_RedToggle()
 {
 	ToggleBit(PORTE, 4);
 }
+
+#endif

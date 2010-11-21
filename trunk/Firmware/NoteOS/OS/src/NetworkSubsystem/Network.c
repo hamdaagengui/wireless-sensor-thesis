@@ -32,15 +32,16 @@ enum
 // headers for the individual layers
 typedef struct
 {
-	uint8_t destination; // set by the network layer (routing)
-	uint8_t source;
-	uint8_t type;
+	uint8_t destination :4; // set by the network layer (routing)
+	uint8_t source :4;
+	uint8_t :4;
+	uint8_t type :4;
 } link_header;
 
 typedef struct
 {
-	uint8_t receiver;
-	uint8_t sender;
+	uint8_t receiver :4;
+	uint8_t sender :4;
 } network_header;
 
 typedef struct
@@ -76,10 +77,10 @@ enum
 	TYPE_TRANSPORT_ACK,
 	// application packets
 	TYPE_APPLICATION_SENSOR_DATA,
-	TYPE_APPLICATION_SET,
-	TYPE_APPLICATION_SET_COMPLETE,
-	TYPE_APPLICATION_GET,
-	TYPE_APPLICATION_GET_COMPLETE,
+	TYPE_APPLICATION_SET_PROPERTY_REQUEST,
+	TYPE_APPLICATION_SET_PROPERTY_RESPONSE,
+	TYPE_APPLICATION_GET_PROPERTY_REQUEST,
+	TYPE_APPLICATION_GET_PROPERTY_RESPONSE,
 // future packet types
 //	TYPE_READ,
 //	TYPE_READ_COMPLETE,
@@ -197,7 +198,8 @@ typedef struct
 static void PreparePreloadedPackets();
 static void TransportTimeoutHandler();
 static void* FrameReceived(void* data, uint8_t length);
-static bool VerifyTransportHeader(void** data, uint8_t length);
+static bool VerifyNetworkLayerHeader(void** data, uint8_t length);
+static bool ProcessNetworkPacket(void** data, uint8_t length, block_handler packetHandler);
 static uint8_t FindNextNodeInRoute(uint8_t destination);
 static void UpdateCca();
 static bool IsChannelClear();
@@ -540,14 +542,11 @@ static void* FrameReceived(void* data, uint8_t length)
 
 		case TYPE_NETWORK_ROUTES:
 			{
-				if (linkState != LINK_STATE_EXPECTING_DATA || currentSource != lh->source)
+				if (VerifyNetworkLayerHeader(&data, length)) // a network layer packet for this node?
 				{
-					linkState = LINK_STATE_IDLE;
-					break;
+					network_routes_packet* p = data;
+					memcpy(distances[p->network.sender], p->distances, 15);
 				}
-
-				network_routes_packet* p = data;
-				memcpy(distances[p->network.sender], p->distances, 15);
 			}
 			break;
 
@@ -556,50 +555,57 @@ static void* FrameReceived(void* data, uint8_t length)
 
 		case TYPE_TRANSPORT_ACK:
 			{
-				queue_element* qe = Queue_Head(transportQueue);
-				transport_acknowledge_packet* qp = qe->object;
-				transport_acknowledge_packet* p = data;
-				if (p->network.sender != qp->network.receiver || p->transport.sequenceNumber != qp->transport.sequenceNumber)
+				if (VerifyNetworkLayerHeader(&data, length)) // a network layer packet for this node?
 				{
-					break;
+					queue_element* qe = Queue_Head(transportQueue);
+					transport_acknowledge_packet* qp = qe->object;
+					transport_acknowledge_packet* p = data;
+					if (p->network.sender != qp->network.receiver || p->transport.sequenceNumber != qp->transport.sequenceNumber)
+					{
+						break;
+					}
+					Queue_AdvanceTail(transportQueue);
 				}
-				Queue_AdvanceTail(transportQueue);
 			}
 			break;
 
 
 			// application layer packets
 
-		case TYPE_APPLICATION_SENSOR_DATA:
-			{
-				if (VerifyTransportHeader(&data, length)) // an application layer packet for this node?
-				{
-					if (EventDispatcher_Process(sensorDataProcessor, data, length)) // add to event queue
-					{
-						AcknowledgeTransportPacket(data); // acknowledge packet if it could be added to queue
-
-						data = NULL; // keep the allocated memory
-
-						Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
-					}
-				}
-			}
-			break;
-
-		case TYPE_APPLICATION_SET:
-			break;
+//		case TYPE_APPLICATION_SENSOR_DATA:
+//			if (ProcessNetworkPacket(&data, length, sensorDataProcessor))
+//			{
+//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
+//			}
+//			break;
+//
+//		case TYPE_APPLICATION_SET_PROPERTY_REQUEST:
+//			if (ProcessNetworkPacket(&data, length, sensorSubSystemGetProperty))
+//			{
+//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
+//			}
+//			break;
+//
+//		case TYPE_APPLICATION_SET_PROPERTY_REQUEST:
+//			if (ProcessNetworkPacket(&data, length, sensorSubSystemGetProperty))
+//			{
+//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
+//			}
+//			break;
 	}
 
 	return data;
 }
 
-static bool VerifyTransportHeader(void** data, uint8_t length)
+static bool VerifyNetworkLayerHeader(void** data, uint8_t length)
 {
 	link_header* lh = *data;
 	link_network_header* lnh = *data;
 
 
-	// verify that a packet is expected and that the source is the node that send the RTS
+	// link layer functionality
+
+	// verify that a packet is expected and that the source is the node that sent the RTS
 	if (linkState != LINK_STATE_EXPECTING_DATA || currentSource != lh->source)
 	{
 		linkState = LINK_STATE_IDLE;
@@ -612,6 +618,8 @@ static bool VerifyTransportHeader(void** data, uint8_t length)
 	ackPacketTemplate.link.destination = currentSource;
 	RadioDriver_Send(&ackPacketTemplate, sizeof(ackPacketTemplate));
 
+
+	// network layer functionality
 
 	// forward if packet was not for this node
 	if (lnh->network.receiver != address)
@@ -633,6 +641,23 @@ static bool VerifyTransportHeader(void** data, uint8_t length)
 	}
 
 	return true;
+}
+
+static bool ProcessNetworkPacket(void** data, uint8_t length, block_handler packetHandler)
+{
+	if (VerifyNetworkLayerHeader(data, length)) // a network layer packet for this node?
+	{
+		if (EventDispatcher_Process(packetHandler, *data, length)) // add to event queue
+		{
+			AcknowledgeTransportPacket(*data); // acknowledge packet if it could be added to queue
+
+			*data = NULL; // keep the allocated memory
+
+			return true;
+		}
+	}
+
+	return false;
 }
 
 // Routing functionality

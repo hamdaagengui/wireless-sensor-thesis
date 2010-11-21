@@ -5,6 +5,8 @@
  *      Author: Coma
  */
 
+#if defined(__AVR_ATmega128RFA1__)
+
 #include <util/atomic.h>
 #include "../DiagnosticsLink.h"
 #include "../../Collections/FIFO.h"
@@ -56,3 +58,5 @@ ISR(USART0_UDRE_vect)
 		UDR0 = FIFO_ReadByte(txFifo);
 	}
 }
+
+#endif
