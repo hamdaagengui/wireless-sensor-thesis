@@ -19,6 +19,8 @@ namespace NodeInspector
 
 		ConcurrentQueue<EventFrame> eventFrameQueue = new ConcurrentQueue<EventFrame>();
 
+		long bytesReceived = 0;
+		long framesReceived = 0;
 
 		Dictionary<int, EventDescriptor> eventDescriptors = new Dictionary<int, EventDescriptor>();
 		List<LogEntry> logs = new List<LogEntry>();
@@ -171,8 +173,9 @@ namespace NodeInspector
 
 			var lvis = new List<ListViewItem>();
 
+			int frameCounter = 100;
 			EventFrame ef;
-			while (eventFrameQueue.TryDequeue(out ef))
+			while (eventFrameQueue.TryDequeue(out ef) && (frameCounter-- > 0))
 			{
 				changes = true;
 				LogEntry log = null;
@@ -219,6 +222,8 @@ namespace NodeInspector
 				{
 					listViewLogs.EnsureVisible(listViewLogs.Items.Count - 1);
 				}
+
+				Text = "Node Inspector " + bytesReceived + "/" + framesReceived;
 			}
 		}
 
@@ -236,7 +241,7 @@ namespace NodeInspector
 				{
 					var spi = (SerialPortInfo)comboBoxPort.SelectedItem;
 					port = new SerialPort(spi.Name, int.Parse(comboBoxBaudrate.Text));
-					port.ReceivedBytesThreshold = 1;
+					port.ReceivedBytesThreshold = 5;
 					port.Open();
 					port.DataReceived += new SerialDataReceivedEventHandler(port_DataReceived);
 					Reset();
@@ -300,6 +305,7 @@ namespace NodeInspector
 
 			while (port.BytesToRead > 0)
 			{
+				Interlocked.Increment(ref bytesReceived);
 				byte v = (byte)port.ReadByte();
 
 				switch (v)
@@ -330,6 +336,7 @@ namespace NodeInspector
 							{
 								case FrameType.Event:
 									eventFrameQueue.Enqueue(new EventFrame(frameTimeStamp, frameData.ToArray()));
+									Interlocked.Increment(ref framesReceived);
 									break;
 								case FrameType.Message:
 									break;
@@ -338,7 +345,9 @@ namespace NodeInspector
 							}
 						}
 						catch
-						{ }
+						{
+							Console.WriteLine("!");
+						}
 						frameData.Clear();
 						break;
 
