@@ -14,4 +14,7 @@
 #include "STK600_ATmega128RFA1/PlatformAbstractionLayer.h"
 #endif
 
+extern void PlatformAbstractionLayer_Initialize();
+extern void PlatformAbstractionLayer_Start();
+
 #endif /* PLATFORMABSTRACTIONLAYER_H_ */

@@ -7,56 +7,58 @@
 
 #if defined(__AVR_ATmega128RFA1__)
 
-#include "../../Globals.h"
+#include "../../HardwareAbstractionLayer/GPIO.h"
 
 void Leds_Initialize()
 {
-
+	GPIO_SetupPin(GPIOE2, GPIO_MODE_OUTPUT_HIGH);
+	GPIO_SetupPin(GPIOE3, GPIO_MODE_OUTPUT_HIGH);
+	GPIO_SetupPin(GPIOE4, GPIO_MODE_OUTPUT_HIGH);
 }
 
 void Leds_GreenOn()
 {
-	ClearBit(PORTE, 2);
+	GPIO_ClearPin(GPIOE2);
 }
 
 void Leds_GreenOff()
 {
-	SetBit(PORTE, 2);
+	GPIO_SetPin(GPIOE2);
 }
 
 void Leds_GreenToggle()
 {
-	ToggleBit(PORTE, 2);
+	GPIO_TogglePin(GPIOE2);
 }
 
 void Leds_YellowOn()
 {
-	ClearBit(PORTE, 3);
+	GPIO_ClearPin(GPIOE3);
 }
 
 void Leds_YellowOff()
 {
-	SetBit(PORTE, 3);
+	GPIO_SetPin(GPIOE3);
 }
 
 void Leds_YellowToggle()
 {
-	ToggleBit(PORTE, 3);
+	GPIO_TogglePin(GPIOE3);
 }
 
 void Leds_RedOn()
 {
-	ClearBit(PORTE, 4);
+	GPIO_ClearPin(GPIOE4);
 }
 
 void Leds_RedOff()
 {
-	SetBit(PORTE, 4);
+	GPIO_SetPin(GPIOE4);
 }
 
 void Leds_RedToggle()
 {
-	ToggleBit(PORTE, 4);
+	GPIO_TogglePin(GPIOE4);
 }
 
 #endif

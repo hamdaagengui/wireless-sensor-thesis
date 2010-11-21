@@ -8,6 +8,7 @@
 #include "../Globals.h"
 #include "../DefaultConfiguration.h"
 #include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
+#include "../PlatformAbstractionLayer/PlatformAbstractionLayer.h"
 #include "../MemorySubsystem/MemoryManager.h"
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../NetworkSubsystem/Network.h"
@@ -17,7 +18,6 @@
 
 // Entry points to user code.
 #ifdef CONFIGURATION_H_
-extern void Initialize();
 extern void Start();
 #endif
 
@@ -25,20 +25,11 @@ uint32_t sn = 0;
 
 int main()
 {
-#ifdef CONFIGURATION_H_
-	Initialize(); // => Platform_Initialize() ?
-#endif
-
-	PORTF = 0x00;
-	DDRF = 0xff;
-
-	PORTB = 0x00;
-	DDRB = 0xff;
 
 
-	// Initialize IO ports
-	DDRE = 0x1c; // LEDs, button and UART
-	PORTE = 0x3c;
+	//
+	//
+	//
 
 	PORTD = 0b01010101; // Id configuration
 	DDRD = 0b10101010;
@@ -47,11 +38,19 @@ int main()
 	sn += ReadBit(PIND, 4) ? 0 : 4;
 	//	sn += ReadBit(PIND, 6) ? 0 : 8;
 
+	//
+	//
+	//
+
+
 	Diagnostics_Initialize(sn);
 
 
-	// Initialize sub systems
+	// Initialize hardware
 	HardwareAbstractionLayer_Initialize();
+
+
+	// Initialize sub systems
 	MemoryManager_Initialize();
 	Network_Initialize();
 	Network_SetAddress(sn);
@@ -63,16 +62,27 @@ int main()
 	HardwareAbstractionLayer_Initialize();
 
 
-	// Start user application
-#ifdef CONFIGURATION_H_
-	Start();
+#ifdef PLATFORMABSTRACTIONLAYER_H_
+	PlatformAbstractionLayer_Initialize();
 #endif
 
 
 	// Start sub systems
 
-	// Start peripherals
-	//	HardwareAbstractionLayer_Start();
+	// Start hardware
+	HardwareAbstractionLayer_Start();
+
+
+#ifdef PLATFORMABSTRACTIONLAYER_H_
+	PlatformAbstractionLayer_Start();
+#endif
+
+
+	// Start user application
+#ifdef CONFIGURATION_H_
+	Start();
+#endif
+
 
 	// Run system
 	sei();
