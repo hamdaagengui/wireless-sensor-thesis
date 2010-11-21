@@ -9,6 +9,6 @@ typedef struct
 {
 	uint8_t spcr;
 	uint8_t spsr;
-	uint8_t csPin;
+	gpio_pin csPin;
 	completion_handler completed;
 } spi_configuration;

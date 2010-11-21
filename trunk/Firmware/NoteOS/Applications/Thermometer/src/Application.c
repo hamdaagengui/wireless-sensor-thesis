@@ -16,10 +16,28 @@
 timer_configuration tickerTimer;
 timer_configuration pulseTimer;
 
+timer_configuration analogTickerConfiguration;
+adc_configuration analogConfiguration;
+uint16_t analogValue;
+
+void AnalogTicker()
+{
+	ADC_Convert(&analogConfiguration);
+
+	static uint16_t counter = 0;
+
+	if (++counter >= analogValue)
+	{
+		counter = 0;
+		Leds_GreenToggle();
+	}
+}
+
 void Ticker()
 {
 	static uint8_t ticker;
 	static uint8_t counter;
+
 
 	//	Network_SendData(2, &ticker, 1);
 
@@ -74,5 +92,10 @@ void Start()
 	Timer_Start(&tickerTimer);
 
 	Timer_CreateConfiguration(&pulseTimer, 500000, TIMER_MODE_RELAXED_ONE_SHOT, PulseOff);
+
+	Timer_CreateConfiguration(&analogTickerConfiguration, 20000, TIMER_MODE_RELAXED_CONTINUES, AnalogTicker);
+	Timer_Start(&analogTickerConfiguration);
+	ADC_CreateConfiguration(&analogConfiguration, 0, ADC_PRESCALER_128, &analogValue, NULL);
+	ADC_Convert(&analogConfiguration);
 #endif
 }

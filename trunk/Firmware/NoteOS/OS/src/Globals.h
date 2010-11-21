@@ -29,9 +29,9 @@ typedef uint8_t bool;
 
 #define MemoryBarrier()													__asm__ volatile ("" : : : "memory")
 
+typedef void (*completion_handler)();
 typedef void (*block_handler)(void* data, uint8_t length);
 typedef void* (*bidirectional_block_handler)(void* data, uint8_t length);
-typedef void (*notification_handler)();
 typedef void (*result_handler)(bool succes);
 enum
 {

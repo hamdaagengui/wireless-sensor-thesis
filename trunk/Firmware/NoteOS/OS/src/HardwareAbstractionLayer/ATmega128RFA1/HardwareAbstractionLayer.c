@@ -22,13 +22,22 @@ void HardwareAbstractionLayer_Initialize()
 	// Symbol counter p 133
 	// SRAM DR p 163
 	// PM p 503
-	//SPI_Initialize();
 
+
+	ADC_Initialize();
+	IIC_Initialize();
+	NetworkTimer_Initialize();
+	// PowerManager_Initialize();
+	SPI_Initialize();
+	StopWatch_Initialize();
 	SystemTimer_Initialize();
 }
 
 void HardwareAbstractionLayer_Start()
 {
+	ADC_Start();
+	IIC_Start();
+	// PowerManager_Start();
 	SPI_Start();
 }
 

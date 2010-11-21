@@ -14,8 +14,8 @@ typedef bool (*property_invokation)(uint8_t propertyId, void* value);
 
 typedef struct
 {
-	notification_handler initialize;
-	notification_handler reset;
+	completion_handler initialize;
+	completion_handler reset;
 	property_invokation set;
 	property_invokation get;
 } sensor_interface;

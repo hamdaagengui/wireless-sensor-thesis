@@ -16,26 +16,7 @@ enum
 	EVENT_SENSOR_DATA = 128
 };
 
-/**
- *
- */
-typedef struct
-{
-	uint8_t id;
-	void* data;
-} event_report;
-
-/**
- *
- */
-typedef struct
-{
-	uint8_t sensor;
-	uint8_t data[];
-} sensor_event_report;
-
-typedef void (*event_handler)(event_report* report);
-typedef void (*completion_handler)();
+typedef void (*event_handler)(uint8_t event, void* data);
 
 /**
  *
