@@ -14,14 +14,14 @@
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../DefaultConfiguration.h"
 
-// TODO Really belongs to the device specific peripheral  driver
+// TODO Really belongs to the device specific peripheral driver
 #define PERIPHERAL_ADC_CONSUMPTION_IDLE					3
 #define PERIPHERAL_ADC_CONSUMPTION_ACTIVE				550
 
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/ADC.h"
 #else
-#error "No SPI driver found for the selected processor!"
+#error "No ADC driver found for the selected processor!"
 #endif
 
 extern void ADC_Initialize();

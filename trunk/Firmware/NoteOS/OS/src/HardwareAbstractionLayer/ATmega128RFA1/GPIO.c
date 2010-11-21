@@ -10,264 +10,126 @@
 #include "../GPIO.h"
 #include "../../Globals.h"
 
-void GPIO_SetupPin(uint8_t pin, uint8_t mode)
+enum
 {
-	switch (pin & GPIO_PORT_MASK)
+	OFFSET_PIN,
+	OFFSET_DDR,
+	OFFSET_PORT
+};
+
+typedef volatile uint8_t* physical_port;
+static const physical_port ports[] = { &PINB, &PIND, &PINE, &PINF, &PING };
+
+void GPIO_SetupPin(gpio_pin pin, gpio_mode mode)
+{
+	physical_port p = ports[pin >> 3];
+	uint8_t index = pin & 0x07;
+
+	switch (mode)
 	{
-		case GPIOB:
-			switch (mode)
-			{
-				case GPIO_MODE_INPUT:
-					ClearBit(DDRB, pin & GPIO_PIN_MASK);
-					ClearBit(PORTB, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_INPUT_PULL_UP:
-					ClearBit(DDRB, pin & GPIO_PIN_MASK);
-					SetBit(PORTB, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_OUTPUT_LOW:
-					SetBit(DDRB, pin & GPIO_PIN_MASK);
-					ClearBit(PORTB, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_OUTPUT_HIGH:
-					SetBit(DDRB, pin & GPIO_PIN_MASK);
-					SetBit(PORTB, pin & GPIO_PIN_MASK);
-					break;
-			}
+		case GPIO_MODE_INPUT_FLOATING:
+			ClearBit(p[OFFSET_DDR], index);
+			ClearBit(p[OFFSET_PORT], index);
 			break;
-
-		case GPIOD:
-			switch (mode)
-			{
-				case GPIO_MODE_INPUT:
-					ClearBit(DDRD, pin & GPIO_PIN_MASK);
-					ClearBit(PORTD, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_INPUT_PULL_UP:
-					ClearBit(DDRD, pin & GPIO_PIN_MASK);
-					SetBit(PORTD, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_OUTPUT_LOW:
-					SetBit(DDRD, pin & GPIO_PIN_MASK);
-					ClearBit(PORTD, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_OUTPUT_HIGH:
-					SetBit(DDRD, pin & GPIO_PIN_MASK);
-					SetBit(PORTD, pin & GPIO_PIN_MASK);
-					break;
-			}
+		case GPIO_MODE_INPUT_PULL_UP:
+			ClearBit(p[OFFSET_DDR], index);
+			SetBit(p[OFFSET_PORT], index);
 			break;
-
-		case GPIOE:
-			switch (mode)
-			{
-				case GPIO_MODE_INPUT:
-					ClearBit(DDRE, pin & GPIO_PIN_MASK);
-					ClearBit(PORTE, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_INPUT_PULL_UP:
-					ClearBit(DDRE, pin & GPIO_PIN_MASK);
-					SetBit(PORTE, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_OUTPUT_LOW:
-					SetBit(DDRE, pin & GPIO_PIN_MASK);
-					ClearBit(PORTE, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_OUTPUT_HIGH:
-					SetBit(DDRE, pin & GPIO_PIN_MASK);
-					SetBit(PORTE, pin & GPIO_PIN_MASK);
-					break;
-			}
+		case GPIO_MODE_OUTPUT_LOW:
+			SetBit(p[OFFSET_DDR], index);
+			ClearBit(p[OFFSET_PORT], index);
 			break;
-
-		case GPIOF:
-			switch (mode)
-			{
-				case GPIO_MODE_INPUT:
-					ClearBit(DDRF, pin & GPIO_PIN_MASK);
-					ClearBit(PORTF, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_INPUT_PULL_UP:
-					ClearBit(DDRF, pin & GPIO_PIN_MASK);
-					SetBit(PORTF, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_OUTPUT_LOW:
-					SetBit(DDRF, pin & GPIO_PIN_MASK);
-					ClearBit(PORTF, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_OUTPUT_HIGH:
-					SetBit(DDRF, pin & GPIO_PIN_MASK);
-					SetBit(PORTF, pin & GPIO_PIN_MASK);
-					break;
-			}
-			break;
-
-		case GPIOG:
-			switch (mode)
-			{
-				case GPIO_MODE_INPUT:
-					ClearBit(DDRG, pin & GPIO_PIN_MASK);
-					ClearBit(PORTG, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_INPUT_PULL_UP:
-					ClearBit(DDRG, pin & GPIO_PIN_MASK);
-					SetBit(PORTG, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_OUTPUT_LOW:
-					SetBit(DDRG, pin & GPIO_PIN_MASK);
-					ClearBit(PORTG, pin & GPIO_PIN_MASK);
-					break;
-				case GPIO_MODE_OUTPUT_HIGH:
-					SetBit(DDRG, pin & GPIO_PIN_MASK);
-					SetBit(PORTG, pin & GPIO_PIN_MASK);
-					break;
-			}
+		case GPIO_MODE_OUTPUT_HIGH:
+			SetBit(p[OFFSET_DDR], index);
+			SetBit(p[OFFSET_PORT], index);
 			break;
 	}
 }
 
-bool GPIO_ReadPin(uint8_t pin)
+bool GPIO_ReadPin(gpio_pin pin)
 {
-	switch (pin & GPIO_PORT_MASK)
+	physical_port p = ports[pin >> 3];
+	uint8_t index = pin & 0x07;
+
+	return ReadBit(p[OFFSET_PIN], index);
+}
+
+void GPIO_WritePin(gpio_pin pin, bool value)
+{
+	physical_port p = ports[pin >> 3];
+	uint8_t index = pin & 0x07;
+
+	if (value)
 	{
-		case GPIOB:
-			return ReadBit(PINB, pin & GPIO_PIN_MASK);
-			break;
+		SetBit(p[OFFSET_PORT], index);
+	}
+	else
+	{
+		ClearBit(p[OFFSET_PORT], index);
+	}
+}
 
-		case GPIOD:
-			return ReadBit(PIND, pin & GPIO_PIN_MASK);
-			break;
+void GPIO_ClearPin(gpio_pin pin)
+{
+	physical_port p = ports[pin >> 3];
+	uint8_t index = pin & 0x07;
 
-		case GPIOE:
-			return ReadBit(PINE, pin & GPIO_PIN_MASK);
-			break;
+	ClearBit(p[OFFSET_PORT], index);
+}
 
-		case GPIOF:
-			return ReadBit(PINF, pin & GPIO_PIN_MASK);
-			break;
+void GPIO_SetPin(gpio_pin pin)
+{
+	physical_port p = ports[pin >> 3];
+	uint8_t index = pin & 0x07;
 
-		case GPIOG:
-			return ReadBit(PING, pin & GPIO_PIN_MASK);
-			break;
+	SetBit(p[OFFSET_PORT], index);
+}
 
-		default:
-			// error
-			return false;
+void GPIO_TogglePin(gpio_pin pin)
+{
+	physical_port p = ports[pin >> 3];
+	uint8_t index = pin & 0x07;
+
+	ToggleBit(p[OFFSET_PORT], index);
+}
+
+void GPIO_SetupPort(gpio_port pin, gpio_mode mode)
+{
+	physical_port p = ports[pin >> 3];
+
+	switch (mode)
+	{
+		case GPIO_MODE_INPUT_FLOATING:
+			p[OFFSET_DDR] = 0x00;
+			p[OFFSET_PORT] = 0x00;
+			break;
+		case GPIO_MODE_INPUT_PULL_UP:
+			p[OFFSET_DDR] = 0x00;
+			p[OFFSET_PORT] = 0xff;
+			break;
+		case GPIO_MODE_OUTPUT_LOW:
+			p[OFFSET_DDR] = 0xff;
+			p[OFFSET_PORT] = 0x00;
+			break;
+		case GPIO_MODE_OUTPUT_HIGH:
+			p[OFFSET_DDR] = 0xff;
+			p[OFFSET_PORT] = 0xff;
 			break;
 	}
 }
 
-void GPIO_WritePin(uint8_t pin, uint8_t value)
+uint8_t GPIO_ReadPort(gpio_port pin)
 {
-	switch (pin & GPIO_PORT_MASK)
-	{
-		case GPIOB:
-			if (value)
-			{
-				SetBit(PORTB, pin & GPIO_PIN_MASK);
-			}
-			else
-			{
-				ClearBit(PORTB, pin & GPIO_PIN_MASK);
-			}
-			break;
+	physical_port p = ports[pin >> 3];
 
-		case GPIOD:
-			if (value)
-			{
-				SetBit(PORTD, pin & GPIO_PIN_MASK);
-			}
-			else
-			{
-				ClearBit(PORTD, pin & GPIO_PIN_MASK);
-			}
-			break;
-
-		case GPIOE:
-			if (value)
-			{
-				SetBit(PORTE, pin & GPIO_PIN_MASK);
-			}
-			else
-			{
-				ClearBit(PORTE, pin & GPIO_PIN_MASK);
-			}
-			break;
-
-		case GPIOF:
-			if (value)
-			{
-				SetBit(PORTF, pin & GPIO_PIN_MASK);
-			}
-			else
-			{
-				ClearBit(PORTF, pin & GPIO_PIN_MASK);
-			}
-			break;
-
-		case GPIOG:
-			if (value)
-			{
-				SetBit(PORTG, pin & GPIO_PIN_MASK);
-			}
-			else
-			{
-				ClearBit(PORTG, pin & GPIO_PIN_MASK);
-			}
-			break;
-	}
+	return p[OFFSET_PIN];
 }
 
-void GPIO_ClearPin(uint8_t pin)
+void GPIO_WritePort(gpio_port pin, uint8_t value)
 {
-	switch (pin & GPIO_PORT_MASK)
-	{
-		case GPIOB:
-			ClearBit(PORTB, pin & GPIO_PIN_MASK);
-			break;
+	physical_port p = ports[pin >> 3];
 
-		case GPIOD:
-			ClearBit(PORTD, pin & GPIO_PIN_MASK);
-			break;
-
-		case GPIOE:
-			ClearBit(PORTE, pin & GPIO_PIN_MASK);
-			break;
-
-		case GPIOF:
-			ClearBit(PORTF, pin & GPIO_PIN_MASK);
-			break;
-
-		case GPIOG:
-			ClearBit(PORTG, pin & GPIO_PIN_MASK);
-			break;
-	}
-}
-
-void GPIO_SetPin(uint8_t pin)
-{
-	switch (pin & GPIO_PORT_MASK)
-	{
-		case GPIOB:
-			SetBit(PORTB, pin & GPIO_PIN_MASK);
-			break;
-
-		case GPIOD:
-			SetBit(PORTD, pin & GPIO_PIN_MASK);
-			break;
-
-		case GPIOE:
-			SetBit(PORTE, pin & GPIO_PIN_MASK);
-			break;
-
-		case GPIOF:
-			SetBit(PORTF, pin & GPIO_PIN_MASK);
-			break;
-
-		case GPIOG:
-			SetBit(PORTG, pin & GPIO_PIN_MASK);
-			break;
-	}
+	p[OFFSET_PORT] = value;
 }
 
 #endif

@@ -21,7 +21,6 @@ void Ticker()
 	static uint8_t ticker;
 	static uint8_t counter;
 
-
 	//	Network_SendData(2, &ticker, 1);
 
 	if (ticker & 1)
@@ -63,11 +62,6 @@ void PulseOff()
 	Leds_RedOff();
 }
 #endif
-
-void Initialize()
-{
-
-}
 
 void Start()
 {
