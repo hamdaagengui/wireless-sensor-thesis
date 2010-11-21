@@ -103,7 +103,7 @@ void Timer_Stop(timer_configuration* configuration)
 
 void Timer_Tick()
 {
-	Diagnostics_SendEvent(DIAGNOSTICS_TIMER_TICK);
+	//Diagnostics_SendEvent(DIAGNOSTICS_TIMER_TICK);
 	TickAllTimers();
 	FindAndSetShortestInterval();
 }

@@ -53,7 +53,7 @@ enum
 #define ReadStatus()														(TRX_STATUS & TRX_STATUS_MASK)
 
 static bidirectional_block_handler frameHandler;
-static notification_handler rxStartHandler;
+static completion_handler rxStartHandler;
 static volatile bool transmitting;
 static volatile uint8_t rssi;
 static uint8_t* frameBufferObject;
@@ -82,7 +82,7 @@ void RadioDriver_Initialize(bidirectional_block_handler frameReceived)
 #endif
 }
 
-void RadioDriver_SetRxStartHandler(notification_handler handler)
+void RadioDriver_SetRxStartHandler(completion_handler handler)
 {
 	rxStartHandler = handler;
 }

@@ -13,8 +13,7 @@
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../NetworkSubsystem/Network.h"
 #include "../Diagnostics/Diagnostics.h"
-
-#include <util/delay.h>
+#include "../SensorSubsystem/SensorManager.h"
 
 // Entry points to user code.
 #ifdef CONFIGURATION_H_
@@ -25,13 +24,11 @@ uint32_t sn = 0;
 
 int main()
 {
-
-
 	//
 	//
 	//
 
-	PORTD = 0b01010101; // Id configuration
+	PORTD = 0b01010101; // SN configuration
 	DDRD = 0b10101010;
 	sn += ReadBit(PIND, 0) ? 0 : 1;
 	sn += ReadBit(PIND, 2) ? 0 : 2;
@@ -43,7 +40,7 @@ int main()
 	//
 
 
-	Diagnostics_Initialize(sn);
+	Diagnostics_Initialize(sn); // should ne in HAL_Init() but troubles with sn
 
 
 	// Initialize hardware
@@ -52,22 +49,20 @@ int main()
 
 	// Initialize sub systems
 	MemoryManager_Initialize();
-	Network_Initialize();
-	Network_SetAddress(sn);
-	//	PowerManager_Initialize();
 	EventDispatcher_Initialize();
-
-
-	// Initialize peripherals
-	HardwareAbstractionLayer_Initialize();
+	SensorManager_Initialize();
+	Network_Initialize();
+	//
+	//
+	Network_SetAddress(sn);
+	//
+	//
 
 
 #ifdef PLATFORMABSTRACTIONLAYER_H_
 	PlatformAbstractionLayer_Initialize();
 #endif
 
-
-	// Start sub systems
 
 	// Start hardware
 	HardwareAbstractionLayer_Start();
@@ -79,9 +74,7 @@ int main()
 
 
 	// Start user application
-#ifdef CONFIGURATION_H_
 	Start();
-#endif
 
 
 	// Run system

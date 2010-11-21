@@ -19,7 +19,7 @@ extern void RadioDriver_Initialize(bidirectional_block_handler frameReceived);
 /**
  *
  */
-extern void RadioDriver_SetRxStartHandler(notification_handler handler);
+extern void RadioDriver_SetRxStartHandler(completion_handler handler);
 
 /**
  * Set the transmit power of the transceiver.

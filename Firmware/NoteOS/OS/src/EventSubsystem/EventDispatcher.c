@@ -66,7 +66,7 @@ void EventDispatcher_Dispatch()
 						break; // no more subscribers
 					}
 
-					subscribers[e->publication.event][i](e->publication.data);
+					subscribers[e->publication.event][i](e->publication.event, e->publication.data);
 				}
 
 				MemoryManager_Release(e->publication.data);

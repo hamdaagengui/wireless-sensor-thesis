@@ -5,7 +5,7 @@
  *      Author: coma
  */
 
-// The ADC driver is an example off a "sampling peripheral driver"
+// The ADC driver is an example of a "sampling peripheral driver"
 
 #ifndef ADC_H_
 #define ADC_H_
@@ -14,18 +14,19 @@
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../DefaultConfiguration.h"
 
-// TODO Really belongs to the device specific peripheral driver
-#define PERIPHERAL_ADC_CONSUMPTION_IDLE					3
-#define PERIPHERAL_ADC_CONSUMPTION_ACTIVE				550
-
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/ADC.h"
 #else
-#error "No ADC driver found for the selected processor!"
+#define ADC_NONE
 #endif
 
+#ifndef ADC_NONE
+
 extern void ADC_Initialize();
-extern void ADC_Subscribe(adc_configuration* configuration);
 extern void ADC_Start();
+extern void ADC_CreateConfiguration(adc_configuration* configuration, uint8_t channel, adc_prescaler prescaler, uint16_t* result, completion_handler completed);
+extern bool ADC_Convert(adc_configuration* configuration);
+
+#endif
 
 #endif /* ADC_H_ */

@@ -13,7 +13,7 @@
 #include "../../EventSubsystem/EventDispatcher.h"
 #include "../GPIO.h"
 
-static bool enabled;
+static bool enabled = false;
 
 typedef struct
 {
@@ -21,18 +21,19 @@ typedef struct
 	uint8_t* output;
 	uint8_t* input;
 	uint8_t length;
-} transfer_command;
-static uint8_t transferQueue[Queue_CalculateSize(sizeof(transfer_command), SPI_TRANSFER_QUEUE_SIZE)];
+} operation;
+static uint8_t operationQueue[Queue_CalculateSize(sizeof(operation), SPI_OPERATION_QUEUE_SIZE)];
 
-static transfer_command* currentTransfer;
+static operation* currentOperation;
 static uint8_t* currentOutput;
 static uint8_t* currentInput;
 static uint8_t remainingBytes;
 
-static void StartTransfer();
+static void ExecuteOperation();
 
 void SPI_Initialize()
 {
+	Queue_Initialize(operationQueue, sizeof(operation), SPI_OPERATION_QUEUE_SIZE);
 }
 
 void SPI_Start()
@@ -41,9 +42,6 @@ void SPI_Start()
 	{
 		//power_spi_enable();
 
-
-		// basic initialization - only that which is not set by each separate transfers configuration.
-		Queue_Initialize(transferQueue, sizeof(transfer_command), SPI_TRANSFER_QUEUE_SIZE);
 
 		PORTB |= (1 << 2) | (1 << 1);
 
@@ -56,7 +54,7 @@ void SPI_Start()
 	}
 }
 
-void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate, spi_data_mode mode, spi_data_order order, uint8_t csPin, completion_handler completed)
+void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate, spi_data_mode mode, spi_data_order order, gpio_pin csPin, completion_handler completed)
 {
 	configuration->spcr = (1 << SPIE) | (1 << SPE) | (1 << MSTR);
 	configuration->spsr = 0;
@@ -134,9 +132,8 @@ void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate,
 
 void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length)
 {
-	if (Queue_IsFull(transferQueue))
+	if (Queue_IsFull(operationQueue))
 	{
-		// error
 		return;
 	}
 
@@ -144,39 +141,41 @@ void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* in
 
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 	{
-		isIdle = Queue_IsEmpty(transferQueue);
+		isIdle = Queue_IsEmpty(operationQueue);
 	}
 
-	transfer_command* cmd = Queue_Head(transferQueue);
+	operation* o = Queue_Head(operationQueue);
 
-	cmd->configuration = configuration;
-	cmd->output = output;
-	cmd->input = input;
-	cmd->length = length;
+	o->configuration = configuration;
+	o->output = output;
+	o->input = input;
+	o->length = length;
 
-	Queue_AdvanceHead(transferQueue);
+	Queue_AdvanceHead(operationQueue);
 
 	if (isIdle) // just check some register bit instead of isIdle?
 	{
 		// power up peripheral
-		StartTransfer();
+		ExecuteOperation();
 	}
 }
 
 // Internals
 
-static void StartTransfer()
+static void ExecuteOperation()
 {
-	currentTransfer = Queue_Tail(transferQueue);
+	// power up if powered off
 
-	GPIO_ClearPin(currentTransfer->configuration->csPin);
+	currentOperation = Queue_Tail(operationQueue);
 
-	currentOutput = currentTransfer->output;
-	currentInput = currentTransfer->input;
-	remainingBytes = currentTransfer->length;
+	GPIO_ClearPin(currentOperation->configuration->csPin);
 
-	SPCR = currentTransfer->configuration->spcr;
-	SPSR = currentTransfer->configuration->spsr;
+	currentOutput = currentOperation->output;
+	currentInput = currentOperation->input;
+	remainingBytes = currentOperation->length;
+
+	SPCR = currentOperation->configuration->spcr;
+	SPSR = currentOperation->configuration->spsr;
 
 	SPDR = *currentOutput;
 }
@@ -187,19 +186,19 @@ ISR(SPI_STC_vect)
 
 	if (--remainingBytes == 0)
 	{
-		GPIO_SetPin(currentTransfer->configuration->csPin);
+		GPIO_SetPin(currentOperation->configuration->csPin);
 
-		EventDispatcher_Notify(currentTransfer->configuration->completed);
+		EventDispatcher_Notify(currentOperation->configuration->completed);
 
-		Queue_AdvanceTail(transferQueue);
-		if (Queue_IsEmpty(transferQueue))
+		Queue_AdvanceTail(operationQueue);
+		if (Queue_IsEmpty(operationQueue))
 		{
 			// power down peripheral
 			SPCR = 0x00; // disable SPI
 		}
 		else
 		{
-			StartTransfer();
+			ExecuteOperation();
 		}
 	}
 	else

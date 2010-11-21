@@ -21,7 +21,6 @@
 #define NETWORK_COMMUNICATION_SLOT_FREQUENCY												128 // Number of transfers per second (i.e. RTS+CTS+DATA+ACK)
 #define NETWORK_NUMBER_OF_RTS_SLOTS																	6
 #define NETWORK_RTS_SLOT_DURATION																		100 // Duration of an RTS slot in micro seconds)
-
 // Sensor subsystem
 #define SENSOR_MAXIMUM_REPORT_SIZE																	8
 #define SENSOR_REPORT_POOL_SIZE																			16
@@ -49,7 +48,10 @@
 // Peripherals
 
 //   SPI
-#define SPI_TRANSFER_QUEUE_SIZE																			10
+#define SPI_OPERATION_QUEUE_SIZE																		10
+
+// ADC
+#define ADC_OPERATION_QUEUE_SIZE																		10
 
 #include <Configuration.h>
 
