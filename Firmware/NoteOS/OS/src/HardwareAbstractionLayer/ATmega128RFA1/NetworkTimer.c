@@ -37,8 +37,6 @@ void NetworkTimer_SetTimerValue(uint16_t value)
 	TCNT2 = value / PRESCALER_VALUE;
 }
 
-// Internals
-
 ISR(TIMER2_COMPA_vect)
 {
 	Network_TimerEvent();

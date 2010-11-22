@@ -53,18 +53,12 @@ enum
 #define ReadStatus()														(TRX_STATUS & TRX_STATUS_MASK)
 
 static bidirectional_block_handler frameHandler;
-static completion_handler rxStartHandler;
 static volatile bool transmitting;
 static volatile uint8_t rssi;
 static uint8_t* frameBufferObject;
 
-void RadioDriver_Initialize(bidirectional_block_handler frameReceived)
+void RadioDriver_Initialize()
 {
-	frameBufferObject = MemoryManager_Allocate(NETWORK_MAXIMUM_LINK_PACKET_SIZE);
-
-	frameHandler = frameReceived;
-
-
 #if defined(RADIODRIVER_USE_CRC)
 	SetBit(TRX_CTRL_1, TX_AUTO_CRC_ON);
 #else
@@ -82,9 +76,14 @@ void RadioDriver_Initialize(bidirectional_block_handler frameReceived)
 #endif
 }
 
-void RadioDriver_SetRxStartHandler(completion_handler handler)
+void RadioDriver_Start()
 {
-	rxStartHandler = handler;
+	frameBufferObject = MemoryManager_Allocate(NETWORK_MAXIMUM_LINK_PACKET_SIZE);
+}
+
+void RadioDriver_SetFrameReceivedHandler(bidirectional_block_handler handler)
+{
+	frameHandler = handler;
 }
 
 void RadioDriver_SetBitRate(uint8_t bitRate)

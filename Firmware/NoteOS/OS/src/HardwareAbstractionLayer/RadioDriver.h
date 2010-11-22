@@ -14,12 +14,17 @@ extern const uint8_t radioDriver_TxPower[];
 /**
  * Initialize the transceiver and sets the frame receive call back function.
  */
-extern void RadioDriver_Initialize(bidirectional_block_handler frameReceived);
+extern void RadioDriver_Initialize();
 
 /**
  *
  */
-extern void RadioDriver_SetRxStartHandler(completion_handler handler);
+extern void RadioDriver_Start();
+
+/**
+ *
+ */
+extern void RadioDriver_SetFrameReceivedHandler(bidirectional_block_handler handler);
 
 /**
  * Set the transmit power of the transceiver.
