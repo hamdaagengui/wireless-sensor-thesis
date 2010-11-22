@@ -237,7 +237,7 @@ void Network_Initialize()
 	Queue_Initialize(linkQueue, sizeof(queue_element), NETWORK_LINK_QUEUE_SIZE);
 	Queue_Initialize(transportQueue, sizeof(queue_element), NETWORK_TRANSPORT_QUEUE_SIZE);
 
-	RadioDriver_Initialize(FrameReceived);
+	RadioDriver_SetFrameReceivedHandler(FrameReceived);
 
 	srand(RadioDriver_GetRandomNumber());
 
@@ -572,26 +572,26 @@ static void* FrameReceived(void* data, uint8_t length)
 
 			// application layer packets
 
-//		case TYPE_APPLICATION_SENSOR_DATA:
-//			if (ProcessNetworkPacket(&data, length, sensorDataProcessor))
-//			{
-//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
-//			}
-//			break;
-//
-//		case TYPE_APPLICATION_SET_PROPERTY_REQUEST:
-//			if (ProcessNetworkPacket(&data, length, sensorSubSystemGetProperty))
-//			{
-//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
-//			}
-//			break;
-//
-//		case TYPE_APPLICATION_SET_PROPERTY_REQUEST:
-//			if (ProcessNetworkPacket(&data, length, sensorSubSystemGetProperty))
-//			{
-//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
-//			}
-//			break;
+			//		case TYPE_APPLICATION_SENSOR_DATA:
+			//			if (ProcessNetworkPacket(&data, length, sensorDataProcessor))
+			//			{
+			//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
+			//			}
+			//			break;
+			//
+			//		case TYPE_APPLICATION_SET_PROPERTY_REQUEST:
+			//			if (ProcessNetworkPacket(&data, length, sensorSubSystemGetProperty))
+			//			{
+			//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
+			//			}
+			//			break;
+			//
+			//		case TYPE_APPLICATION_SET_PROPERTY_REQUEST:
+			//			if (ProcessNetworkPacket(&data, length, sensorSubSystemGetProperty))
+			//			{
+			//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
+			//			}
+			//			break;
 	}
 
 	return data;

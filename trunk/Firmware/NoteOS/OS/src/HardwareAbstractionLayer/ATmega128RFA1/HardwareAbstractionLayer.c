@@ -31,6 +31,7 @@ void HardwareAbstractionLayer_Initialize()
 	SPI_Initialize();
 	StopWatch_Initialize();
 	SystemTimer_Initialize();
+	RadioDriver_Initialize();
 }
 
 void HardwareAbstractionLayer_Start()
@@ -39,6 +40,7 @@ void HardwareAbstractionLayer_Start()
 	IIC_Start();
 	// PowerManager_Start();
 	SPI_Start();
+	RadioDriver_Start();
 }
 
 #endif

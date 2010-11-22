@@ -26,7 +26,7 @@ static void ExecuteOperation();
 
 void ADC_Initialize()
 {
-		Queue_Initialize(operationQueue, sizeof(operation), ADC_OPERATION_QUEUE_SIZE);
+	Queue_Initialize(operationQueue, sizeof(operation), ADC_OPERATION_QUEUE_SIZE);
 }
 
 void ADC_Start()

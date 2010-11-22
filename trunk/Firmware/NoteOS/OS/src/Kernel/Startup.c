@@ -40,7 +40,7 @@ int main()
 	//
 
 
-	Diagnostics_Initialize(sn); // should ne in HAL_Init() but troubles with sn
+	Diagnostics_Initialize(sn); // should be in HAL_Init() but troubles with sn
 
 
 	// Initialize hardware
