@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing.Drawing2D;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -29,10 +30,12 @@ namespace RfSuitPlayer
     private bool _enableCurveUpdates = true;
     private int _position;
     private byte[] _activePicture = null;
+    private string _filename;
 
     private void OpenFile(string filename)
     {
       var entries = EntrySerializer.Instance.OpenRead(filename);
+      _filename = filename;
       Text = Path.GetFileName(filename);
       _entries = entries.ToArray();
 
@@ -238,11 +241,6 @@ namespace RfSuitPlayer
       _updateAwaits = false;
     }
 
-    private void toolStripStatusLabel1_Click(object sender, EventArgs e)
-    {
-
-    }
-
     private void MainForm_Load(object sender, EventArgs e)
     {
       Cursor.Current = Cursors.AppStarting;
@@ -253,6 +251,17 @@ namespace RfSuitPlayer
           OpenFile(args[0]);
       }
       Cursor.Current = Cursors.Default;
+    }
+
+    private void ExportPointInTimeToolStripMenuItemClick(object sender, EventArgs e)
+    {
+      if (_entries == null || _entries.Length < 1) return;
+      using (var writer = new StreamWriter(File.OpenWrite(_filename + "_" + _position + ".csv")))
+      {
+        writer.WriteLine("EndPointA;EndPointB;Quality");
+        foreach (var lqi in _entries[_position].results)
+          writer.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0};{1};{2}", lqi.EndPointA, lqi.EndPointB, lqi.Quality));
+      }
     }
   }
 }

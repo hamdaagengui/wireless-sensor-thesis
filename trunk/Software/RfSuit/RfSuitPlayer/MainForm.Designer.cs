@@ -47,6 +47,7 @@
       this.timer = new System.Windows.Forms.Timer(this.components);
       this.statusStrip1 = new System.Windows.Forms.StatusStrip();
       this.statusToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+      this.exportPointInTimeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.menuStrip.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
       this.splitContainer1.Panel1.SuspendLayout();
@@ -67,13 +68,14 @@
             this.optionsToolStripMenuItem});
       this.menuStrip.Location = new System.Drawing.Point(0, 0);
       this.menuStrip.Name = "menuStrip";
-      this.menuStrip.Size = new System.Drawing.Size(970, 24);
+      this.menuStrip.Size = new System.Drawing.Size(1116, 24);
       this.menuStrip.TabIndex = 0;
       // 
       // fileToolStripMenuItem
       // 
       this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
+            this.exportPointInTimeToolStripMenuItem,
             this.toolStripSeparator1,
             this.exitToolStripMenuItem});
       this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -84,20 +86,20 @@
       // 
       this.openToolStripMenuItem.Name = "openToolStripMenuItem";
       this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-      this.openToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+      this.openToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
       this.openToolStripMenuItem.Text = "&Open";
       this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItemClick);
       // 
       // toolStripSeparator1
       // 
       this.toolStripSeparator1.Name = "toolStripSeparator1";
-      this.toolStripSeparator1.Size = new System.Drawing.Size(143, 6);
+      this.toolStripSeparator1.Size = new System.Drawing.Size(222, 6);
       // 
       // exitToolStripMenuItem
       // 
       this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
       this.exitToolStripMenuItem.ShortcutKeyDisplayString = "Alt+F4";
-      this.exitToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+      this.exitToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
       this.exitToolStripMenuItem.Text = "E&xit";
       this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItemClick);
       // 
@@ -162,8 +164,8 @@
       // splitContainer1.Panel2
       // 
       this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-      this.splitContainer1.Size = new System.Drawing.Size(946, 469);
-      this.splitContainer1.SplitterDistance = 110;
+      this.splitContainer1.Size = new System.Drawing.Size(1092, 686);
+      this.splitContainer1.SplitterDistance = 327;
       this.splitContainer1.TabIndex = 11;
       // 
       // zedGraphControl1
@@ -182,7 +184,7 @@
       this.zedGraphControl1.ScrollMinX = 0D;
       this.zedGraphControl1.ScrollMinY = 0D;
       this.zedGraphControl1.ScrollMinY2 = 0D;
-      this.zedGraphControl1.Size = new System.Drawing.Size(946, 110);
+      this.zedGraphControl1.Size = new System.Drawing.Size(1092, 327);
       this.zedGraphControl1.TabIndex = 0;
       this.zedGraphControl1.MouseDownEvent += new ZedGraph.ZedGraphControl.ZedMouseEventHandler(this.ZedGraphControlMouseEvent);
       this.zedGraphControl1.MouseMoveEvent += new ZedGraph.ZedGraphControl.ZedMouseEventHandler(this.ZedGraphControlMouseEvent);
@@ -202,8 +204,8 @@
       // splitContainer2.Panel2
       // 
       this.splitContainer2.Panel2.Controls.Add(this.pictureBox);
-      this.splitContainer2.Size = new System.Drawing.Size(946, 355);
-      this.splitContainer2.SplitterDistance = 553;
+      this.splitContainer2.Size = new System.Drawing.Size(1092, 355);
+      this.splitContainer2.SplitterDistance = 699;
       this.splitContainer2.TabIndex = 0;
       // 
       // flowLayoutPanel1
@@ -213,7 +215,7 @@
       this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
       this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(551, 353);
+      this.flowLayoutPanel1.Size = new System.Drawing.Size(697, 353);
       this.flowLayoutPanel1.TabIndex = 0;
       // 
       // pictureBox
@@ -235,9 +237,9 @@
       // 
       this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusToolStripStatusLabel});
-      this.statusStrip1.Location = new System.Drawing.Point(0, 486);
+      this.statusStrip1.Location = new System.Drawing.Point(0, 703);
       this.statusStrip1.Name = "statusStrip1";
-      this.statusStrip1.Size = new System.Drawing.Size(970, 22);
+      this.statusStrip1.Size = new System.Drawing.Size(1116, 22);
       this.statusStrip1.TabIndex = 12;
       this.statusStrip1.Text = "statusStrip1";
       // 
@@ -245,13 +247,19 @@
       // 
       this.statusToolStripStatusLabel.Name = "statusToolStripStatusLabel";
       this.statusToolStripStatusLabel.Size = new System.Drawing.Size(0, 17);
-      this.statusToolStripStatusLabel.Click += new System.EventHandler(this.toolStripStatusLabel1_Click);
+      // 
+      // exportPointInTimeToolStripMenuItem
+      // 
+      this.exportPointInTimeToolStripMenuItem.Name = "exportPointInTimeToolStripMenuItem";
+      this.exportPointInTimeToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
+      this.exportPointInTimeToolStripMenuItem.Text = "Export selected position LQIs";
+      this.exportPointInTimeToolStripMenuItem.Click += new System.EventHandler(this.ExportPointInTimeToolStripMenuItemClick);
       // 
       // MainForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(970, 508);
+      this.ClientSize = new System.Drawing.Size(1116, 725);
       this.Controls.Add(this.statusStrip1);
       this.Controls.Add(this.splitContainer1);
       this.Controls.Add(this.menuStrip);
@@ -300,6 +308,7 @@
     private System.Windows.Forms.Timer timer;
     private System.Windows.Forms.StatusStrip statusStrip1;
     private System.Windows.Forms.ToolStripStatusLabel statusToolStripStatusLabel;
+    private System.Windows.Forms.ToolStripMenuItem exportPointInTimeToolStripMenuItem;
 
   }
 }
