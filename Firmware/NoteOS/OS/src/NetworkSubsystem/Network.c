@@ -200,7 +200,6 @@ static void TransportTimeoutHandler();
 static void* FrameReceived(void* data, uint8_t length);
 static bool VerifyNetworkLayerHeader(void** data, uint8_t length);
 static bool ProcessNetworkPacket(void** data, uint8_t length, block_handler packetHandler);
-static uint8_t FindNextNodeInRoute(uint8_t destination);
 static void UpdateCca();
 static bool IsChannelClear();
 static void InitiateSynchronization();
@@ -223,7 +222,42 @@ static link_acknowledge_packet ackPacketTemplate;
 static uint8_t address;
 
 // network
-static uint8_t distances[15][15];
+#define NO_ROUTE																										0xff
+static uint8_t routingTable[15];
+
+#define NETWORK_UNREACHABLE																					0xffff
+#define LINK_DEAD																										0
+typedef struct
+{
+	int8_t txPower; // current transmission power level of node
+	uint8_t hops[15]; // hops from node to indexed node
+	uint8_t linkLoss[15]; // link loss between node and indexed node
+	uint16_t cost; // cost from node to indexed node
+} routing_entry;
+static routing_entry routingTable_[15];
+
+typedef struct
+{
+	int8_t loss;
+	uint8_t node;
+} route_hop;
+
+typedef struct
+{
+	route_hop hops[15];
+} route;
+
+typedef struct
+{
+	uint16_t costToNeighbors[15];
+	bool marked;
+	uint16_t cost;
+	uint8_t previousNode;
+} node;
+
+// rts contains tx power
+
+// link loss is calculated on each node
 
 // transport
 static uint8_t nextSequenceNumber;
@@ -390,7 +424,7 @@ void Network_TimerEvent()
 			queue_element* qe = Queue_Tail(linkQueue);
 			currentLinkPacket = qe->object;
 			currentLinkPacketLength = qe->size;
-			currentLinkPacket->link.destination = FindNextNodeInRoute(currentLinkPacket->network.receiver);
+			currentLinkPacket->link.destination = routingTable[currentLinkPacket->network.receiver];
 
 
 			// Send RTS
@@ -545,7 +579,7 @@ static void* FrameReceived(void* data, uint8_t length)
 				if (VerifyNetworkLayerHeader(&data, length)) // a network layer packet for this node?
 				{
 					network_routes_packet* p = data;
-					memcpy(distances[p->network.sender], p->distances, 15);
+					//memcpy(distances[p->network.sender], p->distances, 15);
 				}
 			}
 			break;
@@ -636,6 +670,10 @@ static bool VerifyNetworkLayerHeader(void** data, uint8_t length)
 
 			Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_FORWARDING);
 		}
+		else
+		{
+			Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_FORWARDING_DROPPED);
+		}
 
 		return false;
 	}
@@ -660,12 +698,84 @@ static bool ProcessNetworkPacket(void** data, uint8_t length, block_handler pack
 	return false;
 }
 
+//
 // Routing functionality
 
-static uint8_t FindNextNodeInRoute(uint8_t destination)
+#define COST_INFINITY																								0xffff
+
+static uint8_t PickCheapestNode(node nodes[])
 {
-	return destination;
+	uint16_t lowestCost = COST_INFINITY;
+	uint8_t index = NO_ROUTE;
+
+	for (uint8_t i = 0; i < 15; i++)
+	{
+		if (nodes[i].marked == false)
+		{
+			if (nodes[i].cost < lowestCost)
+			{
+				index = i;
+			}
+		}
+	}
+
+	return index;
 }
+
+static bool FindRouteToNode(uint8_t target)
+{
+	node nodes[15];
+	for (uint8_t i = 0; i < 15; i++)
+	{
+		node* n = &nodes[i];
+		n->marked = false;
+		n->cost = COST_INFINITY;
+		n->previousNode = NO_ROUTE;
+	}
+	nodes[address].cost = 0;
+
+	for (uint8_t i = 0; i < 15; i++)
+	{
+		uint8_t currentIndex = PickCheapestNode(nodes);
+		if (currentIndex == NO_ROUTE)
+		{
+			routingTable[target] = NO_ROUTE;
+			return false;
+		}
+		if (currentIndex == target)
+		{
+			uint8_t next = target;
+			uint8_t previous = nodes[next].previousNode;
+			while (previous != address)
+			{
+				next = previous;
+				previous = nodes[next].previousNode;
+			}
+			routingTable[target] = next;
+			return true;
+		}
+
+		node* current = &nodes[currentIndex];
+		for (uint8_t neighborIndex = 0; neighborIndex < 15; neighborIndex++)
+		{
+			if (current->costToNeighbors[neighborIndex] != 0)
+			{
+				node* neighbor = &nodes[neighborIndex];
+				uint16_t newCost = current->cost + current->costToNeighbors[neighborIndex];
+				if (newCost < neighbor->cost)
+				{
+					neighbor->cost = newCost;
+					neighbor->previousNode = currentIndex;
+				}
+			}
+		}
+
+		current->marked = true;
+	}
+}
+
+//
+// Clear Channel Assessment stuff here
 
 #define RSSI_SAMPLE_COUNT																						8
 #define CCA_ALPHA																										0.06
@@ -718,35 +828,3 @@ static bool IsChannelClear()
 
 	return outliers > 0;
 }
-
-/*
- 01234567
-
- 0 00000000
- 1 10000000
- 2 10000000
- 3 00000000
- 4 00000000
- 5 00000000
- 6 00000000
- 7 00000000
-
- 0 00000000
- 1 00000000
- 2 00000000
- 3 00000000
- 4 00000000
- 5 00000000
- 6 00000000
- 7 00000000
-
- 0 00000000
- 1 00000000
- 2 00000000
- 3 00000000
- 4 00000000
- 5 00000000
- 6 00000000
- 7 00000000
-
- */
