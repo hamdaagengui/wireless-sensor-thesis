@@ -105,18 +105,20 @@
 <a name="l00076"></a><a class="code" href="Diagnostics_8h.html#a947f83f8f51e68213f2c0ae5c407ffd8a517501a3a63ad3d1031ee5b60913b38c">00076</a>   DIAGNOSTICS_ADC_CONVERSION_QUEUED,
 <a name="l00077"></a><a class="code" href="Diagnostics_8h.html#a947f83f8f51e68213f2c0ae5c407ffd8ad740afe721966d5537807d962eafc623">00077</a>   DIAGNOSTICS_ADC_FAILED_TO_QUEUE_CONVERSION,
 <a name="l00078"></a><a class="code" href="Diagnostics_8h.html#a947f83f8f51e68213f2c0ae5c407ffd8ad184199f7f779f66a1ce490c348b7a2b">00078</a>   DIAGNOSTICS_ADC_CONVERSION_STARTED,
-<a name="l00079"></a><a class="code" href="Diagnostics_8h.html#a947f83f8f51e68213f2c0ae5c407ffd8a8cb2e80f6e55ed3b496118a22f077126">00079</a>   <a class="code" href="Diagnostics_8h.html#a947f83f8f51e68213f2c0ae5c407ffd8a8cb2e80f6e55ed3b496118a22f077126">DIAGNOSTICS_ADC_CONVERSION_COMPLETED</a>
-<a name="l00080"></a>00080 } diagnostics_event;
-<a name="l00081"></a>00081 
-<a name="l00082"></a>00082 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="Diagnostics_8h.html#a76a86a0726572b085e8ae120030c3663">Diagnostics_Initialize</a>(uint32_t serialNumber);
-<a name="l00083"></a>00083 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="Diagnostics_8h.html#a96de62d4a714709bee44b74268cb3d6d">Diagnostics_SendEvent</a>(uint8_t event);
-<a name="l00084"></a>00084 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="Diagnostics_8h.html#a105aea6055737477f5fe64029d5acdde">Diagnostics_SendMessage</a>(uint8_t messageId, <span class="keywordtype">void</span>* message, uint8_t messageLength);
-<a name="l00085"></a>00085 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="Diagnostics_8h.html#a9d9e1a7646cdd5534d3180c2dec3dd6a">Diagnostics_SendState</a>(uint8_t stateMachineId, uint8_t newState);
-<a name="l00086"></a>00086 
-<a name="l00087"></a>00087 <span class="preprocessor">#endif </span><span class="comment">/* DIAGNOSTICS_H_ */</span>
+<a name="l00079"></a><a class="code" href="Diagnostics_8h.html#a947f83f8f51e68213f2c0ae5c407ffd8a8cb2e80f6e55ed3b496118a22f077126">00079</a>   DIAGNOSTICS_ADC_CONVERSION_COMPLETED,
+<a name="l00080"></a>00080 
+<a name="l00081"></a><a class="code" href="Diagnostics_8h.html#a947f83f8f51e68213f2c0ae5c407ffd8a804de04217ada9271b636f7b3f7fe582">00081</a>   <a class="code" href="Diagnostics_8h.html#a947f83f8f51e68213f2c0ae5c407ffd8a804de04217ada9271b636f7b3f7fe582">DIAGNOSTICS_NETWORK_FORWARDING_DROPPED</a>
+<a name="l00082"></a>00082 } diagnostics_event;
+<a name="l00083"></a>00083 
+<a name="l00084"></a>00084 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="Diagnostics_8h.html#a76a86a0726572b085e8ae120030c3663">Diagnostics_Initialize</a>(uint32_t serialNumber);
+<a name="l00085"></a>00085 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="Diagnostics_8h.html#a96de62d4a714709bee44b74268cb3d6d">Diagnostics_SendEvent</a>(uint8_t event);
+<a name="l00086"></a>00086 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="Diagnostics_8h.html#a105aea6055737477f5fe64029d5acdde">Diagnostics_SendMessage</a>(uint8_t messageId, <span class="keywordtype">void</span>* message, uint8_t messageLength);
+<a name="l00087"></a>00087 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="Diagnostics_8h.html#a9d9e1a7646cdd5534d3180c2dec3dd6a">Diagnostics_SendState</a>(uint8_t stateMachineId, uint8_t newState);
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089 <span class="preprocessor">#endif </span><span class="comment">/* DIAGNOSTICS_H_ */</span>
 </pre></div></div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 22 2010 00:27:56 for NoteOS by&nbsp;
+<hr class="footer"/><address class="footer"><small>Generated on Fri Nov 26 2010 11:04:32 for NoteOS by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.1 </small></address>
 </body>

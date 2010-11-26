@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>NoteOS: Kernel/Timer.h Source File</title>
+<title>NoteOS: EventSubsystem/Timer.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -24,7 +24,7 @@
   </div>
 <div class="header">
   <div class="headertitle">
-<h1>Kernel/Timer.h</h1>  </div>
+<h1>EventSubsystem/Timer.h</h1>  </div>
 </div>
 <div class="contents">
 <a href="Timer_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
@@ -38,7 +38,7 @@
 <a name="l00009"></a>00009 <span class="preprocessor"></span><span class="preprocessor">#define TIMER_H_</span>
 <a name="l00010"></a>00010 <span class="preprocessor"></span>
 <a name="l00011"></a>00011 <span class="preprocessor">#include &quot;../Globals.h&quot;</span>
-<a name="l00012"></a>00012 <span class="preprocessor">#include &quot;../EventSubsystem/EventDispatcher.h&quot;</span>
+<a name="l00012"></a>00012 <span class="preprocessor">#include &quot;<a class="code" href="EventDispatcher_8h.html">EventDispatcher.h</a>&quot;</span>
 <a name="l00013"></a>00013 <span class="preprocessor">#include &quot;../HardwareAbstractionLayer/SystemTimer.h&quot;</span>
 <a name="l00014"></a>00014 
 <a name="l00018"></a><a class="code" href="Timer_8h.html#a153b21cab235735bed3752c7735cac4e">00018</a> <span class="preprocessor">#define TIMER_RESOLUTION                                            (1000000UL / (F_CPU / SYSTEM_TIMER_PRESCALER))</span>
@@ -70,7 +70,7 @@
 <a name="l00063"></a>00063 <span class="preprocessor">#endif </span><span class="comment">/* TIMER_H_ */</span>
 </pre></div></div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 22 2010 00:27:56 for NoteOS by&nbsp;
+<hr class="footer"/><address class="footer"><small>Generated on Fri Nov 26 2010 11:04:32 for NoteOS by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.1 </small></address>
 </body>

@@ -36,8 +36,9 @@
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="RadioDriver_8h.html#a980d62efd6dcd93d2fa706a55fb5bb76">RadioDriver_Initialize</a> (<a class="el" href="Globals_8h.html#a86e1b2365effed2561a6a859cbc58826">bidirectional_block_handler</a> frameReceived)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="RadioDriver_8h.html#a0a78c64eeb3b655ff7e8438339038425">RadioDriver_SetRxStartHandler</a> (<a class="el" href="Globals_8h.html#aef51f19c52912fe72785c7b08df62a86">completion_handler</a> handler)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="RadioDriver_8h.html#aa1cdfdd7c37e36fc7cc4bbbb70e21cf9">RadioDriver_Initialize</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="RadioDriver_8h.html#ac6c14a9a5157b454a63f583fc11c8d93">RadioDriver_Start</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="RadioDriver_8h.html#af294ee898a6a2dee108f9b1c517bd7b4">RadioDriver_SetFrameReceivedHandler</a> (<a class="el" href="Globals_8h.html#a86e1b2365effed2561a6a859cbc58826">bidirectional_block_handler</a> handler)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="RadioDriver_8h.html#a5c44fc2313d21e141d2c690b80108d9d">RadioDriver_SetTxPower</a> (uint8_t power)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="RadioDriver_8h.html#a3b76fb8084bbbf806b43bfdbda1c4de3">RadioDriver_SetChannel</a> (uint8_t channel)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int8_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="RadioDriver_8h.html#a9ab5756b6531f80241d00b90a5391b87">RadioDriver_GetRssi</a> ()</td></tr>
@@ -47,15 +48,14 @@ Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">const uint8_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="RadioDriver_8h.html#a499557a1a8a8a3eb49aa582569aa638d">radioDriver_TxPower</a> []</td></tr>
 </table>
 <hr/><h2>Function Documentation</h2>
-<a class="anchor" id="a980d62efd6dcd93d2fa706a55fb5bb76"></a><!-- doxytag: member="RadioDriver.h::RadioDriver_Initialize" ref="a980d62efd6dcd93d2fa706a55fb5bb76" args="(bidirectional_block_handler frameReceived)" -->
+<a class="anchor" id="aa1cdfdd7c37e36fc7cc4bbbb70e21cf9"></a><!-- doxytag: member="RadioDriver.h::RadioDriver_Initialize" ref="aa1cdfdd7c37e36fc7cc4bbbb70e21cf9" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">void RadioDriver_Initialize </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="Globals_8h.html#a86e1b2365effed2561a6a859cbc58826">bidirectional_block_handler</a>&nbsp;</td>
-          <td class="paramname"> <em>frameReceived</em></td>
+          <td class="paramname"></td>
           <td>&nbsp;)&nbsp;</td>
           <td></td>
         </tr>
@@ -66,14 +66,31 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0a78c64eeb3b655ff7e8438339038425"></a><!-- doxytag: member="RadioDriver.h::RadioDriver_SetRxStartHandler" ref="a0a78c64eeb3b655ff7e8438339038425" args="(completion_handler handler)" -->
+<a class="anchor" id="ac6c14a9a5157b454a63f583fc11c8d93"></a><!-- doxytag: member="RadioDriver.h::RadioDriver_Start" ref="ac6c14a9a5157b454a63f583fc11c8d93" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void RadioDriver_SetRxStartHandler </td>
+          <td class="memname">void RadioDriver_Start </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="Globals_8h.html#aef51f19c52912fe72785c7b08df62a86">completion_handler</a>&nbsp;</td>
+          <td class="paramname"></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="af294ee898a6a2dee108f9b1c517bd7b4"></a><!-- doxytag: member="RadioDriver.h::RadioDriver_SetFrameReceivedHandler" ref="af294ee898a6a2dee108f9b1c517bd7b4" args="(bidirectional_block_handler handler)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void RadioDriver_SetFrameReceivedHandler </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="Globals_8h.html#a86e1b2365effed2561a6a859cbc58826">bidirectional_block_handler</a>&nbsp;</td>
           <td class="paramname"> <em>handler</em></td>
           <td>&nbsp;)&nbsp;</td>
           <td></td>
@@ -183,7 +200,7 @@ Variables</h2></td></tr>
 </div>
 </div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 22 2010 00:27:56 for NoteOS by&nbsp;
+<hr class="footer"/><address class="footer"><small>Generated on Fri Nov 26 2010 11:04:32 for NoteOS by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.1 </small></address>
 </body>

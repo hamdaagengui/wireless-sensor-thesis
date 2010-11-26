@@ -9,7 +9,7 @@
 #define TIMER_H_
 
 #include "../Globals.h"
-#include "EventSubsystem/EventDispatcher.h"
+#include "EventDispatcher.h"
 #include "../HardwareAbstractionLayer/SystemTimer.h"
 
 /**
