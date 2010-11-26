@@ -8,7 +8,7 @@
 #if defined(__AVR_ATmega128RFA1__)
 
 #include "../SystemTimer.h"
-#include "../../Kernel/Timer.h"
+#include "../../EventSubsystem/Timer.h"
 
 extern void Timer_Tick();
 

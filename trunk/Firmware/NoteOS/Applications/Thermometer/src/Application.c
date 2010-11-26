@@ -5,12 +5,7 @@
  *      Author: coma
  */
 
-#include <SensorSubsystem/SensorManager.h>
-#include <SensorSubsystem/Sensors/HeartRateVariability.h>
-#include <Kernel/Timer.h>
-#include <NetworkSubsystem/Network.h>
-#include <HardwareAbstractionLayer/HardwareAbstractionLayer.h>
-#include <PlatformAbstractionLayer/PlatformAbstractionLayer.h>
+#include "NoteOS.h"
 
 #ifdef MASTER_NODE
 timer_configuration tickerTimer;

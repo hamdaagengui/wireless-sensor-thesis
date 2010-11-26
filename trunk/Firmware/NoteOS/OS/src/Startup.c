@@ -5,15 +5,15 @@
  *      Author: coma
  */
 
-#include "../Globals.h"
-#include "../DefaultConfiguration.h"
-#include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
-#include "../PlatformAbstractionLayer/PlatformAbstractionLayer.h"
-#include "../MemorySubsystem/MemoryManager.h"
-#include "../EventSubsystem/EventDispatcher.h"
-#include "../NetworkSubsystem/Network.h"
-#include "../Diagnostics/Diagnostics.h"
-#include "../SensorSubsystem/SensorManager.h"
+#include "Globals.h"
+#include "DefaultConfiguration.h"
+#include "HardwareAbstractionLayer/HardwareAbstractionLayer.h"
+#include "PlatformAbstractionLayer/PlatformAbstractionLayer.h"
+#include "MemorySubsystem/MemoryManager.h"
+#include "EventSubsystem/EventDispatcher.h"
+#include "NetworkSubsystem/Network.h"
+#include "Diagnostics/Diagnostics.h"
+#include "SensorSubsystem/SensorManager.h"
 
 // Entry points to user code.
 #ifdef CONFIGURATION_H_
