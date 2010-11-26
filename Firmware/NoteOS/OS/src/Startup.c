@@ -73,8 +73,10 @@ int main()
 #endif
 
 
-	// Start user application
+	// Start user application (only if a configuration file exist (used as an indicator of a real application as opposed to building documentation))
+#ifdef CONFIGURATION_H_
 	Start();
+#endif
 
 
 	// Run system

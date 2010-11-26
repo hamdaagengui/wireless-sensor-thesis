@@ -40,22 +40,24 @@
 <a name="l00011"></a>00011 <span class="preprocessor"></span>
 <a name="l00012"></a>00012 <span class="keyword">extern</span> <span class="keyword">const</span> uint8_t <a class="code" href="RadioDriver_8h.html#a499557a1a8a8a3eb49aa582569aa638d">radioDriver_TxPower</a>[];
 <a name="l00013"></a>00013 
-<a name="l00017"></a>00017 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="RadioDriver_8h.html#a980d62efd6dcd93d2fa706a55fb5bb76">RadioDriver_Initialize</a>(<a class="code" href="Globals_8h.html#a86e1b2365effed2561a6a859cbc58826">bidirectional_block_handler</a> frameReceived);
+<a name="l00017"></a>00017 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="RadioDriver_8h.html#aa1cdfdd7c37e36fc7cc4bbbb70e21cf9">RadioDriver_Initialize</a>();
 <a name="l00018"></a>00018 
-<a name="l00022"></a>00022 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="RadioDriver_8h.html#a0a78c64eeb3b655ff7e8438339038425">RadioDriver_SetRxStartHandler</a>(<a class="code" href="Globals_8h.html#aef51f19c52912fe72785c7b08df62a86">completion_handler</a> handler);
+<a name="l00022"></a>00022 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="RadioDriver_8h.html#ac6c14a9a5157b454a63f583fc11c8d93">RadioDriver_Start</a>();
 <a name="l00023"></a>00023 
-<a name="l00028"></a>00028 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="RadioDriver_8h.html#a5c44fc2313d21e141d2c690b80108d9d">RadioDriver_SetTxPower</a>(uint8_t power);
-<a name="l00029"></a>00029 
-<a name="l00034"></a>00034 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="RadioDriver_8h.html#a3b76fb8084bbbf806b43bfdbda1c4de3">RadioDriver_SetChannel</a>(uint8_t channel);
-<a name="l00035"></a>00035 
-<a name="l00039"></a>00039 <span class="keyword">extern</span> int8_t <a class="code" href="RadioDriver_8h.html#a9ab5756b6531f80241d00b90a5391b87">RadioDriver_GetRssi</a>();
+<a name="l00027"></a>00027 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="RadioDriver_8h.html#af294ee898a6a2dee108f9b1c517bd7b4">RadioDriver_SetFrameReceivedHandler</a>(<a class="code" href="Globals_8h.html#a86e1b2365effed2561a6a859cbc58826">bidirectional_block_handler</a> handler);
+<a name="l00028"></a>00028 
+<a name="l00033"></a>00033 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="RadioDriver_8h.html#a5c44fc2313d21e141d2c690b80108d9d">RadioDriver_SetTxPower</a>(uint8_t power);
+<a name="l00034"></a>00034 
+<a name="l00039"></a>00039 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="RadioDriver_8h.html#a3b76fb8084bbbf806b43bfdbda1c4de3">RadioDriver_SetChannel</a>(uint8_t channel);
 <a name="l00040"></a>00040 
-<a name="l00047"></a>00047 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="RadioDriver_8h.html#a148197b24c3e885ffeff07366530d099">RadioDriver_Send</a>(<span class="keywordtype">void</span>* data, uint8_t length);
-<a name="l00048"></a>00048 
-<a name="l00049"></a>00049 <span class="preprocessor">#endif </span><span class="comment">/* RADIODRIVER_H_ */</span>
+<a name="l00044"></a>00044 <span class="keyword">extern</span> int8_t <a class="code" href="RadioDriver_8h.html#a9ab5756b6531f80241d00b90a5391b87">RadioDriver_GetRssi</a>();
+<a name="l00045"></a>00045 
+<a name="l00052"></a>00052 <span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code" href="RadioDriver_8h.html#a148197b24c3e885ffeff07366530d099">RadioDriver_Send</a>(<span class="keywordtype">void</span>* data, uint8_t length);
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="preprocessor">#endif </span><span class="comment">/* RADIODRIVER_H_ */</span>
 </pre></div></div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Mon Nov 22 2010 00:27:56 for NoteOS by&nbsp;
+<hr class="footer"/><address class="footer"><small>Generated on Fri Nov 26 2010 11:04:32 for NoteOS by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.1 </small></address>
 </body>
