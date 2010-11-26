@@ -34,8 +34,8 @@ typedef struct
 {
 	uint8_t destination :4; // set by the network layer (routing)
 	uint8_t source :4;
-	uint8_t :4;
 	uint8_t type :4;
+	uint8_t :4;
 } link_header;
 
 typedef struct
@@ -97,7 +97,6 @@ typedef struct
 	link_header link;
 	uint8_t slot;
 	int8_t transmissionPowerLevel;
-	uint8_t energyLevel;
 } link_rts_packet;
 
 typedef struct
@@ -431,7 +430,6 @@ void Network_TimerEvent()
 			rtsPacketTemplate.link.destination = currentLinkPacket->link.destination;
 			rtsPacketTemplate.slot = slot;
 			rtsPacketTemplate.transmissionPowerLevel = 0; // TODO Implement this
-			rtsPacketTemplate.energyLevel = 0; // TODO Implement this
 			RadioDriver_Send(&rtsPacketTemplate, sizeof(rtsPacketTemplate));
 
 			Diagnostics_SendEvent(DIAGNOSTICS_TX_RTS);

@@ -7,8 +7,8 @@
 
 #include "../HardwareAbstractionLayer/SPI.h"
 #include "../HardwareAbstractionLayer/GPIO.h"
-#include "../Kernel/Timer.h"
 #include "../EventSubsystem/EventDispatcher.h"
+#include "../EventSubsystem/Timer.h"
 #include "../MemorySubsystem/MemoryManager.h"
 
 static void TimerTick();
