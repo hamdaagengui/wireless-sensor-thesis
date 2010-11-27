@@ -9,16 +9,48 @@
 
 #include <avr/sleep.h>
 #include "../PowerManager.h"
-#include "../../EventSubsystem/EventDispatcher.h"
+#include "../../Diagnostics/Diagnostics.h"
+
+static uint8_t resourceRequests[NUMBER_OF_PROCESSOR_RESOURCES];
 
 void PowerManager_Initialize()
 {
 
 }
 
+void PowerManager_RequestResource(processor_resource resource)
+{
+	if (resourceRequests[resource] < 255)
+	{
+		resourceRequests[resource]++;
+	}
+	else
+	{
+		Diagnostics_SendEvent(DIAGNOSTICS_POWER_MANAGER_RESOURCE_REQUEST_OVERFLOW);
+	}
+}
+
+void PowerManager_ReleaseResource(processor_resource resource)
+{
+	if (resourceRequests[resource] > 0)
+	{
+		resourceRequests[resource]--;
+	}
+	else
+	{
+		Diagnostics_SendEvent(DIAGNOSTICS_POWER_MANAGER_RESOURCE_RELEASE_OVERFLOW);
+	}
+}
+
 void PowerManager_PowerDown()
 {
-	set_sleep_mode(SLEEP_MODE_IDLE); // TODO Could this be more aggressive e.g. using standby?
+	uint8_t sleepMode = SLEEP_MODE_PWR_DOWN; // choose most aggressive mode as default and degrade it based on resource usage
+	if (resourceRequests[PROCESSOR_RESOURCE_ADC_CLOCK])
+	{
+		//...
+	}
+
+	set_sleep_mode(sleepMode);
 	cli();
 	sleep_enable();
 	sei();

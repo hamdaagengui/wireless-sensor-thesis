@@ -12,6 +12,7 @@
 #include "../../Collections/Queue.h"
 #include "../../EventSubsystem/EventDispatcher.h"
 #include "../GPIO.h"
+#include "../PowerManager.h"
 
 static bool enabled = false;
 
@@ -156,6 +157,9 @@ void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* in
 	if (isIdle) // just check some register bit instead of isIdle?
 	{
 		// power up peripheral
+
+		PowerManager_RequestResource(PROCESSOR_RESOURCE_IO_CLOCK); // don't let it sleep
+
 		ExecuteOperation();
 	}
 }
@@ -194,6 +198,7 @@ ISR(SPI_STC_vect)
 		if (Queue_IsEmpty(operationQueue))
 		{
 			// power down peripheral
+			PowerManager_ReleaseResource(PROCESSOR_RESOURCE_IO_CLOCK);
 			SPCR = 0x00; // disable SPI
 		}
 		else

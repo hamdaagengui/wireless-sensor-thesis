@@ -13,10 +13,10 @@
 #if defined(PLATFORM_STK600_ATMEGA128RFA1)
 #include "STK600_ATmega128RFA1/PlatformAbstractionLayer.h"
 #else
-#define PLATFORM_NONE
+#define PLATFORM_UNIMPLEMENTED
 #endif
 
-#ifndef PLATFORM_NONE
+#ifndef PLATFORM_UNIMPLEMENTED
 extern void PlatformAbstractionLayer_Initialize();
 extern void PlatformAbstractionLayer_Start();
 #endif
