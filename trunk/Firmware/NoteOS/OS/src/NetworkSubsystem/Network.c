@@ -214,9 +214,9 @@ static link_network_header* currentLinkPacket;
 static uint8_t currentLinkPacketLength;
 static uint8_t linkQueue[Queue_CalculateSize(sizeof(queue_element), NETWORK_LINK_QUEUE_SIZE)];
 
-static link_rts_packet rtsPacketTemplate;
-static link_cts_packet ctsPacketTemplate;
-static link_acknowledge_packet ackPacketTemplate;
+static link_rts_packet rtsPacketTemplate = { .link.type=TYPE_LINK_RTS };
+static link_cts_packet ctsPacketTemplate = { .link.type=TYPE_LINK_CTS };
+static link_acknowledge_packet ackPacketTemplate = { .link.type=TYPE_LINK_ACK };
 
 static uint8_t address;
 
@@ -345,11 +345,11 @@ void* Network_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t d
 static void PreparePreloadedPackets()
 {
 	rtsPacketTemplate.link.source = address;
-	rtsPacketTemplate.link.type = TYPE_LINK_RTS;
+	//	rtsPacketTemplate.link.type = TYPE_LINK_RTS;
 	ctsPacketTemplate.link.source = address;
-	ctsPacketTemplate.link.type = TYPE_LINK_CTS;
+	//	ctsPacketTemplate.link.type = TYPE_LINK_CTS;
 	ackPacketTemplate.link.source = address;
-	ackPacketTemplate.link.type = TYPE_LINK_ACK;
+	//	ackPacketTemplate.link.type = TYPE_LINK_ACK;
 }
 
 static void InitiateSynchronization()
@@ -423,8 +423,13 @@ void Network_TimerEvent()
 			queue_element* qe = Queue_Tail(linkQueue);
 			currentLinkPacket = qe->object;
 			currentLinkPacketLength = qe->size;
+
+
+			// TODO: This must be moved to the place where the packet is queued.
 			currentLinkPacket->link.destination = routingTable[currentLinkPacket->network.receiver];
 
+
+			// TODO: Extract destination and link loss for destination and calculate needed TX power level and set it
 
 			// Send RTS
 			rtsPacketTemplate.link.destination = currentLinkPacket->link.destination;
@@ -574,7 +579,7 @@ static void* FrameReceived(void* data, uint8_t length)
 
 		case TYPE_NETWORK_ROUTES:
 			{
-				if (VerifyNetworkLayerHeader(&data, length)) // a network layer packet for this node?
+				if (VerifyNetworkLayerHeader(&data, length))
 				{
 					network_routes_packet* p = data;
 					//memcpy(distances[p->network.sender], p->distances, 15);
@@ -587,7 +592,7 @@ static void* FrameReceived(void* data, uint8_t length)
 
 		case TYPE_TRANSPORT_ACK:
 			{
-				if (VerifyNetworkLayerHeader(&data, length)) // a network layer packet for this node?
+				if (VerifyNetworkLayerHeader(&data, length))
 				{
 					queue_element* qe = Queue_Head(transportQueue);
 					transport_acknowledge_packet* qp = qe->object;
@@ -596,6 +601,7 @@ static void* FrameReceived(void* data, uint8_t length)
 					{
 						break;
 					}
+					// TODO: Send notification on timeout (acks just happens without a sound)
 					Queue_AdvanceTail(transportQueue);
 				}
 			}

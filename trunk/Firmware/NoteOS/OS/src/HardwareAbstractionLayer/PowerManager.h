@@ -8,17 +8,21 @@
 #ifndef POWERMANAGER_H_
 #define POWERMANAGER_H_
 
-#include "../Globals.h"
-#include "../EventSubsystem/EventDispatcher.h"
 #include "../DefaultConfiguration.h"
 
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/PowerManager.h"
 #else
-#error "No power management driver found for the selected processor!"
+#define POWERMANAGER_UNIMPLEMENTED
 #endif
 
+#ifndef POWERMANAGER_UNIMPLEMENTED
+
 extern void PowerManager_Initialize();
+extern void PowerManager_RequestResource(processor_resource resource);
+extern void PowerManager_ReleaseResource(processor_resource resource);
 extern void PowerManager_PowerDown();
+
+#endif
 
 #endif /* POWERMANAGER_H_ */
