@@ -30,7 +30,7 @@ typedef struct
 	uint32_t period;
 	uint32_t timer;
 	timer_mode mode;
-	completion_handler completed;
+	notification_handler completed;
 } timer_configuration;
 
 /**
@@ -40,7 +40,7 @@ typedef struct
  * @param mode
  * @param completed
  */
-extern void Timer_CreateConfiguration(timer_configuration* configuration, uint32_t period, timer_mode mode, completion_handler completed);
+extern void Timer_CreateConfiguration(timer_configuration* configuration, uint32_t period, timer_mode mode, notification_handler completed);
 
 /**
  *

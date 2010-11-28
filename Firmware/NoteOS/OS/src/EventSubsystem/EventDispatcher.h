@@ -48,7 +48,12 @@ extern bool EventDispatcher_Publish(uint8_t eventId, void* data);
  * @param handler
  * @return Returns true if the notification was successfully queued.
  */
-extern bool EventDispatcher_Notify(completion_handler handler);
+extern bool EventDispatcher_Notify(notification_handler handler);
+
+/**
+ *
+ */
+//extern bool EventDispatcher_Complete(completion_handler handler, void* operation);
 
 /**
  * Enqueues data for deferred processing.

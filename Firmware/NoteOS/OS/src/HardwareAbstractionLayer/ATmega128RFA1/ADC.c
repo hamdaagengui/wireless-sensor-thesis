@@ -48,7 +48,7 @@ void ADC_Start()
 	}
 }
 
-void ADC_CreateConfiguration(adc_configuration* configuration, uint8_t channel, adc_prescaler prescaler, uint16_t* result, completion_handler completed)
+void ADC_CreateConfiguration(adc_configuration* configuration, uint8_t channel, adc_prescaler prescaler, uint16_t* result, notification_handler completed)
 {
 	SetBit(DIDR0, channel);
 

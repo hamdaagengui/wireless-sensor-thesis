@@ -47,12 +47,12 @@ extern void SPI_Start();
 /**
  *
  */
-extern void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate, spi_data_mode mode, spi_data_order order, gpio_pin csPin, completion_handler completed);
+extern void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t maximumBitrate, spi_data_mode mode, spi_data_order order, gpio_pin csPin);
 
 /**
  * Queues a transfer command. OBS Only a pointer to the output buffer is queued so it is not safe to modify the buffer until the completion handler is called!
  */
-extern void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length);
+extern void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length, notification_handler handler);
 
 #endif
 

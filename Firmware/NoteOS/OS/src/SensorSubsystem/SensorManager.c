@@ -7,22 +7,48 @@
 
 #include "SensorManager.h"
 
+static const sensor_interface* sensors[SENSOR_MANAGER_MAXIMUM_NUMBER_OF_SENSORS];
+static uint8_t numberOfSensorsInstalled;
+
 void SensorManager_Initialize()
 {
 
 }
 
-void SensorManager_InstallSensor(sensor_interface* sensor)
+bool SensorManager_InstallSensor(const sensor_interface* sensor)
 {
+	if (numberOfSensorsInstalled < SENSOR_MANAGER_MAXIMUM_NUMBER_OF_SENSORS)
+	{
+		if (sensor->initialize(numberOfSensorsInstalled))
+		{
+			sensors[numberOfSensorsInstalled++] = sensor;
+			return true;
+		}
+	}
 
+	return false;
 }
 
-void SensorManager_SetProperty(uint8_t sensorId, uint8_t propertyId, void* value)
+bool SensorManager_SetProperty(set_request_packet* packet)
 {
+	uint8_t sensor = packet->sensor;
 
+	if (sensor >= numberOfSensorsInstalled)
+	{
+		return false;
+	}
+
+	return sensors[sensor]->set(packet);
 }
 
-void SensorManager_GetProperty(uint8_t sensorId, uint8_t propertyId, void* value)
+bool SensorManager_GetProperty(get_request_packet* packet)
 {
+	uint8_t sensor = packet->sensor;
 
+	if (sensor >= numberOfSensorsInstalled)
+	{
+		return false;
+	}
+
+	return sensors[sensor]->get(packet);
 }

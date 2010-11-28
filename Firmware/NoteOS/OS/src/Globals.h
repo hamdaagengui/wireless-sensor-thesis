@@ -15,12 +15,11 @@
 
 #define Modify(var, mask, value)								(var = ((var & ~mask) | (value & mask)))
 
-enum
+typedef enum
 {
 	false,
 	true
-};
-typedef uint8_t bool;
+} bool;
 
 #define Critical()															cli()
 #define NonCritical()														sei()
@@ -29,15 +28,11 @@ typedef uint8_t bool;
 
 #define MemoryBarrier()													__asm__ volatile ("" : : : "memory")
 
-typedef void (*completion_handler)();
+typedef void (*notification_handler)();
+//typedef void (*completion_handler)(void* operation);
+typedef void (*result_handler)(bool succes);
 typedef void (*block_handler)(void* data, uint8_t length);
 typedef void* (*bidirectional_block_handler)(void* data, uint8_t length);
-typedef void (*result_handler)(bool succes);
-enum
-{
-	RESULT_OK,
-	RESULT_ERROR
-};
 
 ///#define inline __attribute__ ((__always_inline__))
 ///#define a  flatten

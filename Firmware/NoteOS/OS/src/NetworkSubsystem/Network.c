@@ -15,11 +15,12 @@
 #include "../HardwareAbstractionLayer/HardwareAbstractionLayer.h"
 #include "../MemorySubsystem/MemoryManager.h"
 #include "../Diagnostics/Diagnostics.h"
+#include "../SensorSubsystem/SensorManager.h"
 
 //  Constants
 #define BROADCAST_ADDRESS																						15
 
-enum
+typedef enum
 {
 	LINK_STATE_UNSYNCHRONIZED,
 	LINK_STATE_IDLE,
@@ -27,45 +28,10 @@ enum
 	LINK_STATE_EXPECTING_CTS,
 	LINK_STATE_EXPECTING_ACK,
 	LINK_STATE_EXPECTING_DATA
-};
-
-// headers for the individual layers
-typedef struct
-{
-	uint8_t destination :4; // set by the network layer (routing)
-	uint8_t source :4;
-	uint8_t type :4;
-	uint8_t :4;
-} link_header;
-
-typedef struct
-{
-	uint8_t receiver :4;
-	uint8_t sender :4;
-} network_header;
-
-typedef struct
-{
-	uint8_t sequenceNumber;
-} transport_header;
-
-// combined headers
-typedef struct
-{
-	link_header link;
-	network_header network;
-} link_network_header;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	transport_header transport;
-	uint8_t payload[];
-} link_network_transport_header;
+} link_state;
 
 // possible packet types
-enum
+typedef enum
 {
 	// link packets
 	TYPE_LINK_RTS,
@@ -90,109 +56,7 @@ enum
 //	TYPE_LOAD_COMPLETE,
 //	TYPE_STORE,
 //	TYPE_STORE_COMPLETE
-};
-
-typedef struct
-{
-	link_header link;
-	uint8_t slot;
-	int8_t transmissionPowerLevel;
-} link_rts_packet;
-
-typedef struct
-{
-	link_header link;
-} link_cts_packet;
-
-typedef struct
-{
-	link_header link;
-} link_acknowledge_packet;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	uint8_t distances[15];
-} network_routes_packet;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	transport_header transport;
-} transport_acknowledge_packet;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	transport_header transport;
-	uint8_t sensor;
-	uint8_t data[];
-} application_sensor_data_packet;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	uint8_t sensor;
-	uint8_t propertyId;
-	uint8_t data[];
-} set_packet;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	uint8_t status;
-} set_complete_packet;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	uint8_t sensor;
-	uint8_t propertyId;
-} get_packet;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	uint8_t status;
-	uint8_t data[];
-} get_complete_packet;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	char fieldName[10];
-	uint8_t data[];
-} write_packet;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	uint8_t status;
-} write_complete_packet;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	char fieldName[10];
-} read_packet;
-
-typedef struct
-{
-	link_header link;
-	network_header network;
-	uint8_t status;
-	uint8_t data[];
-} read_complete_packet;
+} packet_type;
 
 static void PreparePreloadedPackets();
 static void TransportTimeoutHandler();
@@ -254,10 +118,6 @@ typedef struct
 	uint8_t previousNode;
 } node;
 
-// rts contains tx power
-
-// link loss is calculated on each node
-
 // transport
 static uint8_t nextSequenceNumber;
 static uint8_t transportQueue[Queue_CalculateSize(sizeof(queue_element), NETWORK_TRANSPORT_QUEUE_SIZE)];
@@ -298,11 +158,6 @@ void Network_Handlers(block_handler sensorDataHandler)
 	sensorDataProcessor = sensorDataHandler;
 }
 
-void Network_SendPacket()
-{
-	Queue_AdvanceHead(transportQueue);
-}
-
 void* Network_CreateTransportPacket(uint8_t receiver, uint8_t type, uint8_t size)
 {
 	if (Queue_IsFull(transportQueue))
@@ -338,6 +193,20 @@ void* Network_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t d
 	p->sensor = sensor;
 
 	return p->data;
+}
+
+void* Network_CreateGetResponsePacket(uint8_t receiver, property_status status, uint8_t dataSize)
+{
+	get_response_packet* p = Network_CreateTransportPacket(receiver, TYPE_APPLICATION_GET_PROPERTY_RESPONSE, sizeof(get_response_packet) + dataSize);
+
+	p->status = status;
+
+	return p->data;
+}
+
+void Network_SendPacket()
+{
+	Queue_AdvanceHead(transportQueue);
 }
 
 // Internal
@@ -487,6 +356,16 @@ static void AcknowledgeTransportPacket(link_network_transport_header* packet)
 	p.link;
 }
 
+static void SensorPropertySet(void* data, uint8_t length)
+{
+	SensorManager_SetProperty(data);
+}
+
+static void SensorPropertyGet(void* data, uint8_t length)
+{
+	SensorManager_GetProperty(data);
+}
+
 static void* FrameReceived(void* data, uint8_t length)
 {
 	link_header* lh = data;
@@ -616,20 +495,20 @@ static void* FrameReceived(void* data, uint8_t length)
 			//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
 			//			}
 			//			break;
-			//
-			//		case TYPE_APPLICATION_SET_PROPERTY_REQUEST:
-			//			if (ProcessNetworkPacket(&data, length, sensorSubSystemGetProperty))
-			//			{
-			//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
-			//			}
-			//			break;
-			//
-			//		case TYPE_APPLICATION_SET_PROPERTY_REQUEST:
-			//			if (ProcessNetworkPacket(&data, length, sensorSubSystemGetProperty))
-			//			{
-			//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
-			//			}
-			//			break;
+
+		case TYPE_APPLICATION_SET_PROPERTY_REQUEST:
+			if (ProcessNetworkPacket(&data, length, SensorPropertySet))
+			{
+				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
+			}
+			break;
+
+		case TYPE_APPLICATION_GET_PROPERTY_REQUEST:
+			if (ProcessNetworkPacket(&data, length, SensorPropertyGet))
+			{
+				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
+			}
+			break;
 	}
 
 	return data;

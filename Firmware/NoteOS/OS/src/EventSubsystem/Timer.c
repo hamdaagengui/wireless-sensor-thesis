@@ -17,7 +17,7 @@ static timer_configuration* timers[TIMER_MAXIMUM_NUMBER_OF_TIMERS];
 static uint8_t timerCount;
 static uint16_t interval;
 
-void Timer_CreateConfiguration(timer_configuration* configuration, uint32_t period, timer_mode mode, completion_handler completed)
+void Timer_CreateConfiguration(timer_configuration* configuration, uint32_t period, timer_mode mode, notification_handler completed)
 {
 	period /= TIMER_RESOLUTION;
 

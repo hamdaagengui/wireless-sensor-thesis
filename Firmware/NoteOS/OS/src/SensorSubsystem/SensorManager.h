@@ -9,20 +9,18 @@
 #define SENSORMANAGER_H_
 
 #include "../Globals.h"
-
-typedef bool (*property_invokation)(uint8_t propertyId, void* value);
+#include "../NetworkSubsystem/Network.h"
 
 typedef struct
 {
-	completion_handler initialize;
-	completion_handler reset;
-	property_invokation set;
-	property_invokation get;
+	const bool (*initialize)(uint8_t id);
+	const bool (*set)(set_request_packet* packet);
+	const bool (*get)(get_request_packet* packet);
 } sensor_interface;
 
 extern void SensorManager_Initialize();
-extern void SensorManager_InstallSensor(sensor_interface* sensor);
-extern void SensorManager_SetProperty(uint8_t sensorId, uint8_t propertyId, void* value);
-extern void SensorManager_GetProperty(uint8_t sensorId, uint8_t propertyId, void* value);
+extern bool SensorManager_InstallSensor(const sensor_interface* sensor);
+extern bool SensorManager_SetProperty(set_request_packet* packet);
+extern bool SensorManager_GetProperty(get_request_packet* packet);
 
 #endif /* SENSORMANAGER_H_ */
