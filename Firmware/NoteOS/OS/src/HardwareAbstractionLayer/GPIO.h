@@ -9,7 +9,6 @@
 #define GPIO_H_
 
 #include "../Globals.h"
-#include "../DefaultConfiguration.h"
 
 typedef enum
 {
@@ -22,8 +21,10 @@ typedef enum
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/GPIO.h"
 #else
-#error "No GPIO driver found for the selected processor!"
+#define GPIO_UNIMPLEMENTED
 #endif
+
+#ifndef GPIO_UNIMPLEMENTED
 
 extern void GPIO_SetupPin(gpio_pin pin, uint8_t mode);
 extern bool GPIO_ReadPin(gpio_pin pin);
@@ -35,5 +36,7 @@ extern void GPIO_TogglePin(gpio_pin pin);
 extern void GPIO_SetupPort(gpio_port port, uint8_t mode);
 extern uint8_t GPIO_ReadPort(gpio_port port);
 extern void GPIO_WritePort(gpio_port port, uint8_t value);
+
+#endif
 
 #endif /* GPIO_H_ */

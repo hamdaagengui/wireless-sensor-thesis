@@ -79,3 +79,16 @@
 //
 //	wmi->Clear();
 //}
+
+
+
+
+
+#define foreach(v, f) while()
+
+
+void B()
+{
+
+
+}

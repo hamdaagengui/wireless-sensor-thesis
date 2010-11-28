@@ -10,20 +10,14 @@
 
 #include "../Globals.h"
 #include "../EventSubsystem/EventDispatcher.h"
-#include "../DefaultConfiguration.h"
-
-typedef struct
-{
-	uint32_t bitrate;
-	completion_handler completed;
-	completion_handler failed;
-} iic_configuration;
 
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/IIC.h"
 #else
-#error "No IIC driver found for the selected processor!"
+#define IIC_UNIMPLEMENTED
 #endif
+
+#ifndef IIC_UNIMPLEMENTED
 
 extern void IIC_Initialize();
 extern void IIC_Subscribe(iic_configuration* configuration);
@@ -35,5 +29,7 @@ extern void IIC_Read(uint8_t address, uint8_t* data, uint8_t length);
 extern void IIC_StartRead(uint8_t address, uint8_t* data, uint8_t length);
 extern void IIC_Write(uint8_t address, uint8_t* data, uint8_t length);
 extern void IIC_StartWrite(uint8_t address, uint8_t* data, uint8_t length);
+
+#endif
 
 #endif /* IIC_H_ */

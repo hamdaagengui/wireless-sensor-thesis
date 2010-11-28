@@ -8,7 +8,7 @@
 #ifndef POWERMANAGER_H_
 #define POWERMANAGER_H_
 
-#include "../DefaultConfiguration.h"
+#include "../Globals.h"
 
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/PowerManager.h"

@@ -8,7 +8,7 @@
 #ifndef PLATFORMABSTRACTIONLAYER_H_
 #define PLATFORMABSTRACTIONLAYER_H_
 
-#include "../DefaultConfiguration.h"
+#include "../Globals.h"
 
 #if defined(PLATFORM_STK600_ATMEGA128RFA1)
 #include "STK600_ATmega128RFA1/PlatformAbstractionLayer.h"
@@ -17,8 +17,10 @@
 #endif
 
 #ifndef PLATFORM_UNIMPLEMENTED
+
 extern void PlatformAbstractionLayer_Initialize();
 extern void PlatformAbstractionLayer_Start();
+
 #endif
 
 #endif /* PLATFORMABSTRACTIONLAYER_H_ */
