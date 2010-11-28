@@ -12,15 +12,14 @@
 
 #include "../Globals.h"
 #include "../EventSubsystem/EventDispatcher.h"
-#include "../DefaultConfiguration.h"
 
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/ADC.h"
 #else
-#define ADC_NONE
+#define ADC_UNIMPLEMENTED
 #endif
 
-#ifndef ADC_NONE
+#ifndef ADC_UNIMPLEMENTED
 
 extern void ADC_Initialize();
 extern void ADC_Start();

@@ -14,7 +14,7 @@
 #include "IIC.h"
 #include "NetworkTimer.h"
 #include "NonVolatileStorage.h"
-//#include "PowerManager.h"
+#include "PowerManager.h"
 #include "RadioDriver.h"
 #include "SPI.h"
 #include "StopWatch.h"

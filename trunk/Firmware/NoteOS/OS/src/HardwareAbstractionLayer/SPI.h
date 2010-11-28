@@ -11,15 +11,14 @@
 #include "../Globals.h"
 #include "../HardwareAbstractionLayer/GPIO.h"
 #include "../EventSubsystem/EventDispatcher.h"
-#include "../DefaultConfiguration.h"
 
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/SPI.h"
 #else
-#define SPI_NONE
+#define SPI_UNIMPLEMENTED
 #endif
 
-#ifndef SPI_NONE
+#ifndef SPI_UNIMPLEMENTED
 
 typedef enum
 {

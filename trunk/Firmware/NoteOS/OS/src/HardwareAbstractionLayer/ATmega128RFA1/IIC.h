@@ -5,3 +5,9 @@
  *      Author: Coma
  */
 
+typedef struct
+{
+	uint32_t bitrate;
+	completion_handler completed;
+	completion_handler failed;
+} iic_configuration;

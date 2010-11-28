@@ -1,13 +1,15 @@
 #ifndef RADIODRIVER_H_
 #define RADIODRIVER_H_
 
-#include "../DefaultConfiguration.h"
+#include "../Globals.h"
 
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/RadioDriver.h"
 #else
-#error "No radio driver found for the selected processor!"
+#define RADIODRIVER_UNIMPLEMENTED
 #endif
+
+#ifndef RADIODRIVER_UNIMPLEMENTED
 
 extern const uint8_t radioDriver_TxPower[];
 
@@ -50,5 +52,7 @@ extern int8_t RadioDriver_GetRssi();
  * This leaves a maximum of either 127 or 125 bytes for user data.
  */
 extern void RadioDriver_Send(void* data, uint8_t length);
+
+#endif
 
 #endif /* RADIODRIVER_H_ */
