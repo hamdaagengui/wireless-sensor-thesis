@@ -81,14 +81,14 @@
 //}
 
 
-
-
-
-#define foreach(v, f) while()
-
+#define foreach(type, value, collection) type* value; while((value = collection))
 
 void B()
 {
+	float fere[10];
 
+	foreach(float, f, fere)
+	{
 
+	}
 }

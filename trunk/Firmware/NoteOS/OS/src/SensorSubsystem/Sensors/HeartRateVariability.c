@@ -9,38 +9,35 @@
 
 enum
 {
-	PROPERTY_SAMPLE_RATE,
+	PROPERTY_CURRENT_VALUE,
+	PROPERTY_SAMPLE_INTERVAL,
 	PROPERTY_BIN_SIZE
 };
 
-static void Initialize();
-static void Reset();
-static bool Set(uint8_t propertyId, void* value);
-static bool Get(uint8_t propertyId, void* value);
+static bool Initialize(uint8_t id);
+static bool Set(set_request_packet* packet);
+static bool Get(get_request_packet* packet);
 
-void HeartRateVariability_Create(sensor_interface* interface)
+static const sensor_interface interface = { Initialize, Set, Get };
+static uint8_t assignedId;
+
+const sensor_interface* HeartRateVariability_GetInterface()
 {
-	interface->initialize = Initialize;
-	interface->reset = Reset;
-	interface->set = Set;
-	interface->get = Get;
+	return &interface;
 }
 
-static void Initialize()
+bool Initialize(uint8_t id)
 {
+	assignedId = id;
 
+	return true;
 }
 
-static void Reset()
+static bool Set(set_request_packet* packet)
 {
-
-}
-
-static bool Set(uint8_t propertyId, void* value)
-{
-	switch (propertyId)
+	switch (packet->property)
 	{
-		case PROPERTY_SAMPLE_RATE:
+		case PROPERTY_SAMPLE_INTERVAL:
 			break;
 
 		case PROPERTY_BIN_SIZE:
@@ -53,11 +50,14 @@ static bool Set(uint8_t propertyId, void* value)
 	return true;
 }
 
-static bool Get(uint8_t propertyId, void* value)
+static bool Get(get_request_packet* packet)
 {
-	switch (propertyId)
+	switch (packet->property)
 	{
-		case PROPERTY_SAMPLE_RATE:
+		case PROPERTY_CURRENT_VALUE:
+			break;
+
+		case PROPERTY_SAMPLE_INTERVAL:
 			break;
 
 		case PROPERTY_BIN_SIZE:

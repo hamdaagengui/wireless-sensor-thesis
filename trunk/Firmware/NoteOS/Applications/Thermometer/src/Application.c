@@ -78,10 +78,6 @@ void PulseOff()
 
 void Start()
 {
-	//	sensor_interface hrv;
-	//	HeartRateVariability_Create(&hrv);
-	//	SensorManager_InstallSensor(&hrv);
-
 #ifdef MASTER_NODE
 	Timer_CreateConfiguration(&tickerTimer, 1000000, TIMER_MODE_RELAXED_CONTINUES, Ticker);
 	Timer_Start(&tickerTimer);
@@ -93,4 +89,7 @@ void Start()
 	ADC_CreateConfiguration(&analogConfiguration, 0, ADC_PRESCALER_128, &analogValue, NULL);
 	ADC_Convert(&analogConfiguration);
 #endif
+
+	SensorManager_InstallSensor(ThermomoterSpi_GetInterface());
+	SensorManager_InstallSensor(HeartRateVariability_GetInterface());
 }

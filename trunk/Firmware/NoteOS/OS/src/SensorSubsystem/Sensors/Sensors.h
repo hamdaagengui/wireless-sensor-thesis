@@ -9,5 +9,6 @@
 #define SENSORS_H_
 
 #include "HeartRateVariability.h"
+#include "ThermometerSpi.h"
 
 #endif /* SENSORS_H_ */

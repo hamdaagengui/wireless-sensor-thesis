@@ -8,6 +8,6 @@
 typedef struct
 {
 	uint32_t bitrate;
-	completion_handler completed;
-	completion_handler failed;
+	notification_handler completed;
+	notification_handler failed;
 } iic_configuration;

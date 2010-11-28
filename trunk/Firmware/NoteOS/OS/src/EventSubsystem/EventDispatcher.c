@@ -17,6 +17,7 @@ enum
 {
 	TYPE_PUBLICATION,
 	TYPE_NOTIFICATION,
+//	TYPE_COMPLETION,
 	TYPE_PROCESSING
 };
 
@@ -32,8 +33,13 @@ typedef struct
 		} publication;
 		struct
 		{
-			completion_handler handler;
+			notification_handler handler;
 		} notification;
+//		struct
+//		{
+//			completion_handler handler;
+//			void* operation;
+//		} completion;
 		struct
 		{
 			block_handler handler;
@@ -133,7 +139,7 @@ bool EventDispatcher_Publish(uint8_t eventId, void* data)
 	return true;
 }
 
-bool EventDispatcher_Notify(completion_handler handler)
+bool EventDispatcher_Notify(notification_handler handler)
 {
 	if (handler == NULL)
 	{
@@ -157,6 +163,32 @@ bool EventDispatcher_Notify(completion_handler handler)
 
 	return true;
 }
+
+//bool EventDispatcher_Complete(completion_handler handler, void* operation)
+//{
+//	if (handler == NULL)
+//	{
+//		return false;
+//	}
+//
+//	if (Queue_IsFull(eventQueue)) // queue full ?
+//	{
+//		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
+//		return false;
+//	}
+//
+//	event* e = Queue_Head(eventQueue);
+//
+//	e->type = TYPE_COMPLETION;
+//	e->completion.handler = handler;
+//	e->completion.operation = operation;
+//
+//	Queue_AdvanceHead(eventQueue);
+//
+//	Diagnostics_SendEvent(DIAGNOSTICS_NOTIFY_QUEUED);
+//
+//	return true;
+//}
 
 bool EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 {

@@ -10,5 +10,4 @@ typedef struct
 	uint8_t spcr;
 	uint8_t spsr;
 	gpio_pin csPin;
-	completion_handler completed;
 } spi_configuration;

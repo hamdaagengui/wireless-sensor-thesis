@@ -22,6 +22,7 @@
 #define NETWORK_NUMBER_OF_RTS_SLOTS																	6
 #define NETWORK_RTS_SLOT_DURATION																		100 // Duration of an RTS slot in micro seconds)
 // Sensor subsystem
+#define SENSOR_MANAGER_MAXIMUM_NUMBER_OF_SENSORS										8
 #define SENSOR_MAXIMUM_REPORT_SIZE																	8
 #define SENSOR_REPORT_POOL_SIZE																			16
 

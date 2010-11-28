@@ -23,7 +23,7 @@
 
 extern void ADC_Initialize();
 extern void ADC_Start();
-extern void ADC_CreateConfiguration(adc_configuration* configuration, uint8_t channel, adc_prescaler prescaler, uint16_t* result, completion_handler completed);
+extern void ADC_CreateConfiguration(adc_configuration* configuration, uint8_t channel, adc_prescaler prescaler, uint16_t* result, notification_handler completed);
 extern bool ADC_Convert(adc_configuration* configuration);
 
 #endif

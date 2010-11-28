@@ -22,6 +22,7 @@ typedef struct
 	uint8_t* output;
 	uint8_t* input;
 	uint8_t length;
+	notification_handler handler;
 } operation;
 static uint8_t operationQueue[Queue_CalculateSize(sizeof(operation), SPI_OPERATION_QUEUE_SIZE)];
 
@@ -55,7 +56,7 @@ void SPI_Start()
 	}
 }
 
-void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate, spi_data_mode mode, spi_data_order order, gpio_pin csPin, completion_handler completed)
+void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t maximumBitrate, spi_data_mode mode, spi_data_order order, gpio_pin csPin)
 {
 	configuration->spcr = (1 << SPIE) | (1 << SPE) | (1 << MSTR);
 	configuration->spsr = 0;
@@ -88,33 +89,33 @@ void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate,
 			break;
 	}
 
-	if ((F_CPU / 2) <= bitrate)
+	if ((F_CPU / 2) <= maximumBitrate)
 	{
 		configuration->spsr |= (1 << SPI2X);
 	}
-	else if ((F_CPU / 4) <= bitrate)
+	else if ((F_CPU / 4) <= maximumBitrate)
 	{
 		// use default
 	}
-	else if ((F_CPU / 8) <= bitrate)
+	else if ((F_CPU / 8) <= maximumBitrate)
 	{
 		configuration->spcr |= (1 << SPR0);
 		configuration->spsr |= (1 << SPI2X);
 	}
-	else if ((F_CPU / 16) <= bitrate)
+	else if ((F_CPU / 16) <= maximumBitrate)
 	{
 		configuration->spcr |= (1 << SPR0);
 	}
-	else if ((F_CPU / 32) <= bitrate)
+	else if ((F_CPU / 32) <= maximumBitrate)
 	{
 		configuration->spcr |= (1 << SPR1);
 		configuration->spsr |= (1 << SPI2X);
 	}
-	else if ((F_CPU / 64) <= bitrate)
+	else if ((F_CPU / 64) <= maximumBitrate)
 	{
 		configuration->spcr |= (1 << SPR1);
 	}
-	else if ((F_CPU / 128) <= bitrate)
+	else if ((F_CPU / 128) <= maximumBitrate)
 	{
 		configuration->spcr |= (1 << SPR1) | (1 << SPR0);
 	}
@@ -124,14 +125,13 @@ void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t bitrate,
 	}
 
 	configuration->csPin = csPin;
-	configuration->completed = completed;
 
 	GPIO_SetupPin(csPin, GPIO_MODE_OUTPUT_HIGH);
 
 	enabled = true;
 }
 
-void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length)
+void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length, notification_handler handler)
 {
 	if (Queue_IsFull(operationQueue))
 	{
@@ -151,6 +151,7 @@ void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* in
 	o->output = output;
 	o->input = input;
 	o->length = length;
+	o->handler = handler;
 
 	Queue_AdvanceHead(operationQueue);
 
@@ -192,7 +193,7 @@ ISR(SPI_STC_vect)
 	{
 		GPIO_SetPin(currentOperation->configuration->csPin);
 
-		EventDispatcher_Notify(currentOperation->configuration->completed);
+		EventDispatcher_Notify(currentOperation->handler);
 
 		Queue_AdvanceTail(operationQueue);
 		if (Queue_IsEmpty(operationQueue))
