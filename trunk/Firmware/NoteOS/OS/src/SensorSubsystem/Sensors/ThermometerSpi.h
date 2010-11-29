@@ -10,6 +10,6 @@
 
 #include "../SensorManager.h"
 
-extern const sensor_interface* ThermomoterSpi_GetInterface();
+extern const sensor_interface thermomoterSpiInterface;
 
 #endif /* THERMOMETERSPI_H_ */

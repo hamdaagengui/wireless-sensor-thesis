@@ -76,6 +76,13 @@ void PulseOff()
 }
 #endif
 
+void ThermoUpdate(uint8_t eventId, void* data)
+{
+	int16_t* v = Network_CreateSensorDataPacket(0, eventId, 2);
+	*v = *((int16_t*) data);
+	Network_SendPacket();
+}
+
 void Start()
 {
 #ifdef MASTER_NODE
@@ -90,6 +97,8 @@ void Start()
 	ADC_Convert(&analogConfiguration);
 #endif
 
-	SensorManager_InstallSensor(ThermomoterSpi_GetInterface());
+	SensorManager_InstallSensor(&thermomoterSpiInterface);
 	SensorManager_InstallSensor(HeartRateVariability_GetInterface());
+
+	EventDispatcher_Subscribe(EVENT_SENSOR_DATA, ThermoUpdate);
 }

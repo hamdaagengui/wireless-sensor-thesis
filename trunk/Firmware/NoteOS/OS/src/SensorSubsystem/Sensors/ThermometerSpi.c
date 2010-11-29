@@ -25,16 +25,12 @@ static bool Get(get_request_packet* packet);
 static void TakeSample();
 static void SampleTaken();
 
-static const sensor_interface interface = { Initialize, Set, Get };
+const sensor_interface thermomoterSpiInterface = { Initialize, Set, Get };
+
 static uint8_t assignedId;
 static timer_configuration timer;
 static uint32_t interval = 2000000;
 static int16_t temperature;
-
-const sensor_interface* ThermomoterSpi_GetInterface()
-{
-	return &interface;
-}
 
 static bool Initialize(uint8_t id)
 {
@@ -51,9 +47,11 @@ static bool Set(set_request_packet* packet)
 	switch (packet->property)
 	{
 		case PROPERTY_SAMPLE_INTERVAL:
-			uint32_t* value = Network_CreateGetResponsePacket(0, PROPERTY_STATUS_SUCCESS, sizeof(uint32_t));
-			*value = interval;
-			Network_SendPacket();
+			{
+				uint32_t* value = Network_CreateGetResponsePacket(0, PROPERTY_STATUS_SUCCESS, sizeof(uint32_t));
+				*value = interval;
+				Network_SendPacket();
+			}
 			break;
 
 		default:

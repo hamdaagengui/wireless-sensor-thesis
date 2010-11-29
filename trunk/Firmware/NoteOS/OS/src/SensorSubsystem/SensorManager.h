@@ -13,9 +13,9 @@
 
 typedef struct
 {
-	const bool (*initialize)(uint8_t id);
-	const bool (*set)(set_request_packet* packet);
-	const bool (*get)(get_request_packet* packet);
+	bool (*initialize)(uint8_t id);
+	bool (*set)(set_request_packet* packet);
+	bool (*get)(get_request_packet* packet);
 } sensor_interface;
 
 extern void SensorManager_Initialize();
