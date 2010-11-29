@@ -6,10 +6,9 @@
  */
 
 #include "ThermometerSpi.h"
-#include "../../EventSubsystem/Timer.h"
 #include "../../Devices/MAX6662.h"
-#include "../../PlatformAbstractionLayer/PlatformAbstractionLayer.h"
-#include "../../NetworkSubsystem/Network.h"
+#include "../../EventSubsystem/Timer.h"
+#include "../../BoardSupportPackage/BoardSupportPackage.h"
 
 enum
 {
@@ -20,14 +19,14 @@ enum
 };
 
 static bool Initialize(uint8_t id);
-static bool Set(set_request_packet* packet);
-static bool Get(get_request_packet* packet);
+static void Set(application_set_request_packet* packet);
+static void Get(application_get_request_packet* packet);
 static void TakeSample();
 static void SampleTaken();
 
 const sensor_interface thermomoterSpiInterface = { Initialize, Set, Get };
-
 static uint8_t assignedId;
+
 static timer_configuration timer;
 static uint32_t interval = 2000000;
 static int16_t temperature;
@@ -42,7 +41,7 @@ static bool Initialize(uint8_t id)
 	return true;
 }
 
-static bool Set(set_request_packet* packet)
+static void Set(application_set_request_packet* packet)
 {
 	switch (packet->property)
 	{
@@ -55,13 +54,13 @@ static bool Set(set_request_packet* packet)
 			break;
 
 		default:
-			return false;
+			Network_CreateSetResponsePacket(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY);
+			Network_SendPacket();
+			break;
 	}
-
-	return true;
 }
 
-static bool Get(get_request_packet* packet)
+static void Get(application_get_request_packet* packet)
 {
 	switch (packet->property)
 	{
@@ -77,10 +76,10 @@ static bool Get(get_request_packet* packet)
 			break;
 
 		default:
-			return false;
+			Network_CreateGetResponsePacket(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY, 0);
+			Network_SendPacket();
+			break;
 	}
-
-	return true;
 }
 
 static void TakeSample()

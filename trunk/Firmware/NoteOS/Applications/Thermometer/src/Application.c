@@ -98,7 +98,7 @@ void Start()
 #endif
 
 	SensorManager_InstallSensor(&thermomoterSpiInterface);
-	SensorManager_InstallSensor(HeartRateVariability_GetInterface());
+	SensorManager_InstallSensor(&heartRateVariabilityInterface);
 
 	EventDispatcher_Subscribe(EVENT_SENSOR_DATA, ThermoUpdate);
 }

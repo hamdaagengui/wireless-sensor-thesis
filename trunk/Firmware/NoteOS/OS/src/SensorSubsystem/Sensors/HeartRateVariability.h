@@ -10,6 +10,6 @@
 
 #include "../SensorManager.h"
 
-extern const sensor_interface* HeartRateVariability_GetInterface();
+extern const sensor_interface heartRateVariabilityInterface;
 
 #endif /* HEARTRATEVARIABILITY_H_ */

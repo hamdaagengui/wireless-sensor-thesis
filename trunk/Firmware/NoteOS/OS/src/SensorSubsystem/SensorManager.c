@@ -29,26 +29,36 @@ bool SensorManager_InstallSensor(const sensor_interface* sensor)
 	return false;
 }
 
-bool SensorManager_SetProperty(set_request_packet* packet)
+void SensorManager_SetProperty(void* data, uint8_t length)
 {
+	application_set_request_packet* packet = data;
+
 	uint8_t sensor = packet->sensor;
 
 	if (sensor >= numberOfSensorsInstalled)
 	{
-		return false;
+		Network_CreateGetResponsePacket(0, PROPERTY_STATUS_INVALID_SENSOR, 0);
+		Network_SendPacket();
 	}
-
-	return sensors[sensor]->set(packet);
+	else
+	{
+		sensors[sensor]->set(packet);
+	}
 }
 
-bool SensorManager_GetProperty(get_request_packet* packet)
+void SensorManager_GetProperty(void* data, uint8_t length)
 {
+	application_get_request_packet* packet = data;
+
 	uint8_t sensor = packet->sensor;
 
 	if (sensor >= numberOfSensorsInstalled)
 	{
-		return false;
+		Network_CreateGetResponsePacket(0, PROPERTY_STATUS_INVALID_SENSOR, 0);
+		Network_SendPacket();
 	}
-
-	return sensors[sensor]->get(packet);
+	else
+	{
+		sensors[sensor]->get(packet);
+	}
 }

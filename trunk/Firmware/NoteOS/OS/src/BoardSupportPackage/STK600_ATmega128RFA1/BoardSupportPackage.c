@@ -1,15 +1,15 @@
 /*
- * PlatformAbstractionLayer.c
+ * BoardSupportPackage.c
  *
  *  Created on: 21/11/2010
  *      Author: coma
  */
 
-#include "../PlatformAbstractionLayer.h"
+#include "../BoardSupportPackage.h"
 
 max6662_configuration max6662Configuration;
 
-void PlatformAbstractionLayer_Initialize()
+void BoardSupportPackage_Initialize()
 {
 	Leds_Initialize();
 
@@ -17,7 +17,7 @@ void PlatformAbstractionLayer_Initialize()
 	MAX6662_Initialize(&max6662Configuration);
 }
 
-void PlatformAbstractionLayer_Start()
+void BoardSupportPackage_Start()
 {
 
 }

@@ -1,27 +1,27 @@
 /*
- * HeartRateVariability.c
+ * Internal.c
  *
- *  Created on: 21/10/2010
+ *  Created on: 29/11/2010
  *      Author: coma
  */
 
-#include "HeartRateVariability.h"
+#include "Internal.h"
 
 enum
 {
-	PROPERTY_CURRENT_VALUE,
-	PROPERTY_SAMPLE_INTERVAL,
-	PROPERTY_BIN_SIZE
+	PROPERTY_ZERO,
+	PROPERTY_ENERGY_LEVEL
 };
 
 static bool Initialize(uint8_t id);
 static void Set(application_set_request_packet* packet);
 static void Get(application_get_request_packet* packet);
 
-const sensor_interface heartRateVariabilityInterface = { Initialize, Set, Get };
+const sensor_interface internalInterface = { Initialize, Set, Get };
+
 static uint8_t assignedId;
 
-bool Initialize(uint8_t id)
+static bool Initialize(uint8_t id)
 {
 	assignedId = id;
 
@@ -32,10 +32,9 @@ static void Set(application_set_request_packet* packet)
 {
 	switch (packet->property)
 	{
-		case PROPERTY_SAMPLE_INTERVAL:
-			break;
-
-		case PROPERTY_BIN_SIZE:
+		case PROPERTY_ZERO:
+			Network_CreateSetResponsePacket(packet->network.sender, PROPERTY_STATUS_READ_ONLY);
+			Network_SendPacket();
 			break;
 
 		default:
@@ -49,13 +48,12 @@ static void Get(application_get_request_packet* packet)
 {
 	switch (packet->property)
 	{
-		case PROPERTY_CURRENT_VALUE:
-			break;
-
-		case PROPERTY_SAMPLE_INTERVAL:
-			break;
-
-		case PROPERTY_BIN_SIZE:
+		case PROPERTY_ZERO:
+			{
+				uint8_t* value = Network_CreateGetResponsePacket(packet->network.sender, PROPERTY_STATUS_SUCCESS, sizeof(uint8_t));
+				*value = 0;
+				Network_SendPacket();
+			}
 			break;
 
 		default:

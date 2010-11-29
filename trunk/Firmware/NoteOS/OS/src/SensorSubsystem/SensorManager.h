@@ -14,13 +14,13 @@
 typedef struct
 {
 	bool (*initialize)(uint8_t id);
-	bool (*set)(set_request_packet* packet);
-	bool (*get)(get_request_packet* packet);
+	void (*set)(application_set_request_packet* packet);
+	void (*get)(application_get_request_packet* packet);
 } sensor_interface;
 
 extern void SensorManager_Initialize();
 extern bool SensorManager_InstallSensor(const sensor_interface* sensor);
-extern bool SensorManager_SetProperty(set_request_packet* packet);
-extern bool SensorManager_GetProperty(get_request_packet* packet);
+extern void SensorManager_SetProperty(void* data, uint8_t length);
+extern void SensorManager_GetProperty(void* data, uint8_t length);
 
 #endif /* SENSORMANAGER_H_ */
