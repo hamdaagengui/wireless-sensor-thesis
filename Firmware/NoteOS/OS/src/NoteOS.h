@@ -16,7 +16,7 @@
 #include "HardwareAbstractionLayer/HardwareAbstractionLayer.h"
 #include "MemorySubsystem/MemoryManager.h"
 #include "NetworkSubsystem/Network.h"
-#include "PlatformAbstractionLayer/PlatformAbstractionLayer.h"
+#include "BoardSupportPackage/BoardSupportPackage.h"
 #include "SensorSubsystem/SensorManager.h"
 #include "SensorSubsystem/Sensors/Sensors.h"
 

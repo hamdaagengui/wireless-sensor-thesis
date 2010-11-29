@@ -196,9 +196,16 @@ void* Network_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t d
 	return p->data;
 }
 
+void Network_CreateSetResponsePacket(uint8_t receiver, property_status status)
+{
+	application_set_response_packet* p = Network_CreateTransportPacket(receiver, TYPE_APPLICATION_SET_PROPERTY_RESPONSE, sizeof(application_get_response_packet));
+
+	p->status = status;
+}
+
 void* Network_CreateGetResponsePacket(uint8_t receiver, property_status status, uint8_t dataSize)
 {
-	get_response_packet* p = Network_CreateTransportPacket(receiver, TYPE_APPLICATION_GET_PROPERTY_RESPONSE, sizeof(get_response_packet) + dataSize);
+	application_get_response_packet* p = Network_CreateTransportPacket(receiver, TYPE_APPLICATION_GET_PROPERTY_RESPONSE, sizeof(application_get_response_packet) + dataSize);
 
 	p->status = status;
 
@@ -215,11 +222,8 @@ void Network_SendPacket()
 static void PreparePreloadedPackets()
 {
 	rtsPacketTemplate.link.source = address;
-	//	rtsPacketTemplate.link.type = TYPE_LINK_RTS;
 	ctsPacketTemplate.link.source = address;
-	//	ctsPacketTemplate.link.type = TYPE_LINK_CTS;
 	ackPacketTemplate.link.source = address;
-	//	ackPacketTemplate.link.type = TYPE_LINK_ACK;
 }
 
 static void InitiateSynchronization()
@@ -357,16 +361,6 @@ static void AcknowledgeTransportPacket(link_network_transport_header* packet)
 	p.link;
 }
 
-static void SensorPropertySet(void* data, uint8_t length)
-{
-	SensorManager_SetProperty(data);
-}
-
-static void SensorPropertyGet(void* data, uint8_t length)
-{
-	SensorManager_GetProperty(data);
-}
-
 static void* FrameReceived(void* data, uint8_t length)
 {
 	link_header* lh = data;
@@ -498,14 +492,14 @@ static void* FrameReceived(void* data, uint8_t length)
 			//			break;
 
 		case TYPE_APPLICATION_SET_PROPERTY_REQUEST:
-			if (ProcessNetworkPacket(&data, length, SensorPropertySet))
+			if (ProcessNetworkPacket(&data, length, SensorManager_SetProperty))
 			{
 				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
 			}
 			break;
 
 		case TYPE_APPLICATION_GET_PROPERTY_REQUEST:
-			if (ProcessNetworkPacket(&data, length, SensorPropertyGet))
+			if (ProcessNetworkPacket(&data, length, SensorManager_GetProperty))
 			{
 				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
 			}

@@ -5,15 +5,7 @@
  *      Author: coma
  */
 
-#include "Globals.h"
-#include "DefaultConfiguration.h"
-#include "HardwareAbstractionLayer/HardwareAbstractionLayer.h"
-#include "PlatformAbstractionLayer/PlatformAbstractionLayer.h"
-#include "MemorySubsystem/MemoryManager.h"
-#include "EventSubsystem/EventDispatcher.h"
-#include "NetworkSubsystem/Network.h"
-#include "Diagnostics/Diagnostics.h"
-#include "SensorSubsystem/SensorManager.h"
+#include "NoteOS.h"
 
 // Entry points to user code.
 #ifdef CONFIGURATION_H_
@@ -71,6 +63,8 @@ int main()
 #ifdef PLATFORMABSTRACTIONLAYER_H_
 	PlatformAbstractionLayer_Start();
 #endif
+
+	SensorManager_InstallSensor(&internalInterface);
 
 
 	// Start user application (only if a configuration file exist (used as an indicator of a real application as opposed to building documentation))

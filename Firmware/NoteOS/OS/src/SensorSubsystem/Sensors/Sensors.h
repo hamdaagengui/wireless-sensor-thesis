@@ -8,6 +8,7 @@
 #ifndef SENSORS_H_
 #define SENSORS_H_
 
+#include "Internal.h"
 #include "HeartRateVariability.h"
 #include "ThermometerSpi.h"
 
