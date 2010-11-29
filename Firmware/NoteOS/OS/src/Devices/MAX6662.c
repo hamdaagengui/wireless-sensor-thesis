@@ -53,6 +53,6 @@ void MAX6662_GetTemperature(max6662_configuration* configuration, int16_t* tempe
 
 static void SpiHandler()
 {
-	*temp = (data[2] << 8) + data[1];
+	*temp = ((uint16_t)data[2] << 8) + data[1];
 	EventDispatcher_Notify(handl);
 }
