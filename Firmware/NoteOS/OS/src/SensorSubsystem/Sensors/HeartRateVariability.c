@@ -40,7 +40,7 @@ static void Set(application_set_request_packet* packet)
 
 		default:
 			Network_CreateSetResponsePacket(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY);
-			Network_SendRddPacket();
+			Network_QueueRddPacket();
 			break;
 	}
 }
@@ -60,7 +60,7 @@ static void Get(application_get_request_packet* packet)
 
 		default:
 			Network_CreateGetResponsePacket(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY, 0);
-			Network_SendRddPacket();
+			Network_QueueRddPacket();
 			break;
 	}
 }

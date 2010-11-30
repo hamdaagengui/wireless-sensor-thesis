@@ -10,11 +10,6 @@
 static const sensor_interface* sensors[SENSOR_MANAGER_MAXIMUM_NUMBER_OF_SENSORS];
 static uint8_t numberOfSensorsInstalled;
 
-void SensorManager_Initialize()
-{
-
-}
-
 bool SensorManager_InstallSensor(const sensor_interface* sensor)
 {
 	if (numberOfSensorsInstalled < SENSOR_MANAGER_MAXIMUM_NUMBER_OF_SENSORS)
@@ -38,7 +33,7 @@ void SensorManager_SetProperty(void* data, uint8_t length)
 	if (sensor >= numberOfSensorsInstalled)
 	{
 		Network_CreateGetResponsePacket(0, PROPERTY_STATUS_INVALID_SENSOR, 0);
-		Network_SendRddPacket();
+		Network_QueueRddPacket();
 	}
 	else
 	{
@@ -55,7 +50,7 @@ void SensorManager_GetProperty(void* data, uint8_t length)
 	if (sensor >= numberOfSensorsInstalled)
 	{
 		Network_CreateGetResponsePacket(0, PROPERTY_STATUS_INVALID_SENSOR, 0);
-		Network_SendRddPacket();
+		Network_QueueRddPacket();
 	}
 	else
 	{

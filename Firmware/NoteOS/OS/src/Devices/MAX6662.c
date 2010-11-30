@@ -27,7 +27,7 @@ static void SpiHandler();
 
 static uint8_t data[3];
 static int16_t* temp;
-static notification_handler handl;
+static completion_handler complete;
 
 void MAX6662_CreateConfiguration(max6662_configuration* configuration, gpio_pin csPin)
 {
@@ -40,10 +40,10 @@ void MAX6662_Initialize(max6662_configuration* configuration)
 	SPI_Transfer(&configuration->spiConfiguration, defaultConfiguration, defaultConfiguration, 3, NULL);
 }
 
-void MAX6662_GetTemperature(max6662_configuration* configuration, int16_t* temperature, notification_handler handler)
+void MAX6662_GetTemperature(max6662_configuration* configuration, int16_t* temperature, completion_handler handler)
 {
 	temp = temperature;
-	handl = handler;
+	complete = handler;
 
 	data[0] = REGISTER_READ_TEMPERATURE;
 	data[1] = 0;
@@ -54,5 +54,5 @@ void MAX6662_GetTemperature(max6662_configuration* configuration, int16_t* tempe
 static void SpiHandler()
 {
 	*temp = ((uint16_t)data[2] << 8) + data[1];
-	EventDispatcher_Notify(handl);
+	EventDispatcher_Complete(complete);
 }

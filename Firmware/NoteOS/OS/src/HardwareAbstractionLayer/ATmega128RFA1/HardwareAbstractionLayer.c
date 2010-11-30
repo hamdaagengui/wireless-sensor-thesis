@@ -24,23 +24,22 @@ void HardwareAbstractionLayer_Initialize()
 	// PM p 503
 
 
-	ADC_Initialize();
-	IIC_Initialize();
+	//ADC_Initialize();
+	//IIC_Initialize();
 	NetworkTimer_Initialize();
 	// PowerManager_Initialize();
 	SPI_Initialize();
-	StopWatch_Initialize();
+	//StopWatch_Initialize();
 	SystemTimer_Initialize();
 	RadioDriver_Initialize();
 }
 
 void HardwareAbstractionLayer_Start()
 {
-	ADC_Start();
-	IIC_Start();
+	//ADC_Start();
+	//IIC_Start();
 	// PowerManager_Start();
-	SPI_Start();
-	RadioDriver_Start();
+	//SPI_Start();
 }
 
 #endif

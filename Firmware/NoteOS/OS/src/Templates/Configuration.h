@@ -19,7 +19,6 @@
 #define NETWORK_LINK_COMMUNICATION_SLOT_FREQUENCY										128 // Number of transfers per second (i.e. RTS + CTS + DATA + ACK)
 #define NETWORK_LINK_NUMBER_OF_RTS_SLOTS														6
 #define NETWORK_LINK_RTS_SLOT_DURATION															100 // Duration of an RTS slot in micro seconds)
-#define NETWORK_LINK_MAXIMUM_TRANSMISSION_ATTEMPTS									2
 #define NETWORK_LINK_MAXIMUM_PACKET_SIZE														64
 #define NETWORK_LINK_QUEUE_SIZE																			10
 #define NETWORK_NETWORK_CAN_ROUTE																		1
@@ -56,8 +55,8 @@
 
 // Diagnostics
 #define DIAGNOSTICS																									1
-#define DIAGNOSTICS_LINK_TRANSMISSION_BUFFER_SIZE										200
-#define DIAGNOSTICS_LINK_RECEPTION_BUFFER_SIZE											10
+#define DIAGNOSTICS_LINK_TRANSMISSION_BUFFER_SIZE										150
+#define DIAGNOSTICS_LINK_RECEPTION_BUFFER_SIZE											30
 #define DIAGNOSTICS_LINK_BAUDRATE																		1000000
 
 #endif /* CONFIGURATION_H_ */

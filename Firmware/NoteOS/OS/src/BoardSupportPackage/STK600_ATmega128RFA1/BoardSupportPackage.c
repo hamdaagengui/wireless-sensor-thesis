@@ -13,11 +13,6 @@ void BoardSupportPackage_Initialize()
 {
 	Leds_Initialize();
 
-	MAX6662_CreateConfiguration(&max6662Configuration, GPIOB4);
-	MAX6662_Initialize(&max6662Configuration);
-}
-
-void BoardSupportPackage_Start()
-{
-
+//	MAX6662_CreateConfiguration(&max6662Configuration, GPIOB4);
+//	MAX6662_Initialize(&max6662Configuration);
 }

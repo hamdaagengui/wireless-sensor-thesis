@@ -19,7 +19,6 @@
 #ifndef BOARDSUPPORTPACKAGE_UNIMPLEMENTED
 
 extern void BoardSupportPackage_Initialize();
-extern void BoardSupportPackage_Start();
 
 #endif
 

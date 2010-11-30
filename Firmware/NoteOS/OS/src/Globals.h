@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <util/atomic.h>
-#include "DefaultConfiguration.h"
+#include <Configuration.h>
 
 #define ReadBit(var, bit)												(((var) & (1 << (bit))) != 0)
 #define SetBit(var, bit)												((var) |= (1 << (bit)))
@@ -28,7 +28,7 @@ typedef enum
 
 #define MemoryBarrier()													__asm__ volatile ("" : : : "memory")
 
-typedef void (*notification_handler)();
+typedef void (*completion_handler)();
 //typedef void (*completion_handler)(void* operation);
 typedef void (*result_handler)(bool succes);
 typedef void (*block_handler)(void* data, uint8_t length);
@@ -36,5 +36,7 @@ typedef void* (*bidirectional_block_handler)(void* data, uint8_t length);
 
 ///#define inline __attribute__ ((__always_inline__))
 ///#define a  flatten
+
+extern uint8_t serialNumber;
 
 #endif /* GLOBALS_H_ */

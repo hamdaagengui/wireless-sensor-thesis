@@ -3,6 +3,9 @@
 #include "../RadioDriver.h"
 #include "../../MemorySubsystem/MemoryManager.h"
 
+#define RADIODRIVER_AUTO_RX																					0
+#define RADIODRIVER_USE_CRC																					1
+
 // Transceiver state status
 #define TRX_STATUS_MASK													0x1f
 enum
@@ -59,7 +62,7 @@ static uint8_t* frameBufferObject;
 
 void RadioDriver_Initialize()
 {
-#if defined(RADIODRIVER_USE_CRC)
+#if RADIODRIVER_USE_CRC == 1
 	SetBit(TRX_CTRL_1, TX_AUTO_CRC_ON);
 #else
 	ClearBit(TRX_CTRL_1, TX_AUTO_CRC_ON);
@@ -69,16 +72,13 @@ void RadioDriver_Initialize()
 	IRQ_MASK |= (1 << TX_END_EN) | (1 << RX_END_EN) | (1 << RX_START_EN);
 
 
-#if defined(RADIODRIVER_AUTO_RX)
+#if RADIODRIVER_AUTO_RX == 1
 	ChangeState(STATE_RX_ON);
 #else
 	ChangeState(STATE_TRX_OFF);
 #endif
-}
 
-void RadioDriver_Start()
-{
-	frameBufferObject = MemoryManager_Allocate(NETWORK_MAXIMUM_LINK_PACKET_SIZE);
+	frameBufferObject = MemoryManager_Allocate(NETWORK_LINK_MAXIMUM_PACKET_SIZE);
 }
 
 void RadioDriver_SetFrameReceivedHandler(bidirectional_block_handler handler)
@@ -136,7 +136,7 @@ void RadioDriver_Calibrate()
 
 void RadioDriver_Send(void* data, uint8_t length)
 {
-#if defined(RADIODRIVER_USE_CRC)
+#if RADIODRIVER_USE_CRC == 1
 	if (length > 125)
 #else
 	if (length > 127)
@@ -166,12 +166,10 @@ void RadioDriver_Send(void* data, uint8_t length)
 	ChangeState(STATE_PLL_ON);
 
 
-#if defined(RADIODRIVER_USE_CRC)
-	// If automatic CRC calculation is used two additional bytes must be sent.
-	TRX_BUF(0) = (length + 2);
+#if RADIODRIVER_USE_CRC == 1
+	TRX_BUF(0) = (length + 2); // If automatic CRC calculation is used two additional bytes must be sent.
 #else
-	// Set number of bytes to be sent.
-	TRX_BUF(0) = length;
+	TRX_BUF(0) = length; // Set number of bytes to be sent.
 #endif
 
 	uint8_t* d = (uint8_t*) data;
@@ -221,7 +219,7 @@ void RadioDriver_DisableReceiveMode()
 ISR( TRX24_TX_END_vect)
 {
 	// Maybe this can be done immediately after starting the transmission (data sheet page 40).
-#if defined(RADIODRIVER_AUTO_RX)
+#if RADIODRIVER_AUTO_RX == 1
 	ChangeState(STATE_RX_ON);
 #else
 	ChangeState(STATE_TRX_OFF);
@@ -240,7 +238,7 @@ ISR( TRX24_TX_END_vect)
 
 ISR( TRX24_RX_END_vect)
 {
-#if defined(RADIODRIVER_USE_CRC)
+#if RADIODRIVER_USE_CRC == 1
 	if (ReadBit(PHY_RSSI, RX_CRC_VALID) == 0) // CRC error in frame => dump it
 	{
 		return;
@@ -250,11 +248,11 @@ ISR( TRX24_RX_END_vect)
 	uint8_t length = TST_RX_LENGTH;
 
 
-#if defined(RADIODRIVER_USE_CRC)
+#if RADIODRIVER_USE_CRC == 1
 	length -= 2;
 #endif
 
-	if (length > NETWORK_MAXIMUM_LINK_PACKET_SIZE)
+	if (length > NETWORK_LINK_MAXIMUM_PACKET_SIZE)
 	{
 		//error over size link layer packet
 		return;
@@ -262,7 +260,7 @@ ISR( TRX24_RX_END_vect)
 
 	if (frameBufferObject == NULL) // last allocate failed? try again then
 	{
-		frameBufferObject = MemoryManager_Allocate(NETWORK_MAXIMUM_LINK_PACKET_SIZE);
+		frameBufferObject = MemoryManager_Allocate(NETWORK_LINK_MAXIMUM_PACKET_SIZE);
 
 		if (frameBufferObject == NULL) // still no luck?
 		{
@@ -282,7 +280,7 @@ ISR( TRX24_RX_END_vect)
 
 	if (frameBufferObject == NULL) // acquire new block if the frame handler kept the previous one
 	{
-		frameBufferObject = MemoryManager_Allocate(NETWORK_MAXIMUM_LINK_PACKET_SIZE);
+		frameBufferObject = MemoryManager_Allocate(NETWORK_LINK_MAXIMUM_PACKET_SIZE);
 	}
 }
 

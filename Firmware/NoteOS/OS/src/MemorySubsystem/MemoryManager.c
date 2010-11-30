@@ -6,13 +6,12 @@
  */
 
 #include "../Collections/Pool.h"
-#include "../DefaultConfiguration.h"
 #include "../Diagnostics/Diagnostics.h"
 
-static uint8_t pool1[Pool_CalculateSize(POOL_1_ALLOCATION_SIZE, POOL_1_ALLOCATION_COUNT)];
-static uint8_t pool2[Pool_CalculateSize(POOL_2_ALLOCATION_SIZE, POOL_2_ALLOCATION_COUNT)];
-static uint8_t pool3[Pool_CalculateSize(POOL_3_ALLOCATION_SIZE, POOL_3_ALLOCATION_COUNT)];
-static uint8_t pool4[Pool_CalculateSize(POOL_4_ALLOCATION_SIZE, POOL_4_ALLOCATION_COUNT)];
+static uint8_t pool1[Pool_CalculateSize(MEMORYMANAGER_POOL_1_ALLOCATION_SIZE, MEMORYMANAGER_POOL_1_ALLOCATION_COUNT)];
+static uint8_t pool2[Pool_CalculateSize(MEMORYMANAGER_POOL_2_ALLOCATION_SIZE, MEMORYMANAGER_POOL_2_ALLOCATION_COUNT)];
+static uint8_t pool3[Pool_CalculateSize(MEMORYMANAGER_POOL_3_ALLOCATION_SIZE, MEMORYMANAGER_POOL_3_ALLOCATION_COUNT)];
+static uint8_t pool4[Pool_CalculateSize(MEMORYMANAGER_POOL_4_ALLOCATION_SIZE, MEMORYMANAGER_POOL_4_ALLOCATION_COUNT)];
 static const uint8_t* const pool1End = pool1 + sizeof(pool1) - 1;
 static const uint8_t* const pool2End = pool2 + sizeof(pool2) - 1;
 static const uint8_t* const pool3End = pool3 + sizeof(pool3) - 1;
@@ -20,15 +19,15 @@ static const uint8_t* const pool4End = pool4 + sizeof(pool4) - 1;
 
 void MemoryManager_Initialize()
 {
-	Pool_Initialize(pool1, POOL_1_ALLOCATION_SIZE, POOL_1_ALLOCATION_COUNT);
-	Pool_Initialize(pool2, POOL_2_ALLOCATION_SIZE, POOL_2_ALLOCATION_COUNT);
-	Pool_Initialize(pool3, POOL_3_ALLOCATION_SIZE, POOL_3_ALLOCATION_COUNT);
-	Pool_Initialize(pool4, POOL_4_ALLOCATION_SIZE, POOL_4_ALLOCATION_COUNT);
+	Pool_Initialize(pool1, MEMORYMANAGER_POOL_1_ALLOCATION_SIZE, MEMORYMANAGER_POOL_1_ALLOCATION_COUNT);
+	Pool_Initialize(pool2, MEMORYMANAGER_POOL_2_ALLOCATION_SIZE, MEMORYMANAGER_POOL_2_ALLOCATION_COUNT);
+	Pool_Initialize(pool3, MEMORYMANAGER_POOL_3_ALLOCATION_SIZE, MEMORYMANAGER_POOL_3_ALLOCATION_COUNT);
+	Pool_Initialize(pool4, MEMORYMANAGER_POOL_4_ALLOCATION_SIZE, MEMORYMANAGER_POOL_4_ALLOCATION_COUNT);
 }
 
 void* MemoryManager_Allocate(uint8_t size)
 {
-	if (size <= POOL_1_ALLOCATION_SIZE)
+	if (size <= MEMORYMANAGER_POOL_1_ALLOCATION_SIZE)
 	{
 		void* block = Pool_AllocateBlock(pool1);
 		if (block != NULL)
@@ -39,7 +38,7 @@ void* MemoryManager_Allocate(uint8_t size)
 		Diagnostics_SendEvent(DIAGNOSTICS_POOL_1_EXHAUSTED);
 	}
 
-	if (size <= POOL_2_ALLOCATION_SIZE)
+	if (size <= MEMORYMANAGER_POOL_2_ALLOCATION_SIZE)
 	{
 		void* block = Pool_AllocateBlock(pool2);
 		if (block != NULL)
@@ -50,7 +49,7 @@ void* MemoryManager_Allocate(uint8_t size)
 		Diagnostics_SendEvent(DIAGNOSTICS_POOL_2_EXHAUSTED);
 	}
 
-	if (size <= POOL_3_ALLOCATION_SIZE)
+	if (size <= MEMORYMANAGER_POOL_3_ALLOCATION_SIZE)
 	{
 		void* block = Pool_AllocateBlock(pool3);
 		if (block != NULL)
@@ -61,7 +60,7 @@ void* MemoryManager_Allocate(uint8_t size)
 		Diagnostics_SendEvent(DIAGNOSTICS_POOL_3_EXHAUSTED);
 	}
 
-	if (size <= POOL_4_ALLOCATION_SIZE)
+	if (size <= MEMORYMANAGER_POOL_4_ALLOCATION_SIZE)
 	{
 		void* block = Pool_AllocateBlock(pool4);
 		if (block != NULL)

@@ -48,7 +48,7 @@ void ADC_Start()
 	}
 }
 
-void ADC_CreateConfiguration(adc_configuration* configuration, uint8_t channel, adc_prescaler prescaler, uint16_t* result, notification_handler completed)
+void ADC_CreateConfiguration(adc_configuration* configuration, uint8_t channel, adc_prescaler prescaler, uint16_t* result, completion_handler completed)
 {
 	SetBit(DIDR0, channel);
 
@@ -111,7 +111,7 @@ static void ExecuteOperation()
 ISR( ADC_vect)
 {
 	*currentOperation->configuration->result = ADC;
-	EventDispatcher_Notify(currentOperation->configuration->completed);
+	EventDispatcher_Complete(currentOperation->configuration->completed);
 
 	Queue_AdvanceTail(operationQueue);
 

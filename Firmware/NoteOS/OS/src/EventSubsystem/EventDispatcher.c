@@ -21,8 +21,7 @@ static uint8_t numberOfSubscribers;
 enum
 {
 	TYPE_PUBLICATION,
-	TYPE_NOTIFICATION,
-	//	TYPE_COMPLETION,
+	TYPE_COMPLETION,
 	TYPE_PROCESSING
 };
 
@@ -38,13 +37,8 @@ typedef struct
 		} publication;
 		struct
 		{
-			notification_handler handler;
+			completion_handler handler;
 		} notification;
-		//		struct
-		//		{
-		//			completion_handler handler;
-		//			void* operation;
-		//		} completion;
 		struct
 		{
 			block_handler handler;
@@ -83,10 +77,10 @@ void EventDispatcher_Dispatch()
 				Diagnostics_SendEvent(DIAGNOSTICS_PUBLISH_EXECUTED);
 				break;
 
-			case TYPE_NOTIFICATION:
+			case TYPE_COMPLETION:
 				e->notification.handler();
 
-				Diagnostics_SendEvent(DIAGNOSTICS_NOTIFY_EXECUTED);
+				Diagnostics_SendEvent(DIAGNOSTICS_COMPLETION_EXECUTED);
 				break;
 
 			case TYPE_PROCESSING:
@@ -122,7 +116,7 @@ bool EventDispatcher_Publish(sensor_id sensor, void* data)
 		return false;
 	}
 
-	if (Queue_IsFull(eventQueue)) // queue full ?
+	if (Queue_IsFull(eventQueue))
 	{
 		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
 		return false;
@@ -141,14 +135,14 @@ bool EventDispatcher_Publish(sensor_id sensor, void* data)
 	return true;
 }
 
-bool EventDispatcher_Notify(notification_handler handler)
+bool EventDispatcher_Complete(completion_handler handler)
 {
 	if (handler == NULL)
 	{
 		return false;
 	}
 
-	if (Queue_IsFull(eventQueue)) // queue full ?
+	if (Queue_IsFull(eventQueue))
 	{
 		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
 		return false;
@@ -156,41 +150,15 @@ bool EventDispatcher_Notify(notification_handler handler)
 
 	event* e = Queue_Head(eventQueue);
 
-	e->type = TYPE_NOTIFICATION;
+	e->type = TYPE_COMPLETION;
 	e->notification.handler = handler;
 
 	Queue_AdvanceHead(eventQueue);
 
-	Diagnostics_SendEvent(DIAGNOSTICS_NOTIFY_QUEUED);
+	Diagnostics_SendEvent(DIAGNOSTICS_COMPLETION_QUEUED);
 
 	return true;
 }
-
-//bool EventDispatcher_Complete(completion_handler handler, void* operation)
-//{
-//	if (handler == NULL)
-//	{
-//		return false;
-//	}
-//
-//	if (Queue_IsFull(eventQueue)) // queue full ?
-//	{
-//		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
-//		return false;
-//	}
-//
-//	event* e = Queue_Head(eventQueue);
-//
-//	e->type = TYPE_COMPLETION;
-//	e->completion.handler = handler;
-//	e->completion.operation = operation;
-//
-//	Queue_AdvanceHead(eventQueue);
-//
-//	Diagnostics_SendEvent(DIAGNOSTICS_NOTIFY_QUEUED);
-//
-//	return true;
-//}
 
 bool EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 {
@@ -199,7 +167,7 @@ bool EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 		return false;
 	}
 
-	if (Queue_IsFull(eventQueue)) // queue full ?
+	if (Queue_IsFull(eventQueue))
 	{
 		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
 		return false;
