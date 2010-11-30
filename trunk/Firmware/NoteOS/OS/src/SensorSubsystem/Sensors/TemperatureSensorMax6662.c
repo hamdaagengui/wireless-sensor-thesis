@@ -48,17 +48,17 @@ static void Set(application_set_request_packet* packet)
 	{
 		case PROPERTY_CURRENT_VALUE:
 			Network_CreateSetResponsePacket(sender, PROPERTY_STATUS_READ_ONLY);
-			Network_SendRddPacket();
+			Network_QueueRddPacket();
 			break;
 
 		case PROPERTY_SAMPLE_INTERVAL:
 			*(uint32_t*) Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_SUCCESS, sizeof(uint32_t)) = interval;
-			Network_SendRddPacket();
+			Network_QueueRddPacket();
 			break;
 
 		default:
 			Network_CreateSetResponsePacket(sender, PROPERTY_STATUS_INVALID_PROPERTY);
-			Network_SendRddPacket();
+			Network_QueueRddPacket();
 			break;
 	}
 }
@@ -71,17 +71,17 @@ static void Get(application_get_request_packet* packet)
 	{
 		case PROPERTY_CURRENT_VALUE:
 			*(uint16_t*) Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_SUCCESS, sizeof(uint16_t)) = temperature;
-			Network_SendRddPacket();
+			Network_QueueRddPacket();
 			break;
 
 		case PROPERTY_SAMPLE_INTERVAL:
 			*(uint32_t*) Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_SUCCESS, sizeof(uint32_t)) = interval;
-			Network_SendRddPacket();
+			Network_QueueRddPacket();
 			break;
 
 		default:
 			Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_INVALID_PROPERTY, 0);
-			Network_SendRddPacket();
+			Network_QueueRddPacket();
 			break;
 	}
 }

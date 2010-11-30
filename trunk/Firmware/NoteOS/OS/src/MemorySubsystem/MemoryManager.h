@@ -8,6 +8,8 @@
 #ifndef MEMORYMANAGER_H_
 #define MEMORYMANAGER_H_
 
+#include "Globals.h"
+
 extern void MemoryManager_Initialize();
 extern void* MemoryManager_Allocate(uint8_t size);
 extern void MemoryManager_Release(void* block);

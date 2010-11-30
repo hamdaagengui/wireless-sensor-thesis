@@ -14,10 +14,10 @@
 #ifdef __AVR_ATmega128RFA1__
 #include "ATmega128RFA1/NonVolatileStorage.h"
 #else
-#define NONVOLATILESTORAGE_NONE
+#define NONVOLATILESTORAGE_UNIMPLEMENTED
 #endif
 
-#ifndef NONVOLATILESTORAGE_NONE
+#ifndef NONVOLATILESTORAGE_UNIMPLEMENTED
 
 extern void NonVolatileStorage_Read(const void* object, void* buffer, uint8_t length);
 extern void NonVolatileStorage_Write(void* object, const void* buffer, uint8_t length);

@@ -44,6 +44,8 @@ void PowerManager_ReleaseResource(processor_resource resource)
 
 void PowerManager_PowerDown()
 {
+	return;
+
 	uint8_t sleepMode = SLEEP_MODE_PWR_DOWN; // choose most aggressive mode as default and degrade it based on resource usage
 	if (resourceRequests[PROCESSOR_RESOURCE_ADC_CLOCK])
 	{

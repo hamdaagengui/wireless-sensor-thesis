@@ -14,10 +14,10 @@ static void FindAndSetShortestInterval();
 static void RemoveTimer(uint8_t index);
 
 static timer_configuration* timers[TIMER_MAXIMUM_NUMBER_OF_TIMERS];
-static uint8_t timerCount;
+static uint8_t timerCount = 0;
 static uint16_t interval;
 
-void Timer_CreateConfiguration(timer_configuration* configuration, uint32_t period, timer_mode mode, notification_handler completed)
+void Timer_CreateConfiguration(timer_configuration* configuration, uint32_t period, timer_mode mode, completion_handler completed)
 {
 	period /= TIMER_RESOLUTION;
 
@@ -103,7 +103,7 @@ void Timer_Stop(timer_configuration* configuration)
 
 void Timer_Tick()
 {
-	//Diagnostics_SendEvent(DIAGNOSTICS_TIMER_TICK);
+	Diagnostics_SendEvent(DIAGNOSTICS_TIMER_TICK);
 	TickAllTimers();
 	FindAndSetShortestInterval();
 }
@@ -130,12 +130,12 @@ static void TickAllTimers()
 					break;
 				case TIMER_MODE_RELAXED_ONE_SHOT:
 					Diagnostics_SendEvent(DIAGNOSTICS_TIMER_FIRED_AND_STOPPED);
-					EventDispatcher_Notify(timers[i]->completed);
+					EventDispatcher_Complete(timers[i]->completed);
 					RemoveTimer(i--);
 					break;
 				case TIMER_MODE_RELAXED_CONTINUES:
 					Diagnostics_SendEvent(DIAGNOSTICS_TIMER_FIRED_AND_CONTINUED);
-					EventDispatcher_Notify(timers[i]->completed);
+					EventDispatcher_Complete(timers[i]->completed);
 					timers[i]->timer = timers[i]->period;
 					break;
 			}

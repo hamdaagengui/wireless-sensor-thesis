@@ -22,7 +22,7 @@ typedef struct
 	uint8_t* output;
 	uint8_t* input;
 	uint8_t length;
-	notification_handler handler;
+	completion_handler handler;
 } operation;
 static uint8_t operationQueue[Queue_CalculateSize(sizeof(operation), SPI_OPERATION_QUEUE_SIZE)];
 
@@ -36,21 +36,19 @@ static void ExecuteOperation();
 void SPI_Initialize()
 {
 	Queue_Initialize(operationQueue, sizeof(operation), SPI_OPERATION_QUEUE_SIZE);
+
+
+	//power_spi_enable();
+
+	PORTB |= (1 << 2) | (1 << 1);
+
+	uint8_t dummy = SPSR; // make sure interrupt flag is cleared
+	dummy = SPDR;
 }
 
 void SPI_Start()
 {
-	if (enabled)
-	{
-		//power_spi_enable();
-
-
-		PORTB |= (1 << 2) | (1 << 1);
-
-		uint8_t dummy = SPSR; // make sure interrupt flag is cleared
-		dummy = SPDR;
-	}
-	else
+	if (enabled == false)
 	{
 		//power_spi_disable();
 	}
@@ -131,7 +129,7 @@ void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t maximumB
 	enabled = true;
 }
 
-void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length, notification_handler handler)
+void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length, completion_handler handler)
 {
 	if (Queue_IsFull(operationQueue))
 	{
@@ -193,7 +191,7 @@ ISR(SPI_STC_vect)
 	{
 		GPIO_SetPin(currentOperation->configuration->csPin);
 
-		EventDispatcher_Notify(currentOperation->handler);
+		EventDispatcher_Complete(currentOperation->handler);
 
 		Queue_AdvanceTail(operationQueue);
 		if (Queue_IsEmpty(operationQueue))

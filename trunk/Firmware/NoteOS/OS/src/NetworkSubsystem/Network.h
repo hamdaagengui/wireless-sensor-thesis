@@ -114,7 +114,7 @@ typedef struct
 	link_header link;
 	network_header network;
 	transport_bed_header transport;
-	uint8_t data[16];
+	uint8_t serialNumber[16];
 } application_join_request_packet;
 
 typedef struct
@@ -122,8 +122,8 @@ typedef struct
 	link_header link;
 	network_header network;
 	transport_bed_header transport;
-	uint8_t data[16];
-	uint8_t address;
+	uint8_t serialNumber[16];
+	uint8_t assignedAddress;
 } application_join_response_packet;
 
 typedef struct
@@ -202,13 +202,15 @@ typedef struct
 //} read_complete_packet;
 
 extern void Network_Initialize();
-extern void Network_AssignAddress(uint8_t id);
-extern void Network_Handlers(block_handler sensorDataHandler);
+extern void Network_Start();
+
+extern void* Network_CreateBedPacket(uint8_t receiver, uint8_t type, uint8_t size);
+extern bool Network_QueueBedPacket();
 
 extern void* Network_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t dataSize);
 extern void Network_CreateSetResponsePacket(uint8_t receiver, property_status status);
 extern void* Network_CreateGetResponsePacket(uint8_t receiver, property_status status, uint8_t dataSize);
-extern void Network_SendRddPacket();
+extern void Network_QueueRddPacket();
 
 extern bool Network_SetProperty(uint8_t node, uint8_t sensor, uint8_t property, void* data, uint8_t length, result_handler resultHandler);
 extern bool Network_GetProperty(uint8_t node, uint8_t sensor, uint8_t property, void* data, uint8_t length, result_handler resultHandler);

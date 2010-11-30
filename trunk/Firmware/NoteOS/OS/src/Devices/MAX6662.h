@@ -18,6 +18,6 @@ typedef struct
 
 void MAX6662_CreateConfiguration(max6662_configuration* configuration, gpio_pin csPin);
 void MAX6662_Initialize(max6662_configuration* configuration);
-void MAX6662_GetTemperature(max6662_configuration* configuration, int16_t* temperature, notification_handler handler);
+void MAX6662_GetTemperature(max6662_configuration* configuration, int16_t* temperature, completion_handler handler);
 
 #endif /* MAX6662_H_ */

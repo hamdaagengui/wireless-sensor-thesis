@@ -24,7 +24,6 @@ typedef struct
 	void (*get)(application_get_request_packet* packet);
 } sensor_interface;
 
-extern void SensorManager_Initialize();
 extern bool SensorManager_InstallSensor(const sensor_interface* sensor);
 extern void SensorManager_SetProperty(void* data, uint8_t length);
 extern void SensorManager_GetProperty(void* data, uint8_t length);

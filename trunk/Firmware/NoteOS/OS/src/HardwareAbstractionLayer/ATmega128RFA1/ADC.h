@@ -36,5 +36,5 @@ typedef struct
 	uint8_t adcsrb;
 	uint8_t adcsrc;
 	uint16_t* result;
-	notification_handler completed;
+	completion_handler completed;
 } adc_configuration;

@@ -21,11 +21,6 @@ extern void RadioDriver_Initialize();
 /**
  *
  */
-extern void RadioDriver_Start();
-
-/**
- *
- */
 extern void RadioDriver_SetFrameReceivedHandler(bidirectional_block_handler handler);
 
 /**

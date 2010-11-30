@@ -9,7 +9,7 @@
 #define EVENTDISPATCHER_H_
 
 #include "../Globals.h"
-#include "../DefaultConfiguration.h"
+#include <Configuration.h>
 #include "../SensorSubsystem/SensorManager.h"
 
 typedef void (*event_handler)(sensor_id sensor, void* data);
@@ -42,14 +42,9 @@ extern bool EventDispatcher_Publish(sensor_id sensor, void* data);
 /**
  *
  * @param handler
- * @return Returns true if the notification was successfully queued.
+ * @return Returns true if the completion was successfully queued.
  */
-extern bool EventDispatcher_Notify(notification_handler handler);
-
-/**
- *
- */
-//extern bool EventDispatcher_Complete(completion_handler handler, void* operation);
+extern bool EventDispatcher_Complete(completion_handler handler);
 
 /**
  * Enqueues data for deferred processing.

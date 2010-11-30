@@ -52,7 +52,7 @@ extern void SPI_CreateConfiguration(spi_configuration* configuration, uint32_t m
 /**
  * Queues a transfer command. OBS Only a pointer to the output buffer is queued so it is not safe to modify the buffer until the completion handler is called!
  */
-extern void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length, notification_handler handler);
+extern void SPI_Transfer(spi_configuration* configuration, uint8_t* output, uint8_t* input, uint8_t length, completion_handler handler);
 
 #endif
 
