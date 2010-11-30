@@ -21,6 +21,8 @@ typedef enum
 	PROPERTY_STATUS_OVERFLOW
 } property_status;
 
+//
+//
 // Layer headers
 typedef struct
 {
@@ -38,9 +40,15 @@ typedef struct
 
 typedef struct
 {
-	uint8_t sequenceNumber;
-} transport_header;
+} transport_bed_header;
 
+typedef struct
+{
+	uint8_t sequenceNumber;
+} transport_rdd_header;
+
+//
+//
 // Combined layer headers
 typedef struct
 {
@@ -52,10 +60,20 @@ typedef struct
 {
 	link_header link;
 	network_header network;
-	transport_header transport;
+	transport_bed_header transport;
 	uint8_t payload[];
-} link_network_transport_header;
+} link_network_bed_transport_header;
 
+typedef struct
+{
+	link_header link;
+	network_header network;
+	transport_rdd_header transport;
+	uint8_t payload[];
+} link_network_rdd_transport_header;
+
+//
+//
 // Link layer packets
 typedef struct
 {
@@ -87,15 +105,32 @@ typedef struct
 {
 	link_header link;
 	network_header network;
-	transport_header transport;
-} transport_acknowledge_packet;
+	transport_rdd_header transport;
+} transport_rdd_acknowledge_packet;
 
 // Application layer packets
 typedef struct
 {
 	link_header link;
 	network_header network;
-	transport_header transport;
+	transport_bed_header transport;
+	uint8_t data[16];
+} application_join_request_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	transport_bed_header transport;
+	uint8_t data[16];
+	uint8_t address;
+} application_join_response_packet;
+
+typedef struct
+{
+	link_header link;
+	network_header network;
+	transport_rdd_header transport;
 	uint8_t sensor;
 	uint8_t data[];
 } application_sensor_data_packet;
@@ -104,6 +139,7 @@ typedef struct
 {
 	link_header link;
 	network_header network;
+	transport_rdd_header transport;
 	uint8_t sensor;
 	uint8_t property;
 	uint8_t data[];
@@ -113,6 +149,7 @@ typedef struct
 {
 	link_header link;
 	network_header network;
+	transport_rdd_header transport;
 	uint8_t status;
 } application_set_response_packet;
 
@@ -120,6 +157,7 @@ typedef struct
 {
 	link_header link;
 	network_header network;
+	transport_rdd_header transport;
 	uint8_t sensor;
 	uint8_t property;
 } application_get_request_packet;
@@ -128,6 +166,7 @@ typedef struct
 {
 	link_header link;
 	network_header network;
+	transport_rdd_header transport;
 	uint8_t status;
 	uint8_t data[];
 } application_get_response_packet;
@@ -163,14 +202,13 @@ typedef struct
 //} read_complete_packet;
 
 extern void Network_Initialize();
-extern void Network_SetAddress(uint8_t id);
+extern void Network_AssignAddress(uint8_t id);
 extern void Network_Handlers(block_handler sensorDataHandler);
 
-extern void* Network_CreateTransportPacket(uint8_t receiver, uint8_t type, uint8_t size);
 extern void* Network_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t dataSize);
 extern void Network_CreateSetResponsePacket(uint8_t receiver, property_status status);
 extern void* Network_CreateGetResponsePacket(uint8_t receiver, property_status status, uint8_t dataSize);
-extern void Network_SendPacket();
+extern void Network_SendRddPacket();
 
 extern bool Network_SetProperty(uint8_t node, uint8_t sensor, uint8_t property, void* data, uint8_t length, result_handler resultHandler);
 extern bool Network_GetProperty(uint8_t node, uint8_t sensor, uint8_t property, void* data, uint8_t length, result_handler resultHandler);
@@ -184,14 +222,3 @@ extern bool Network_GetProperty(uint8_t node, uint8_t sensor, uint8_t property, 
 //extern bool Network_Write(uint16_t address, void* data, uint8_t length, result_handler resultHandler);
 
 #endif /* NETWORK_H_ */
-
-/*
- void SensorSendExample()
- {
- uint16_t* value = Network_CreateSensorDataPacket(0, 123, sizeof(uint16_t));
-
- *value = 1234;
-
- Network_SendPacket();
- }
- */

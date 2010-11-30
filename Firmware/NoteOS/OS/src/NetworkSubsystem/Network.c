@@ -19,6 +19,7 @@
 #include "../SensorSubsystem/SensorManager.h"
 
 //  Constants
+#define GATEWAY_ADDRESS																							0
 #define BROADCAST_ADDRESS																						15
 
 typedef enum
@@ -41,8 +42,10 @@ typedef enum
 	// network packets
 	TYPE_NETWORK_ROUTES,
 	// transport packets
-	TYPE_TRANSPORT_ACK,
+	TYPE_TRANSPORT_RDD_ACK,
 	// application packets
+	TYPE_APPLICATION_JOIN_REQUEST,
+	TYPE_APPLICATION_JOIN_RESPONSE,
 	TYPE_APPLICATION_SENSOR_DATA,
 	TYPE_APPLICATION_SET_PROPERTY_REQUEST,
 	TYPE_APPLICATION_SET_PROPERTY_RESPONSE,
@@ -59,7 +62,6 @@ typedef enum
 //	TYPE_STORE_COMPLETE
 } packet_type;
 
-static void PreparePreloadedPackets();
 static void TransportTimeoutHandler();
 static void* FrameReceived(void* data, uint8_t length);
 static bool VerifyNetworkLayerHeader(void** data, uint8_t length);
@@ -67,38 +69,55 @@ static bool ProcessNetworkPacket(void** data, uint8_t length, block_handler pack
 static void UpdateCca();
 static bool IsChannelClear();
 static void InitiateSynchronization();
+static bool SendLinkPacket(link_network_header* packet, uint8_t length);
 
 // misc
 //static unsigned long randomContext;
-static block_handler sensorDataProcessor;
+static block_handler sensorDataProcessor = NULL;
 
 // link
-static volatile uint8_t linkState;
+#ifdef MASTER_NODE
+
+static volatile uint8_t linkState = LINK_STATE_IDLE;
+static uint8_t address = 0;
+static bool connected = true;
+static link_rts_packet rtsPacketTemplate = { .link.source = 0, .link.type = TYPE_LINK_RTS };
+static link_cts_packet ctsPacketTemplate = { .link.source = 0, .link.type = TYPE_LINK_CTS };
+static link_acknowledge_packet ackPacketTemplate = { .link.source = 0, .link.type = TYPE_LINK_ACK };
+
+#else
+
+static volatile uint8_t linkState = LINK_STATE_UNSYNCHRONIZED;
+static uint8_t address = BROADCAST_ADDRESS;
+static bool connected = false;
+static link_rts_packet rtsPacketTemplate =
+{	.link.type=TYPE_LINK_RTS};
+static link_cts_packet ctsPacketTemplate =
+{	.link.type=TYPE_LINK_CTS};
+static link_acknowledge_packet ackPacketTemplate =
+{	.link.type=TYPE_LINK_ACK};
+
+#endif
+
 static uint8_t currentSource;
 static link_network_header* currentLinkPacket;
 static uint8_t currentLinkPacketLength;
 static uint8_t linkQueue[Queue_CalculateSize(sizeof(queue_element), NETWORK_LINK_QUEUE_SIZE)];
 
-static link_rts_packet rtsPacketTemplate = { .link.type=TYPE_LINK_RTS };
-static link_cts_packet ctsPacketTemplate = { .link.type=TYPE_LINK_CTS };
-static link_acknowledge_packet ackPacketTemplate = { .link.type=TYPE_LINK_ACK };
-
-static uint8_t address;
-
 // network
 #define NO_ROUTE																										0xff
-static uint8_t routingTable[15];
+static uint8_t routingTable[15] = { NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE };
 
 #define NETWORK_UNREACHABLE																					0xffff
 #define LINK_DEAD																										0
-typedef struct
-{
-	int8_t txPower; // current transmission power level of node
-	uint8_t hops[15]; // hops from node to indexed node
-	uint8_t linkLoss[15]; // link loss between node and indexed node
-	uint16_t cost; // cost from node to indexed node
-} routing_entry;
-static routing_entry routingTable_[15];
+//typedef struct
+//{
+//	int8_t txPower; // current transmission power level of node
+//	uint8_t hops[15]; // hops from node to indexed node
+//	uint8_t linkLoss[15]; // link loss between node and indexed node
+//	uint16_t cost; // cost from node to indexed node
+//} routing_entry;
+//static routing_entry routingTable_[15];
 
 typedef struct
 {
@@ -120,38 +139,33 @@ typedef struct
 } node;
 
 // transport
-static uint8_t nextSequenceNumber;
-static uint8_t transportQueue[Queue_CalculateSize(sizeof(queue_element), NETWORK_TRANSPORT_QUEUE_SIZE)];
-static link_network_transport_header* currentTransportPacket;
-static uint8_t currentTransportPacketLength;
-static uint8_t transportTimer;
+//   RDD
+static uint8_t rddNextSequenceNumber = 0;
+static uint8_t rddQueue[Queue_CalculateSize(sizeof(queue_element), NETWORK_RDD_QUEUE_SIZE)];
+static link_network_rdd_transport_header* rddCurrentPacket;
+static uint8_t rddCurrentPacketLength;
+static uint8_t rddTimer;
 
 void Network_Initialize()
 {
 	Queue_Initialize(linkQueue, sizeof(queue_element), NETWORK_LINK_QUEUE_SIZE);
-	Queue_Initialize(transportQueue, sizeof(queue_element), NETWORK_TRANSPORT_QUEUE_SIZE);
+	Queue_Initialize(rddQueue, sizeof(queue_element), NETWORK_RDD_QUEUE_SIZE);
 
 	RadioDriver_SetFrameReceivedHandler(FrameReceived);
 
 	srand(RadioDriver_GetRandomNumber());
-
-
-#ifdef MASTER_NODE
-	PreparePreloadedPackets(); // uses default id (0) and does not need synchronization
-	linkState = LINK_STATE_IDLE;
-#else
-	linkState = LINK_STATE_UNSYNCHRONIZED;
-#endif
 
 	NetworkTimer_Initialize();
 	NetworkTimer_SetTimerPeriod(NETWORK_TIMER_FREQUENCY / NETWORK_COMMUNICATION_SLOT_FREQUENCY);
 	NetworkTimer_SetTimerValue(0);
 }
 
-void Network_SetAddress(uint8_t adr)
+void Network_AssignAddress(uint8_t adr)
 {
 	address = adr;
-	PreparePreloadedPackets();
+	rtsPacketTemplate.link.source = address;
+	ctsPacketTemplate.link.source = address;
+	ackPacketTemplate.link.source = address;
 }
 
 void Network_Handlers(block_handler sensorDataHandler)
@@ -159,14 +173,14 @@ void Network_Handlers(block_handler sensorDataHandler)
 	sensorDataProcessor = sensorDataHandler;
 }
 
-void* Network_CreateTransportPacket(uint8_t receiver, uint8_t type, uint8_t size)
+static void* Network_CreateRddTransportPacket(uint8_t receiver, uint8_t type, uint8_t size)
 {
-	if (Queue_IsFull(transportQueue))
+	if (Queue_IsFull(rddQueue))
 	{
 		Diagnostics_SendEvent(DIAGNOSTICS_DATA_NOT_QUEUED);
 		return NULL;
 	}
-	queue_element* qe = Queue_Head(transportQueue);
+	queue_element* qe = Queue_Head(rddQueue);
 
 	qe->size = size;
 	qe->object = MemoryManager_Allocate(qe->size);
@@ -177,19 +191,19 @@ void* Network_CreateTransportPacket(uint8_t receiver, uint8_t type, uint8_t size
 		return NULL;
 	}
 
-	link_network_transport_header* p = qe->object;
+	link_network_rdd_transport_header* p = qe->object;
 	p->link.source = address;
 	p->link.type = type;
 	p->network.receiver = receiver;
 	p->network.sender = address;
-	p->transport.sequenceNumber = nextSequenceNumber++;
+	p->transport.sequenceNumber = rddNextSequenceNumber++;
 
 	return qe->object;
 }
 
 void* Network_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t dataSize)
 {
-	application_sensor_data_packet* p = Network_CreateTransportPacket(receiver, TYPE_APPLICATION_SENSOR_DATA, sizeof(application_sensor_data_packet) + dataSize);
+	application_sensor_data_packet* p = Network_CreateRddTransportPacket(receiver, TYPE_APPLICATION_SENSOR_DATA, sizeof(application_sensor_data_packet) + dataSize);
 
 	p->sensor = sensor;
 
@@ -198,33 +212,31 @@ void* Network_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t d
 
 void Network_CreateSetResponsePacket(uint8_t receiver, property_status status)
 {
-	application_set_response_packet* p = Network_CreateTransportPacket(receiver, TYPE_APPLICATION_SET_PROPERTY_RESPONSE, sizeof(application_get_response_packet));
+	application_set_response_packet* p = Network_CreateRddTransportPacket(receiver, TYPE_APPLICATION_SET_PROPERTY_RESPONSE, sizeof(application_get_response_packet));
 
 	p->status = status;
 }
 
 void* Network_CreateGetResponsePacket(uint8_t receiver, property_status status, uint8_t dataSize)
 {
-	application_get_response_packet* p = Network_CreateTransportPacket(receiver, TYPE_APPLICATION_GET_PROPERTY_RESPONSE, sizeof(application_get_response_packet) + dataSize);
+	application_get_response_packet* p = Network_CreateRddTransportPacket(receiver, TYPE_APPLICATION_GET_PROPERTY_RESPONSE, sizeof(application_get_response_packet) + dataSize);
 
 	p->status = status;
 
 	return p->data;
 }
 
-void Network_SendPacket()
+void Network_SendRddPacket()
 {
-	Queue_AdvanceHead(transportQueue);
+	Queue_AdvanceHead(rddQueue);
+}
+
+static void AcknowledgeTransportRddPacket(link_network_rdd_transport_header* packet)
+{
+
 }
 
 // Internal
-
-static void PreparePreloadedPackets()
-{
-	rtsPacketTemplate.link.source = address;
-	ctsPacketTemplate.link.source = address;
-	ackPacketTemplate.link.source = address;
-}
 
 static void InitiateSynchronization()
 {
@@ -337,9 +349,9 @@ void Network_TimerEvent()
 
 
 	// transport timer
-	if (transportTimer > 0)
+	if (rddTimer > 0)
 	{
-		if (--transportTimer == 0)
+		if (--rddTimer == 0)
 		{
 			EventDispatcher_Notify(TransportTimeoutHandler);
 		}
@@ -351,14 +363,20 @@ void Network_TimerEvent()
 
 static void TransportTimeoutHandler()
 {
-	transportTimer = NETWORK_TRANSPORT_TIMEOUT;
+	rddTimer = NETWORK_TRANSPORT_TIMEOUT;
 
 }
 
-static void AcknowledgeTransportPacket(link_network_transport_header* packet)
+static void SynchronizationHandler()
 {
-	transport_acknowledge_packet p;
-	p.link;
+	if (connected == false)
+	{
+		// TODO: Send join request
+		application_join_request_packet p;
+		p.link.type = TYPE_APPLICATION_JOIN_REQUEST;
+		p.network.sender = BROADCAST_ADDRESS;
+		p.network.receiver = GATEWAY_ADDRESS;
+	}
 }
 
 static void* FrameReceived(void* data, uint8_t length)
@@ -378,6 +396,8 @@ static void* FrameReceived(void* data, uint8_t length)
 			NetworkTimer_SetTimerValue(2);
 
 			linkState = LINK_STATE_EXPECTING_RTS;
+
+			EventDispatcher_Notify(SynchronizationHandler);
 		}
 		else
 		{
@@ -464,19 +484,19 @@ static void* FrameReceived(void* data, uint8_t length)
 
 			// transport layer packets
 
-		case TYPE_TRANSPORT_ACK:
+		case TYPE_TRANSPORT_RDD_ACK:
 			{
 				if (VerifyNetworkLayerHeader(&data, length))
 				{
-					queue_element* qe = Queue_Head(transportQueue);
-					transport_acknowledge_packet* qp = qe->object;
-					transport_acknowledge_packet* p = data;
+					queue_element* qe = Queue_Head(rddQueue);
+					transport_rdd_acknowledge_packet* qp = qe->object;
+					transport_rdd_acknowledge_packet* p = data;
 					if (p->network.sender != qp->network.receiver || p->transport.sequenceNumber != qp->transport.sequenceNumber)
 					{
 						break;
 					}
 					// TODO: Send notification on timeout (acks just happens without a sound)
-					Queue_AdvanceTail(transportQueue);
+					Queue_AdvanceTail(rddQueue);
 				}
 			}
 			break;
@@ -504,9 +524,32 @@ static void* FrameReceived(void* data, uint8_t length)
 				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
 			}
 			break;
+
+		default:
+			linkState = LINK_STATE_IDLE;
+			break;
 	}
 
 	return data;
+}
+
+static bool SendLinkPacket(link_network_header* packet, uint8_t length)
+{
+	if (Queue_IsFull(linkQueue))
+	{
+		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_LINK_BUFFER_OVERRUN);
+		return false;
+	}
+
+	packet->link->source = address;
+	queue_element* qe = Queue_Head(linkQueue);
+	qe->size = length;
+	qe->object = packet;
+	Queue_AdvanceHead(linkQueue);
+
+	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_LINK_PACKET_QUEUED);
+
+	return false;
 }
 
 static bool VerifyNetworkLayerHeader(void** data, uint8_t length)
@@ -536,16 +579,9 @@ static bool VerifyNetworkLayerHeader(void** data, uint8_t length)
 	// forward if packet was not for this node
 	if (lnh->network.receiver != address)
 	{
-		if (Queue_IsFull(linkQueue) == false)
+		if (SendLinkPacket(*data, length))
 		{
-			lh->source = address;
-			queue_element* qe = Queue_Head(linkQueue);
-			qe->size = length;
-			qe->object = *data;
-			Queue_AdvanceHead(linkQueue);
-
 			*data = NULL; // keep the allocated block
-
 			Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_FORWARDING);
 		}
 		else
@@ -565,7 +601,7 @@ static bool ProcessNetworkPacket(void** data, uint8_t length, block_handler pack
 	{
 		if (EventDispatcher_Process(packetHandler, *data, length)) // add to event queue
 		{
-			AcknowledgeTransportPacket(*data); // acknowledge packet if it could be added to queue
+			AcknowledgeTransportRddPacket(*data); // acknowledge packet if it could be added to queue
 
 			*data = NULL; // keep the allocated memory
 

@@ -46,7 +46,7 @@ int main()
 	Network_Initialize();
 	//
 	//
-	Network_SetAddress(sn);
+	Network_AssignAddress(sn);
 	//
 	//
 

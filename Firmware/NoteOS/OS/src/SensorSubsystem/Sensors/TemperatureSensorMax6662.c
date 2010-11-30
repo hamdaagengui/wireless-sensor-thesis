@@ -1,21 +1,20 @@
 /*
- * ThermometerSpi.c
+ * TemperatureSensorMax6662.c
  *
  *  Created on: 28/11/2010
  *      Author: coma
  */
 
-#include "ThermometerSpi.h"
+#include "TemperatureSensorMax6662.h"
 #include "../../Devices/MAX6662.h"
 #include "../../EventSubsystem/Timer.h"
 #include "../../BoardSupportPackage/BoardSupportPackage.h"
+#include "../../MemorySubsystem/MemoryManager.h"
 
 enum
 {
 	PROPERTY_CURRENT_VALUE,
-	PROPERTY_SAMPLE_INTERVAL,
-	PROPERTY_UPPER_THRESHOLD,
-	PROPERTY_LOWER_THRESHOLD
+	PROPERTY_SAMPLE_INTERVAL
 };
 
 static bool Initialize(uint8_t id);
@@ -24,7 +23,7 @@ static void Get(application_get_request_packet* packet);
 static void TakeSample();
 static void SampleTaken();
 
-const sensor_interface thermomoterSpiInterface = { Initialize, Set, Get };
+const sensor_interface temperatureSensorMax6662Interface = { Initialize, Set, Get };
 static uint8_t assignedId;
 
 static timer_configuration timer;
@@ -43,41 +42,46 @@ static bool Initialize(uint8_t id)
 
 static void Set(application_set_request_packet* packet)
 {
+	uint8_t sender = packet->network.sender;
+
 	switch (packet->property)
 	{
+		case PROPERTY_CURRENT_VALUE:
+			Network_CreateSetResponsePacket(sender, PROPERTY_STATUS_READ_ONLY);
+			Network_SendRddPacket();
+			break;
+
 		case PROPERTY_SAMPLE_INTERVAL:
-			{
-				uint32_t* value = Network_CreateGetResponsePacket(0, PROPERTY_STATUS_SUCCESS, sizeof(uint32_t));
-				*value = interval;
-				Network_SendPacket();
-			}
+			*(uint32_t*) Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_SUCCESS, sizeof(uint32_t)) = interval;
+			Network_SendRddPacket();
 			break;
 
 		default:
-			Network_CreateSetResponsePacket(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY);
-			Network_SendPacket();
+			Network_CreateSetResponsePacket(sender, PROPERTY_STATUS_INVALID_PROPERTY);
+			Network_SendRddPacket();
 			break;
 	}
 }
 
 static void Get(application_get_request_packet* packet)
 {
+	uint8_t sender = packet->network.sender;
+
 	switch (packet->property)
 	{
 		case PROPERTY_CURRENT_VALUE:
+			*(uint16_t*) Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_SUCCESS, sizeof(uint16_t)) = temperature;
+			Network_SendRddPacket();
 			break;
 
 		case PROPERTY_SAMPLE_INTERVAL:
-			{
-				uint32_t* value = Network_CreateGetResponsePacket(0, PROPERTY_STATUS_SUCCESS, sizeof(uint32_t));
-				*value = interval;
-				Network_SendPacket();
-			}
+			*(uint32_t*) Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_SUCCESS, sizeof(uint32_t)) = interval;
+			Network_SendRddPacket();
 			break;
 
 		default:
-			Network_CreateGetResponsePacket(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY, 0);
-			Network_SendPacket();
+			Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_INVALID_PROPERTY, 0);
+			Network_SendRddPacket();
 			break;
 	}
 }
@@ -89,5 +93,7 @@ static void TakeSample()
 
 static void SampleTaken()
 {
-	//EventDispatcher_Publish()
+	int16_t* value = MemoryManager_Allocate(sizeof(int16_t));
+	*value = temperature;
+	EventDispatcher_Publish(SENSOR_TEMPERATURE_EAR_LEFT, value);
 }

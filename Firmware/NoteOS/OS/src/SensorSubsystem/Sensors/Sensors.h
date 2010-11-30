@@ -10,6 +10,6 @@
 
 #include "Internal.h"
 #include "HeartRateVariability.h"
-#include "ThermometerSpi.h"
+#include "TemperatureSensorMax6662.h"
 
 #endif /* SENSORS_H_ */

@@ -10,14 +10,19 @@
 #include "../MemorySubsystem/MemoryManager.h"
 #include "../Diagnostics/Diagnostics.h"
 
-// TODO EVENTDISPATCHER_HIGHEST_EVENT_ID should be replaced by EVENT_LAST_ID or something like that so the user shouldn't explicitly define it.
-static event_handler subscribers[EVENTDISPATCHER_HIGHEST_EVENT_ID][EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS];
+typedef struct
+{
+	sensor_id sensor;
+	event_handler handler;
+} subscriber;
+static subscriber subscribers[EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS];
+static uint8_t numberOfSubscribers;
 
 enum
 {
 	TYPE_PUBLICATION,
 	TYPE_NOTIFICATION,
-//	TYPE_COMPLETION,
+	//	TYPE_COMPLETION,
 	TYPE_PROCESSING
 };
 
@@ -28,18 +33,18 @@ typedef struct
 	{
 		struct
 		{
-			uint8_t event;
+			sensor_id sensor;
 			void* data;
 		} publication;
 		struct
 		{
 			notification_handler handler;
 		} notification;
-//		struct
-//		{
-//			completion_handler handler;
-//			void* operation;
-//		} completion;
+		//		struct
+		//		{
+		//			completion_handler handler;
+		//			void* operation;
+		//		} completion;
 		struct
 		{
 			block_handler handler;
@@ -65,14 +70,12 @@ void EventDispatcher_Dispatch()
 		switch (e->type)
 		{
 			case TYPE_PUBLICATION:
-				for (uint8_t i = 0; i < EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS; i++)
+				for (uint8_t i = 0; i < numberOfSubscribers; i++)
 				{
-					if (subscribers[e->publication.event][i] == NULL)
+					if (subscribers[i].sensor == e->publication.sensor)
 					{
-						break; // no more subscribers
+						subscribers[i].handler(e->publication.sensor, e->publication.data);
 					}
-
-					subscribers[e->publication.event][i](e->publication.event, e->publication.data);
 				}
 
 				MemoryManager_Release(e->publication.data);
@@ -99,21 +102,20 @@ void EventDispatcher_Dispatch()
 	}
 }
 
-void EventDispatcher_Subscribe(uint8_t eventId, event_handler handler)
+void EventDispatcher_Subscribe(sensor_id sensor, event_handler handler)
 {
-	for (uint8_t i = 0; i < EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS; i++)
+	if (numberOfSubscribers >= EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS)
 	{
-		if (subscribers[eventId][i] == NULL)
-		{
-			subscribers[eventId][i] = handler;
-			return;
-		}
+		Diagnostics_SendEvent(DIAGNOSTICS_TOO_MANY_EVENT_SUBSCRIBERS);
+		return;
 	}
 
-	Diagnostics_SendEvent(DIAGNOSTICS_TOO_MANY_EVENT_SUBSCRIBERS);
+	subscribers[numberOfSubscribers].sensor = sensor;
+	subscribers[numberOfSubscribers].handler = handler;
+	numberOfSubscribers++;
 }
 
-bool EventDispatcher_Publish(uint8_t eventId, void* data)
+bool EventDispatcher_Publish(sensor_id sensor, void* data)
 {
 	if (data == NULL)
 	{
@@ -129,7 +131,7 @@ bool EventDispatcher_Publish(uint8_t eventId, void* data)
 	event* e = Queue_Head(eventQueue);
 
 	e->type = TYPE_PUBLICATION;
-	e->publication.event = eventId;
+	e->publication.sensor = sensor;
 	e->publication.data = data;
 
 	Queue_AdvanceHead(eventQueue);

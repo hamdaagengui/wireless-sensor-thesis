@@ -10,13 +10,9 @@
 
 #include "../Globals.h"
 #include "../DefaultConfiguration.h"
+#include "../SensorSubsystem/SensorManager.h"
 
-enum
-{
-	EVENT_SENSOR_DATA = 128
-};
-
-typedef void (*event_handler)(uint8_t event, void* data);
+typedef void (*event_handler)(sensor_id sensor, void* data);
 
 /**
  *
@@ -30,18 +26,18 @@ extern void EventDispatcher_Dispatch();
 
 /**
  *
- * @param eventId
- * @param handler
+ * @param sensor
+ * @param data
  */
-extern void EventDispatcher_Subscribe(uint8_t eventId, event_handler handler);
+extern void EventDispatcher_Subscribe(sensor_id sensor, event_handler handler);
 
 /**
  *
- * @param eventId
+ * @param sensor
  * @param data
  * @return
  */
-extern bool EventDispatcher_Publish(uint8_t eventId, void* data);
+extern bool EventDispatcher_Publish(sensor_id sensor, void* data);
 
 /**
  *
