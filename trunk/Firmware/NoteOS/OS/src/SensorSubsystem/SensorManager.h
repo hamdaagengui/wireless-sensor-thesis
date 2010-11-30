@@ -11,6 +11,12 @@
 #include "../Globals.h"
 #include "../NetworkSubsystem/Network.h"
 
+typedef enum
+{
+	SENSOR_TEMPERATURE_EAR_LEFT = 1000,
+	SENSOR_ECG_THREE_LEAD
+} sensor_id;
+
 typedef struct
 {
 	bool (*initialize)(uint8_t id);

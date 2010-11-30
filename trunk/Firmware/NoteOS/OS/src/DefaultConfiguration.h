@@ -15,7 +15,7 @@
 #define NETWORK_CAN_ROUTE																						1
 #define NETWORK_MAXIMUM_LINK_PACKET_SIZE														64
 #define NETWORK_LINK_QUEUE_SIZE																			10
-#define NETWORK_TRANSPORT_QUEUE_SIZE																10
+#define NETWORK_RDD_QUEUE_SIZE																10
 #define NETWORK_TRANSPORT_TIMEOUT																		64 // in units of: 1 / (NETWORK_TIMER_FREQUENCY / NETWORK_COMMUNICATION_SLOT_FREQUENCY) (default = 500 ms)
 #define NETWORK_TIMER_FREQUENCY																			32768 // In Hz
 #define NETWORK_COMMUNICATION_SLOT_FREQUENCY												128 // Number of transfers per second (i.e. RTS+CTS+DATA+ACK)

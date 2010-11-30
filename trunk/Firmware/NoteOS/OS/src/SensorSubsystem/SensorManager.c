@@ -38,7 +38,7 @@ void SensorManager_SetProperty(void* data, uint8_t length)
 	if (sensor >= numberOfSensorsInstalled)
 	{
 		Network_CreateGetResponsePacket(0, PROPERTY_STATUS_INVALID_SENSOR, 0);
-		Network_SendPacket();
+		Network_SendRddPacket();
 	}
 	else
 	{
@@ -55,7 +55,7 @@ void SensorManager_GetProperty(void* data, uint8_t length)
 	if (sensor >= numberOfSensorsInstalled)
 	{
 		Network_CreateGetResponsePacket(0, PROPERTY_STATUS_INVALID_SENSOR, 0);
-		Network_SendPacket();
+		Network_SendRddPacket();
 	}
 	else
 	{
