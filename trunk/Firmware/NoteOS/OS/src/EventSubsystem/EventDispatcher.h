@@ -12,7 +12,20 @@
 #include <Configuration.h>
 #include "../SensorSubsystem/SensorManager.h"
 
-typedef void (*event_handler)(sensor_id sensor, void* data);
+typedef enum
+{
+	EVENT_SYNCHRONIZED,
+	EVENT_CONNECTED,
+	EVENT_SENSOR_DATA
+} event;
+
+typedef struct
+{
+	sensor_id sensor;
+	uint8_t data[];
+} sensor_event;
+
+typedef void (*event_handler)(event e, void* data);
 
 /**
  *
@@ -29,7 +42,7 @@ extern void EventDispatcher_Dispatch();
  * @param sensor
  * @param data
  */
-extern void EventDispatcher_Subscribe(sensor_id sensor, event_handler handler);
+extern void EventDispatcher_Subscribe(event e, event_handler handler);
 
 /**
  *
@@ -37,7 +50,7 @@ extern void EventDispatcher_Subscribe(sensor_id sensor, event_handler handler);
  * @param data
  * @return
  */
-extern bool EventDispatcher_Publish(sensor_id sensor, void* data);
+extern bool EventDispatcher_Publish(event e, void* data);
 
 /**
  *

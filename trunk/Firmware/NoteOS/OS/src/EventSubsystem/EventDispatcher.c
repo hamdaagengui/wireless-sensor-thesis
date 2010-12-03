@@ -12,7 +12,7 @@
 
 typedef struct
 {
-	sensor_id sensor;
+	event e;
 	event_handler handler;
 } subscriber;
 static subscriber subscribers[EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS];
@@ -32,7 +32,7 @@ typedef struct
 	{
 		struct
 		{
-			sensor_id sensor;
+			event e;
 			void* data;
 		} publication;
 		struct
@@ -46,47 +46,50 @@ typedef struct
 			uint8_t length;
 		} processing;
 	};
-} event;
+} queued_event;
 
-static uint8_t eventQueue[Queue_CalculateSize(sizeof(event), EVENTDISPATCHER_QUEUE_SIZE)];
+static uint8_t eventQueue[Queue_CalculateSize(sizeof(queued_event), EVENTDISPATCHER_QUEUE_SIZE)];
 
 void EventDispatcher_Initialize()
 {
-	Queue_Initialize(eventQueue, sizeof(event), EVENTDISPATCHER_QUEUE_SIZE);
+	Queue_Initialize(eventQueue, sizeof(queued_event), EVENTDISPATCHER_QUEUE_SIZE);
 }
 
 void EventDispatcher_Dispatch()
 {
 	while (Queue_IsEmpty(eventQueue) == false)
 	{
-		event* e = Queue_Tail(eventQueue);
+		queued_event* qe = Queue_Tail(eventQueue);
 
-		switch (e->type)
+		switch (qe->type)
 		{
 			case TYPE_PUBLICATION:
 				for (uint8_t i = 0; i < numberOfSubscribers; i++)
 				{
-					if (subscribers[i].sensor == e->publication.sensor)
+					if (subscribers[i].e == qe->publication.e)
 					{
-						subscribers[i].handler(e->publication.sensor, e->publication.data);
+						subscribers[i].handler(qe->publication.e, qe->publication.data);
 					}
 				}
 
-				MemoryManager_Release(e->publication.data);
+				if (qe->publication.data != NULL)
+				{
+					MemoryManager_Release(qe->publication.data);
+				}
 
 				Diagnostics_SendEvent(DIAGNOSTICS_PUBLISH_EXECUTED);
 				break;
 
 			case TYPE_COMPLETION:
-				e->notification.handler();
+				qe->notification.handler();
 
 				Diagnostics_SendEvent(DIAGNOSTICS_COMPLETION_EXECUTED);
 				break;
 
 			case TYPE_PROCESSING:
-				e->processing.handler(e->processing.data, e->processing.length);
+				qe->processing.handler(qe->processing.data, qe->processing.length);
 
-				MemoryManager_Release(e->processing.data);
+				MemoryManager_Release(qe->processing.data);
 
 				Diagnostics_SendEvent(DIAGNOSTICS_PROCESS_EXECUTED);
 				break;
@@ -96,7 +99,7 @@ void EventDispatcher_Dispatch()
 	}
 }
 
-void EventDispatcher_Subscribe(sensor_id sensor, event_handler handler)
+void EventDispatcher_Subscribe(event e, event_handler handler)
 {
 	if (numberOfSubscribers >= EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS)
 	{
@@ -104,29 +107,24 @@ void EventDispatcher_Subscribe(sensor_id sensor, event_handler handler)
 		return;
 	}
 
-	subscribers[numberOfSubscribers].sensor = sensor;
+	subscribers[numberOfSubscribers].e = e;
 	subscribers[numberOfSubscribers].handler = handler;
 	numberOfSubscribers++;
 }
 
-bool EventDispatcher_Publish(sensor_id sensor, void* data)
+bool EventDispatcher_Publish(event e, void* data)
 {
-	if (data == NULL)
-	{
-		return false;
-	}
-
 	if (Queue_IsFull(eventQueue))
 	{
 		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
 		return false;
 	}
 
-	event* e = Queue_Head(eventQueue);
+	queued_event* qe = Queue_Head(eventQueue);
 
-	e->type = TYPE_PUBLICATION;
-	e->publication.sensor = sensor;
-	e->publication.data = data;
+	qe->type = TYPE_PUBLICATION;
+	qe->publication.e = e;
+	qe->publication.data = data;
 
 	Queue_AdvanceHead(eventQueue);
 
@@ -148,10 +146,10 @@ bool EventDispatcher_Complete(completion_handler handler)
 		return false;
 	}
 
-	event* e = Queue_Head(eventQueue);
+	queued_event* qe = Queue_Head(eventQueue);
 
-	e->type = TYPE_COMPLETION;
-	e->notification.handler = handler;
+	qe->type = TYPE_COMPLETION;
+	qe->notification.handler = handler;
 
 	Queue_AdvanceHead(eventQueue);
 
@@ -173,12 +171,12 @@ bool EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 		return false;
 	}
 
-	event* e = Queue_Head(eventQueue);
+	queued_event* qe = Queue_Head(eventQueue);
 
-	e->type = TYPE_PROCESSING;
-	e->processing.handler = handler;
-	e->processing.data = data;
-	e->processing.length = length;
+	qe->type = TYPE_PROCESSING;
+	qe->processing.handler = handler;
+	qe->processing.data = data;
+	qe->processing.length = length;
 
 	Queue_AdvanceHead(eventQueue);
 

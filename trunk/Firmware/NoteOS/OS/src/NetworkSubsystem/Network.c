@@ -17,60 +17,19 @@
 #include "../Diagnostics/Diagnostics.h"
 #include "../SensorSubsystem/SensorManager.h"
 #include "../BoardSupportPackage/BoardSupportPackage.h"
-
-//  Constants
-#define GATEWAY_ADDRESS																							0
-#define BROADCAST_ADDRESS																						15
-
-typedef enum
-{
-	LINK_STATE_UNSYNCHRONIZED,
-	LINK_STATE_IDLE,
-	LINK_STATE_EXPECTING_RTS,
-	LINK_STATE_EXPECTING_CTS,
-	LINK_STATE_EXPECTING_ACK,
-	LINK_STATE_EXPECTING_DATA
-} link_state;
-
-// possible packet types
-typedef enum
-{
-	// link packets
-	TYPE_LINK_RTS,
-	TYPE_LINK_CTS,
-	TYPE_LINK_ACK,
-	// network packets
-	TYPE_NETWORK_ROUTES,
-	// transport packets
-	TYPE_TRANSPORT_RDD_ACK,
-	// application packets
-	TYPE_APPLICATION_JOIN_REQUEST,
-	TYPE_APPLICATION_JOIN_RESPONSE,
-	TYPE_APPLICATION_SENSOR_DATA,
-	TYPE_APPLICATION_SET_PROPERTY_REQUEST,
-	TYPE_APPLICATION_SET_PROPERTY_RESPONSE,
-	TYPE_APPLICATION_GET_PROPERTY_REQUEST,
-	TYPE_APPLICATION_GET_PROPERTY_RESPONSE,
-// future packet types
-//	TYPE_READ,
-//	TYPE_READ_COMPLETE,
-//	TYPE_WRITE,
-//	TYPE_WRITE_COMPLETE
-//	TYPE_LOAD,
-//	TYPE_LOAD_COMPLETE,
-//	TYPE_STORE,
-//	TYPE_STORE_COMPLETE
-} packet_type;
+#include "../FixedMath.h"
+#include "RddProtocol.h"
+#include "BedProtocol.h"
+#include "RoutingLogic.h"
+#include "NetworkInternals.h"
 
 static void TransportRddTimeoutHandler();
 static void* FrameReceived(void* data, uint8_t length);
-static bool VerifyNetworkLayerHeader(void** data, uint8_t length);
 static bool ProcessBedPacket(void** data, uint8_t length, block_handler packetHandler);
 static bool ProcessRddPacket(void** data, uint8_t length, block_handler packetHandler);
 static void UpdateCca();
 static bool IsChannelClear();
 static void InitiateSynchronization();
-static bool QueueLinkPacket(link_network_header* packet, uint8_t length);
 
 // misc
 //static unsigned long randomContext;
@@ -78,8 +37,8 @@ static bool QueueLinkPacket(link_network_header* packet, uint8_t length);
 // link
 #if MASTER_NODE == 1
 
-static volatile uint8_t linkState = LINK_STATE_IDLE;
-static uint8_t address = GATEWAY_ADDRESS;
+volatile uint8_t linkState = LINK_STATE_IDLE;
+uint8_t address = GATEWAY_ADDRESS;
 static link_rts_packet rtsPacketTemplate =
 {	.link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_RTS};
 static link_cts_packet ctsPacketTemplate =
@@ -89,9 +48,9 @@ static link_acknowledge_packet ackPacketTemplate =
 
 #else
 
-static volatile uint8_t linkState = LINK_STATE_UNSYNCHRONIZED;
-static uint8_t address = BROADCAST_ADDRESS;
-static bool connected = false;
+volatile uint8_t linkState = LINK_STATE_UNSYNCHRONIZED;
+uint8_t address = BROADCAST_ADDRESS;
+connection_state connectionState = CONNECTION_STATE_UNCONNECTED;
 static link_rts_packet rtsPacketTemplate = { .link.type=TYPE_LINK_RTS };
 static link_cts_packet ctsPacketTemplate = { .link.type=TYPE_LINK_CTS };
 static link_acknowledge_packet ackPacketTemplate = { .link.type=TYPE_LINK_ACK };
@@ -102,49 +61,12 @@ static uint8_t linkCurrentSource;
 static link_network_header* linkCurrentPacket;
 static uint8_t linkCurrentPacketLength;
 static uint8_t linkQueue[Queue_CalculateSize(sizeof(queue_element), NETWORK_LINK_QUEUE_SIZE)];
-static uint8_t linkTransmissionCount = 0;
-
-// network
-#define NO_ROUTE																										0xff
-static uint8_t routingTable[15] = { NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE };
-
-#define NETWORK_UNREACHABLE																					0xffff
-#define LINK_DEAD																										0
-
-typedef struct
-{
-	int8_t loss;
-	uint8_t node;
-} route_hop;
-
-typedef struct
-{
-	route_hop hops[15];
-} route;
-
-typedef struct
-{
-	uint16_t costToNeighbors[15];
-	bool marked;
-	uint16_t cost;
-	uint8_t previousNode;
-} node;
-
-// transport
-//   BED
-static link_network_bed_transport_header* transportBedCurrentPacket;
-static uint8_t transportBedCurrentPacketLength;
-//   RDD
-static uint8_t transportRddNextSequenceNumber = 0;
-static uint8_t transportRddQueue[Queue_CalculateSize(sizeof(queue_element), NETWORK_TRANSPORT_RDD_QUEUE_SIZE)];
-static link_network_rdd_transport_header* transportRddCurrentPacket;
-static uint8_t transportRddCurrentPacketLength;
-static uint8_t transportRddTimer;
+static uint8_t linkTransmissionAttemptCounter = 0;
 
 void Network_Initialize()
 {
 	Queue_Initialize(linkQueue, sizeof(queue_element), NETWORK_LINK_QUEUE_SIZE);
-	Queue_Initialize(transportRddQueue, sizeof(queue_element), NETWORK_TRANSPORT_RDD_QUEUE_SIZE);
+	RddProtocol_Initialize();
 }
 
 void Network_Start()
@@ -167,10 +89,10 @@ static void AssignAddress(uint8_t adr)
 }
 #endif
 
-// Link
-
-static bool QueueLinkPacket(link_network_header* packet, uint8_t length)
+bool QueueLinkPacket(void* packet, uint8_t length)
 {
+	link_network_header* p = packet;
+
 	if (Queue_IsFull(linkQueue))
 	{
 		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_LINK_QUEUE_OVERRUN);
@@ -180,135 +102,22 @@ static bool QueueLinkPacket(link_network_header* packet, uint8_t length)
 	uint8_t nextNode = routingTable[linkCurrentPacket->network.receiver];
 	if (nextNode == NO_ROUTE)
 	{
+		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_STAR_TOPOLOGY_FALL_BACK);
 		//return false;
 		nextNode = linkCurrentPacket->network.receiver; // no route => go star
 	}
-	packet->link.destination = nextNode;
-	packet->link.source = address;
+	p->link.destination = nextNode;
+	p->link.source = address;
 
 	queue_element* qe = Queue_Head(linkQueue);
 	qe->size = length;
-	qe->object = packet;
+	qe->object = p;
 	Queue_AdvanceHead(linkQueue);
 
 	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_LINK_PACKET_QUEUED);
 
 	return true;
 }
-
-// End link
-
-// BED protocol
-
-void* Network_CreateBedPacket(uint8_t receiver, uint8_t type, uint8_t size)
-{
-	link_network_bed_transport_header* p = MemoryManager_Allocate(size);
-
-	if (p == NULL)
-	{
-		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_UNABLE_TO_CREATE_BED_PACKET);
-		return NULL;
-	}
-
-	p->link.type = type;
-	p->network.receiver = receiver;
-	p->network.sender = address;
-
-	transportBedCurrentPacket = p;
-	transportBedCurrentPacketLength = size;
-
-	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_CREATED_BED_PACKET);
-
-	return p;
-}
-
-static void* CreateJoinRequestPacket()
-{
-	application_join_request_packet* p = Network_CreateBedPacket(GATEWAY_ADDRESS, TYPE_APPLICATION_JOIN_REQUEST, sizeof(application_join_request_packet));
-
-	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_CREATED_JOIN_REQUEST);
-
-	return p->serialNumber;
-}
-
-bool Network_QueueBedPacket()
-{
-	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_SENT_BED_PACKET);
-	return QueueLinkPacket((link_network_header*) transportBedCurrentPacket, transportBedCurrentPacketLength);
-}
-// End BED protocol
-
-// RDD protocol
-
-static void* CreateRddPacket(uint8_t receiver, uint8_t type, uint8_t size)
-{
-	if (Queue_IsFull(transportRddQueue))
-	{
-		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_UNABLE_TO_CREATE_RDD_PACKET);
-		return NULL;
-	}
-	queue_element* qe = Queue_Head(transportRddQueue);
-
-	qe->size = size;
-	qe->object = MemoryManager_Allocate(qe->size);
-
-	if (qe->object == NULL)
-	{
-		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_UNABLE_TO_CREATE_RDD_PACKET);
-		return NULL;
-	}
-
-	link_network_rdd_transport_header* p = qe->object;
-	p->link.type = type;
-	p->network.receiver = receiver;
-	p->network.sender = address;
-	p->transport.sequenceNumber = transportRddNextSequenceNumber++;
-
-	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_CREATED_RDD_PACKET);
-
-	return qe->object;
-}
-
-void* Network_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t dataSize)
-{
-	application_sensor_data_packet* p = CreateRddPacket(receiver, TYPE_APPLICATION_SENSOR_DATA, sizeof(application_sensor_data_packet) + dataSize);
-	if (p == NULL)
-	{
-		return NULL;
-	}
-
-	p->sensor = sensor;
-
-	return p->data;
-}
-
-void Network_CreateSetResponsePacket(uint8_t receiver, property_status status)
-{
-	application_set_response_packet* p = CreateRddPacket(receiver, TYPE_APPLICATION_SET_PROPERTY_RESPONSE, sizeof(application_get_response_packet));
-
-	p->status = status;
-}
-
-void* Network_CreateGetResponsePacket(uint8_t receiver, property_status status, uint8_t dataSize)
-{
-	application_get_response_packet* p = CreateRddPacket(receiver, TYPE_APPLICATION_GET_PROPERTY_RESPONSE, sizeof(application_get_response_packet) + dataSize);
-
-	p->status = status;
-
-	return p->data;
-}
-
-void Network_QueueRddPacket()
-{
-	Queue_AdvanceHead(transportRddQueue);
-}
-
-static void AcknowledgeTransportRddPacket(link_network_rdd_transport_header* packet)
-{
-
-}
-
-// End RDD protocol
 
 // Internal
 
@@ -320,24 +129,38 @@ static void InitiateSynchronization()
 	linkState = LINK_STATE_UNSYNCHRONIZED;
 }
 
+void SignalLinkLayerTransmissionAttemptFailed()
+{
+	if (++linkTransmissionAttemptCounter >= NETWORK_LINK_MAXIMUM_TRANSMISSION_ATTEMPTS)
+	{
+		linkTransmissionAttemptCounter = 0;
+		if (Queue_IsEmpty(linkQueue) == false)
+		{
+			queue_element* qe = Queue_Tail(linkQueue);
+			MemoryManager_Release(qe->object);
+			Queue_AdvanceTail(linkQueue);
+		}
+	}
+}
+
 /**
  * Called directly from the timer interrupt and so it is atomic.
  */
 void Network_TimerEvent()
 {
-	RadioDriver_EnableReceiveMode();
+	SetBit(PORTF, 0);
 
-
-	// a node must be synchronized before it can communicate on the network
 	if (linkState == LINK_STATE_UNSYNCHRONIZED)
 	{
+		//	RadioDriver_EnableReceiveMode();
+		ClearBit(PORTF, 0);
 		return;
 	}
 
 	//Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_TICK);
 
 	// update the CCA threshold
-	UpdateCca();
+	//UpdateCca();
 
 
 	// if state is not STATE_IDLE a frame was not received when one was expected
@@ -349,16 +172,7 @@ void Network_TimerEvent()
 
 		case LINK_STATE_EXPECTING_CTS:
 			// RTS was never replied to. Inform router that the node addressed is bad. Maybe a weak link
-			if (++linkTransmissionCount >= NETWORK_LINK_MAXIMUM_TRANSMISSION_ATTEMPTS)
-			{
-				linkTransmissionCount = 0;
-				if (Queue_IsEmpty(linkQueue) == false)
-				{
-					queue_element* qe = Queue_Tail(linkQueue);
-					MemoryManager_Release(qe->object);
-					Queue_AdvanceTail(linkQueue);
-				}
-			}
+			SignalLinkLayerTransmissionAttemptFailed();
 			break;
 
 		case LINK_STATE_EXPECTING_DATA:
@@ -367,102 +181,94 @@ void Network_TimerEvent()
 
 		case LINK_STATE_EXPECTING_ACK:
 			// Data was never acknowledged. Inform router of weak link.
-			if (++linkTransmissionCount >= NETWORK_LINK_MAXIMUM_TRANSMISSION_ATTEMPTS)
-			{
-				linkTransmissionCount = 0;
-				if (Queue_IsEmpty(linkQueue) == false)
-				{
-					queue_element* qe = Queue_Tail(linkQueue);
-					MemoryManager_Release(qe->object);
-					Queue_AdvanceTail(linkQueue);
-				}
-			}
+			SignalLinkLayerTransmissionAttemptFailed();
 			break;
 	}
 
 	// reset state
 	linkState = LINK_STATE_IDLE;
 
-	uint8_t currentSlot = 0;
-
 	if (Queue_IsEmpty(linkQueue) == false) // frames to send?
 	{
 		//uint8_t slot = rand_r(&randomContext) & 0x3; // if this is a high priority node or packet choose an earlier slot
 		uint8_t slot = 0;
-		for (; currentSlot < slot; currentSlot++)
+		bool channelIsClear = true;
+		for (uint8_t currentSlot = 0; currentSlot < slot; currentSlot++)
 		{
+			_delay_us(NETWORK_LINK_RTS_GUARD_SLOT_DURATION - NETWORK_LINK_CCA_CHECK_DURATION);
+
 			if (IsChannelClear() == false)
 			{
+				channelIsClear = false;
+				linkState = LINK_STATE_EXPECTING_RTS;
 				break;
 			}
-			_delay_us(NETWORK_LINK_RTS_SLOT_DURATION);
 		}
 
-		if (IsChannelClear())
+		if (channelIsClear == true)
 		{
 			// get next packet and find the next node in its route
 			queue_element* qe = Queue_Tail(linkQueue);
 			linkCurrentPacket = qe->object;
 			linkCurrentPacketLength = qe->size;
 
-
-			// TODO: Extract destination and link loss for destination and calculate needed TX power level and set it
-
-			// Send RTS
-			rtsPacketTemplate.link.destination = linkCurrentPacket->link.destination;
-			rtsPacketTemplate.slot = slot;
-			rtsPacketTemplate.transmissionPowerLevel = 0; // TODO Implement this
-			RadioDriver_Send(&rtsPacketTemplate, sizeof(rtsPacketTemplate));
-
-			Diagnostics_SendEvent(DIAGNOSTICS_TX_RTS);
-
-			linkState = LINK_STATE_EXPECTING_CTS;
-		}
-	}
-
-	if (linkState == LINK_STATE_IDLE) // nothing to send => receive maybe
-	{
-		for (uint8_t i = currentSlot; i < NETWORK_LINK_NUMBER_OF_RTS_SLOTS; i++)
-		{
-			if (IsChannelClear() == false) // transmission in progress
+			if (linkCurrentPacket->link.destination == BROADCAST_ADDRESS)
 			{
-				linkState = LINK_STATE_EXPECTING_RTS;
-				break;
+				RadioDriver_SetTxPower(RADIODRIVER_TX_POWER_MAXIMUM); // broadcasts are always sent at maximum power.
+
+				RadioDriver_Send(linkCurrentPacket, linkCurrentPacketLength); // send packet. stay in idle state as no reply is expected.
+
+				MemoryManager_Release(linkCurrentPacket); // release allocated memory
+				Queue_AdvanceTail(linkQueue); // and remove it from the queue
+
+				Diagnostics_SendEvent(DIAGNOSTICS_TX_DATA);
 			}
-			_delay_us(NETWORK_LINK_RTS_SLOT_DURATION);
-		}
+			else
+			{
+				// TODO: Extract destination and link loss for destination and calculate needed TX power level and set it. If NO_ROUTE use maximum power.
+				RadioDriver_SetTxPower(RADIODRIVER_TX_POWER_MAXIMUM); // use maximum for now
 
-		if (linkState == LINK_STATE_IDLE) // channel clear => no one is sending
-		{
-			RadioDriver_DisableReceiveMode();
+				rtsPacketTemplate.link.destination = linkCurrentPacket->link.destination;
+				rtsPacketTemplate.slot = slot;
+				rtsPacketTemplate.transmissionPowerLevel = 0; // TODO Implement this
+				RadioDriver_Send(&rtsPacketTemplate, sizeof(rtsPacketTemplate));
+
+				linkState = LINK_STATE_EXPECTING_CTS;
+
+				Diagnostics_SendEvent(DIAGNOSTICS_TX_RTS);
+			}
 		}
 	}
-
-
-	// transport timer
-	if (transportRddTimer > 0)
+	else
 	{
-		if (--transportRddTimer == 0)
-		{
-			EventDispatcher_Complete(TransportRddTimeoutHandler);
-		}
+		linkState = LINK_STATE_EXPECTING_RTS;
+
+
+		//		for (uint8_t i = 0; i < NETWORK_LINK_NUMBER_OF_RTS_GUARD_SLOTS; i++)
+		//		{
+		//			if (IsChannelClear() == false) // transmission in progress
+		//			{
+		//				linkState = LINK_STATE_EXPECTING_RTS;
+		//				break;
+		//			}
+		//			_delay_us(NETWORK_LINK_RTS_GUARD_SLOT_DURATION - NETWORK_LINK_CCA_CHECK_DURATION);
+		//		}
+		//
+		//		if (linkState == LINK_STATE_IDLE) // channel clear => no one is sending
+		//		{
+		//			//RadioDriver_DisableReceiveMode();
+		//		}
 	}
 
-
-	// process low resolution, high precision timers - high jitter if placed after network logic
-}
-
-static void TransportRddTimeoutHandler()
-{
-	transportRddTimer = NETWORK_TRANSPORT_RDD_TIMEOUT;
+	ClearBit(PORTF, 0);
 }
 
 #if MASTER_NODE == 0
 static void SynchronizationHandler()
 {
-	if (connected == false)
+	if (connectionState == CONNECTION_STATE_UNCONNECTED)
 	{
-		application_join_request_packet* p = CreateJoinRequestPacket();
+		application_join_request_packet* p = BedProtocol_CreatePacket(GATEWAY_ADDRESS, TYPE_APPLICATION_JOIN_REQUEST, sizeof(application_join_request_packet));
 
 
 		//NonVolatileStorage_Read(0, p->serialNumber, lengthof(p->serialNumber));
@@ -471,8 +277,11 @@ static void SynchronizationHandler()
 
 		memset(p->serialNumber + 1, 0, 15);
 		Network_QueueBedPacket();
-		Leds_GreenOn();
+
+		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_CREATED_JOIN_REQUEST);
 	}
+
+	EventDispatcher_Publish(EVENT_SYNCHRONIZED, NULL);
 }
 #endif
 
@@ -488,6 +297,8 @@ static void JoinRequestHandler(void* data, uint8_t length)
 	memcpy(response->serialNumber, p->serialNumber, lengthof(p->serialNumber));
 	Network_QueueBedPacket();
 
+	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_GOT_JOIN_REQUEST);
+
 	Leds_GreenOn();
 }
 #endif
@@ -500,45 +311,22 @@ static void JoinResponseHandler(void* data, uint8_t length)
 
 	//NonVolatileStorage_Read(0, p->serialNumber, lengthof(p->serialNumber));
 
+	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_GOT_JOIN_RESPONSE);
+
 	if (p->serialNumber[0] == serialNumber)
 	{
 		AssignAddress(p->assignedAddress);
+		EventDispatcher_Publish(EVENT_CONNECTED, NULL);
 		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_JOINED);
-		Leds_YellowOn();
 	}
 }
 #endif
 
 static void* FrameReceived(void* data, uint8_t length)
 {
+	SetBit(PORTF, 2);
+
 	link_header* lh = data;
-
-
-#if MASTER_NODE == 0
-	if (linkState == LINK_STATE_UNSYNCHRONIZED)
-	{
-		if (lh->type == TYPE_LINK_RTS)
-		{
-			//link_rts_packet* p = data;
-			//uint8_t slot = p->slot;
-			// set timer
-			NetworkTimer_SetTimerValue(2);
-
-			linkState = LINK_STATE_EXPECTING_RTS;
-
-			EventDispatcher_Complete(SynchronizationHandler);
-		}
-		else
-		{
-			return data;
-		}
-	}
-#endif
-
-	if (lh->destination != address && lh->destination != BROADCAST_ADDRESS)
-	{
-		return data;
-	}
 
 	switch (lh->type)
 	{
@@ -546,13 +334,27 @@ static void* FrameReceived(void* data, uint8_t length)
 
 		case TYPE_LINK_RTS:
 			{
+				link_rts_packet* p = data;
+
+				NetworkTimer_SetTimerValue(20 + 0 * p->slot);
+
 				if (linkState != LINK_STATE_EXPECTING_RTS)
 				{
+					// signal unexpected RTS
 					linkState = LINK_STATE_IDLE;
 					break;
 				}
 
+				if (lh->destination != address)
+				{
+					break;
+				}
+
 				linkCurrentSource = lh->source;
+
+
+				// TODO: Extract destination and link loss for destination and calculate needed TX power level and set it. If NO_ROUTE use maximum power.
+				RadioDriver_SetTxPower(RADIODRIVER_TX_POWER_MAXIMUM); // use maximum for now
 
 				ctsPacketTemplate.link.destination = linkCurrentSource;
 				RadioDriver_Send(&ctsPacketTemplate, sizeof(ctsPacketTemplate));
@@ -561,13 +363,28 @@ static void* FrameReceived(void* data, uint8_t length)
 
 				Diagnostics_SendEvent(DIAGNOSTICS_RX_RTS);
 				Diagnostics_SendEvent(DIAGNOSTICS_TX_CTS);
+
+
+				//				if (connectionState == CONNECTION_STATE_UNCONNECTED)
+				//				{
+				//					EventDispatcher_Complete(SynchronizationHandler);
+				//				}
 			}
 			break;
 
 		case TYPE_LINK_CTS:
 			{
-				if (linkState != LINK_STATE_EXPECTING_CTS || linkCurrentPacket->link.destination != lh->source)
+				if (linkState != LINK_STATE_EXPECTING_CTS)
 				{
+					// signal unexpected CTS
+					linkState = LINK_STATE_IDLE;
+					break;
+				}
+
+				if (linkCurrentPacket->link.destination != lh->source)
+				{
+					// CTS from wrong node
+					SignalLinkLayerTransmissionAttemptFailed();
 					linkState = LINK_STATE_IDLE;
 					break;
 				}
@@ -583,14 +400,24 @@ static void* FrameReceived(void* data, uint8_t length)
 
 		case TYPE_LINK_ACK:
 			{
-				if (linkState != LINK_STATE_EXPECTING_ACK || linkCurrentPacket->link.destination != lh->source)
+				if (linkState != LINK_STATE_EXPECTING_ACK)
 				{
+					// signal unexpected ACK
+					linkState = LINK_STATE_IDLE;
+					break;
+				}
+
+				if (linkCurrentPacket->link.destination != lh->source)
+				{
+					// ACK from wrong node
+					SignalLinkLayerTransmissionAttemptFailed();
 					linkState = LINK_STATE_IDLE;
 					break;
 				}
 
 				MemoryManager_Release(linkCurrentPacket); // release allocated memory
 				Queue_AdvanceTail(linkQueue); // and remove it from the queue
+				linkTransmissionAttemptCounter = 0;
 
 				linkState = LINK_STATE_IDLE;
 
@@ -616,18 +443,18 @@ static void* FrameReceived(void* data, uint8_t length)
 
 		case TYPE_TRANSPORT_RDD_ACK:
 			{
-				if (VerifyNetworkLayerHeader(&data, length))
-				{
-					queue_element* qe = Queue_Head(transportRddQueue);
-					transport_rdd_acknowledge_packet* qp = qe->object;
-					transport_rdd_acknowledge_packet* p = data;
-					if (p->network.sender != qp->network.receiver || p->transport.sequenceNumber != qp->transport.sequenceNumber)
-					{
-						break;
-					}
-					// TODO: Send notification on timeout (acks just happens without a sound)
-					Queue_AdvanceTail(transportRddQueue);
-				}
+				//				if (VerifyNetworkLayerHeader(&data, length))
+				//				{
+				//					queue_element* qe = Queue_Head(transportRddQueue);
+				//					transport_rdd_acknowledge_packet* qp = qe->object;
+				//					transport_rdd_acknowledge_packet* p = data;
+				//					if (p->network.sender != qp->network.receiver || p->transport.sequenceNumber != qp->transport.sequenceNumber)
+				//					{
+				//						break;
+				//					}
+				//					// TODO: Send notification on timeout (acks just happens without a sound)
+				//					Queue_AdvanceTail(transportRddQueue);
+				//				}
 			}
 			break;
 
@@ -679,10 +506,11 @@ static void* FrameReceived(void* data, uint8_t length)
 			break;
 	}
 
+	ClearBit(PORTF, 2);
 	return data;
 }
 
-static bool VerifyNetworkLayerHeader(void** data, uint8_t length)
+bool VerifyNetworkLayerHeader(void** data, uint8_t length)
 {
 	link_header* lh = *data;
 	link_network_header* lnh = *data;
@@ -725,165 +553,106 @@ static bool VerifyNetworkLayerHeader(void** data, uint8_t length)
 	return true;
 }
 
-static bool ProcessBedPacket(void** data, uint8_t length, block_handler packetHandler)
-{
-	if (VerifyNetworkLayerHeader(data, length)) // a network layer packet for this node?
-	{
-		if (EventDispatcher_Process(packetHandler, *data, length)) // add to event queue
-		{
-			*data = NULL; // keep the allocated memory
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
-static bool ProcessRddPacket(void** data, uint8_t length, block_handler packetHandler)
-{
-	if (VerifyNetworkLayerHeader(data, length)) // a network layer packet for this node?
-	{
-		if (EventDispatcher_Process(packetHandler, *data, length)) // add to event queue
-		{
-			AcknowledgeTransportRddPacket(*data); // acknowledge packet if it could be added to queue
-
-			*data = NULL; // keep the allocated memory
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
-//
-// Routing functionality
-
-#define COST_INFINITY																								0xffff
-
-static uint8_t PickCheapestNode(node nodes[])
-{
-	uint16_t lowestCost = COST_INFINITY;
-	uint8_t index = NO_ROUTE;
-
-	for (uint8_t i = 0; i < 15; i++)
-	{
-		if (nodes[i].marked == false)
-		{
-			if (nodes[i].cost < lowestCost)
-			{
-				index = i;
-			}
-		}
-	}
-
-	return index;
-}
-
-static bool FindRouteToNode(uint8_t target)
-{
-	node nodes[15];
-	for (uint8_t i = 0; i < 15; i++)
-	{
-		node* n = &nodes[i];
-		n->marked = false;
-		n->cost = COST_INFINITY;
-		n->previousNode = NO_ROUTE;
-	}
-	nodes[address].cost = 0;
-
-	for (uint8_t i = 0; i < 15; i++)
-	{
-		uint8_t currentIndex = PickCheapestNode(nodes);
-		if (currentIndex == NO_ROUTE)
-		{
-			routingTable[target] = NO_ROUTE;
-			return false;
-		}
-		if (currentIndex == target)
-		{
-			uint8_t next = target;
-			uint8_t previous = nodes[next].previousNode;
-			while (previous != address)
-			{
-				next = previous;
-				previous = nodes[next].previousNode;
-			}
-			routingTable[target] = next;
-			return true;
-		}
-
-		node* current = &nodes[currentIndex];
-		for (uint8_t neighborIndex = 0; neighborIndex < 15; neighborIndex++)
-		{
-			if (current->costToNeighbors[neighborIndex] != 0)
-			{
-				node* neighbor = &nodes[neighborIndex];
-				uint16_t newCost = current->cost + current->costToNeighbors[neighborIndex];
-				if (newCost < neighbor->cost)
-				{
-					neighbor->cost = newCost;
-					neighbor->previousNode = currentIndex;
-				}
-			}
-		}
-
-		current->marked = true;
-	}
-}
-
 //
 // Clear Channel Assessment stuff here
 
-#define RSSI_SAMPLE_COUNT																						8
-#define CCA_ALPHA																										0.06
-#define RSSI_OUTLIER_COUNT																					5
-#define CCA_RSSI_CHECK_INTERVAL																			2
-
 static int8_t ccaThreshold;
 
-// TODO Please! use fixed point brrr
 static void UpdateCca()
 {
-	static float rssiSamples[RSSI_SAMPLE_COUNT];
-	static uint8_t rssiIndex = 0;
-	static float oldMedian = 0;
-	static float oldThreshold = 0;
-	static float sum = 0;
+	SetBit(PORTF, 4);
 
-	float rssi = RadioDriver_GetRssi();
+	static uint8_t currentIndex = 0;
+	static int8_t samples[NETWORK_LINK_CCA_SAMPLE_COUNT];
+	static int16_t sum = 0;
 
-	sum -= rssiSamples[rssiIndex];
-	rssiSamples[rssiIndex] = rssi;
+	int8_t rssi = RadioDriver_GetRssi();
+
+	sum -= samples[currentIndex];
+	samples[currentIndex] = rssi;
 	sum += rssi;
 
-	if (++rssiIndex >= RSSI_SAMPLE_COUNT)
+	if (++currentIndex >= NETWORK_LINK_CCA_SAMPLE_COUNT)
 	{
-		rssiIndex = 0;
+		currentIndex = 0;
+		Diagnostics_SendRaw(rssi);
 	}
 
-	float median = sum / RSSI_SAMPLE_COUNT;
+	static fixed15_16 oldMedian = 0;
+	fixed15_16 newMedian = Fixed15_16Div(ToFixed15_16(sum), ToFixed15_16(NETWORK_LINK_CCA_SAMPLE_COUNT));
+	static fixed15_16 oldThreshold = 0;
+	fixed15_16 alpha = ToFixed15_16(NETWORK_LINK_CCA_ALPHA);
+	fixed15_16 alphaMedian = Fixed15_16Mul(alpha, newMedian);
+	fixed15_16 beta = Fixed15_16Sub(ToFixed15_16(1.0), alpha);
+	fixed15_16 betaOld = Fixed15_16Mul(beta, oldThreshold);
+	oldThreshold = Fixed15_16Add(alphaMedian, betaOld);
 
-	oldThreshold = CCA_ALPHA * oldMedian + (1.0 - CCA_ALPHA) * oldThreshold;
+	oldMedian = newMedian;
 
-	oldMedian = median;
+	ccaThreshold = ToInt15_16(oldThreshold);
 
-	ccaThreshold = oldThreshold;
+
+	//	static uint8_t reportCounter = 0;
+	//	if (++reportCounter >= (128 / 10))
+	//	{
+	//		reportCounter = 0;
+	//		Diagnostics_SendRaw(ccaThreshold);
+	//	}
+
+
+	//	Diagnostics_SendRaw(0);
+	//	Diagnostics_SendRaw(1);
+	//	Diagnostics_SendRaw(ccaThreshold * -1);
+	//Diagnostics_SendRaw(rssi);
+	//	Diagnostics_SendRaw(RadioDriver_GetRssiAtFrameStart() * -1);
+
+
+	//	static float rssiSamples[NETWORK_LINK_CCA_SAMPLE_COUNT];
+	//	static uint8_t rssiIndex = 0;
+	//	static float oldMedian = 0;
+	//	static float oldThreshold = 0;
+	//	static float sum = 0;
+	//
+	//	float rssi = RadioDriver_GetRssi();
+	//
+	//	sum -= rssiSamples[rssiIndex];
+	//	rssiSamples[rssiIndex] = rssi;
+	//	sum += rssi;
+	//
+	//	if (++rssiIndex >= NETWORK_LINK_CCA_SAMPLE_COUNT)
+	//	{
+	//		rssiIndex = 0;
+	//	}
+	//
+	//	float median = sum / (float) NETWORK_LINK_CCA_SAMPLE_COUNT;
+	//
+	//	oldThreshold = NETWORK_LINK_CCA_ALPHA * oldMedian + (1.0 - NETWORK_LINK_CCA_ALPHA) * oldThreshold;
+	//
+	//	oldMedian = median;
+	//
+	//	ccaThreshold = oldThreshold;
+
+	ClearBit(PORTF, 4);
 }
 
 static bool IsChannelClear()
 {
-	uint8_t outliers = 0;
+	SetBit(PORTF, 6);
 
-	for (uint8_t i = 0; i < RSSI_OUTLIER_COUNT; i++)
+	bool clear = false;
+
+
+	// do all loops even though an outlier is found to maintain a constant execution time
+	for (uint8_t i = 0; i < NETWORK_LINK_CCA_OUTLIER_COUNT; i++)
 	{
-		if (RadioDriver_GetRssi() <= ccaThreshold)
+		if (RadioDriver_GetRssi() < (ccaThreshold - NETWORK_LINK_CCA_THRESHOLD_SAFE_BAND))
 		{
-			outliers++;
+			clear = true;
 		}
-		_delay_us(CCA_RSSI_CHECK_INTERVAL);
+		_delay_us(NETWORK_LINK_CCA_CHECK_INTERVAL);
 	}
 
-	return outliers > 0;
+	ClearBit(PORTF, 6);
+
+	return clear;
 }

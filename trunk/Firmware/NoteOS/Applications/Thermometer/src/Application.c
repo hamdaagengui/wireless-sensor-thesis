@@ -16,19 +16,33 @@ void ThermoUpdate(sensor_id sensor, void* data)
 
 void Ping()
 {
-	network_routes_packet* p = Network_CreateBedPacket(12, 15, sizeof(network_routes_packet));
-
+	transport_bed_header* p = BedProtocol_CreatePacket(1, 15, sizeof(transport_bed_header));
 	Network_QueueBedPacket();
+
 	Leds_RedToggle();
 }
 
 timer_configuration tim;
+
+void Synced(event e, void* data)
+{
+	Leds_YellowOn();
+}
+
+void Connected(event e, void* data)
+{
+	Leds_GreenOn();
+}
+
 void Start()
 {
 	//	SensorManager_InstallSensor(&temperatureSensorMax6662Interface);
 	//	SensorManager_InstallSensor(&heartRateVariabilityInterface);
 	//
 	//	EventDispatcher_Subscribe(SENSOR_TEMPERATURE_EAR_LEFT, ThermoUpdate);
+
+	EventDispatcher_Subscribe(EVENT_SYNCHRONIZED, Synced);
+	EventDispatcher_Subscribe(EVENT_CONNECTED, Connected);
 
 
 #if MASTER_NODE == 1
