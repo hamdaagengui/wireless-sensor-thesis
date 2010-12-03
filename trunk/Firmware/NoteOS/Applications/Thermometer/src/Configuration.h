@@ -9,7 +9,7 @@
 #define CONFIGURATION_H_
 
 // General
-#define MASTER_NODE																									0
+#define MASTER_NODE																									1
 
 // Board Support Package selection
 #define BOARDSUPPORTPACKAGE_STK600_ATMEGA128RFA1										1
@@ -25,7 +25,7 @@
 #define NETWORK_LINK_CCA_THRESHOLD_SAFE_BAND												5
 #define NETWORK_LINK_CCA_CHECK_INTERVAL															2
 #define NETWORK_LINK_CCA_CHECK_DURATION															(NETWORK_LINK_CCA_OUTLIER_COUNT * NETWORK_LINK_CCA_CHECK_INTERVAL)
-#define NETWORK_LINK_MAXIMUM_TRANSMISSION_ATTEMPTS									5
+#define NETWORK_LINK_MAXIMUM_TRANSMISSION_ATTEMPTS									3
 #define NETWORK_LINK_MAXIMUM_PACKET_SIZE														64
 #define NETWORK_LINK_QUEUE_SIZE																			10
 #define NETWORK_NETWORK_CAN_ROUTE																		1

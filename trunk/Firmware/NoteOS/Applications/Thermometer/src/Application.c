@@ -9,15 +9,13 @@
 
 void ThermoUpdate(sensor_id sensor, void* data)
 {
-	int16_t* v = Network_CreateSensorDataPacket(0, 1, 2);
-	*v = *((int16_t*) data);
-	Network_QueueRddPacket();
+	ApplicationProtocols_SendSensorData(0, 1, data, 2);
 }
 
 void Ping()
 {
-	transport_bed_header* p = BedProtocol_CreatePacket(1, 15, sizeof(transport_bed_header));
-	Network_QueueBedPacket();
+	char pingMsg[] = { "Ping" };
+	ApplicationProtocols_SendRawBedData(BROADCAST_ADDRESS, pingMsg, sizeof(pingMsg));
 
 	Leds_RedToggle();
 }

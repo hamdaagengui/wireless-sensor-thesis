@@ -13,6 +13,8 @@ static void TickAllTimers();
 static void FindAndSetShortestInterval();
 static void RemoveTimer(uint8_t index);
 
+static uint32_t localTime = 0;
+
 static timer_configuration* timers[TIMER_MAXIMUM_NUMBER_OF_TIMERS];
 static uint8_t timerCount = 0;
 static uint16_t interval;
@@ -25,7 +27,7 @@ void Timer_CreateConfiguration(timer_configuration* configuration, uint32_t peri
 	configuration->mode = mode;
 	configuration->completed = completed;
 
-	Diagnostics_SendEvent(DIAGNOSTICS_TIMER_CREATED);
+	Diagnostics_SendEvent(DIAGNOSTICS_TIMER_CONFIGURATION_CREATED);
 }
 
 void Timer_Start(timer_configuration* configuration)
@@ -34,7 +36,7 @@ void Timer_Start(timer_configuration* configuration)
 	{
 		if (timerCount == TIMER_MAXIMUM_NUMBER_OF_TIMERS)
 		{
-			Diagnostics_SendEvent(DIAGNOSTICS_TIMER_NOT_STARTED);
+			Diagnostics_SendEvent(DIAGNOSTICS_TIMER_FAILED_TO_START);
 			return;
 		}
 
@@ -101,9 +103,14 @@ void Timer_Stop(timer_configuration* configuration)
 	}
 }
 
+uint32_t Timer_GetLocalTime()
+{
+	return (SystemTimer_GetCurrent() + localTime) * TIMER_RESOLUTION;
+}
+
 void Timer_Tick()
 {
-	Diagnostics_SendEvent(DIAGNOSTICS_TIMER_TICK);
+//	Diagnostics_SendEvent(DIAGNOSTICS_TIMER_TICK);
 	TickAllTimers();
 	FindAndSetShortestInterval();
 }
@@ -141,6 +148,8 @@ static void TickAllTimers()
 			}
 		}
 	}
+
+	localTime += interval;
 }
 
 static void FindAndSetShortestInterval()

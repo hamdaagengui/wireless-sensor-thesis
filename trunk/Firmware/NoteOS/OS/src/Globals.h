@@ -37,6 +37,6 @@ typedef void* (*bidirectional_block_handler)(void* data, uint8_t length);
 ///#define inline __attribute__ ((__always_inline__))
 ///#define a  flatten
 
-extern uint8_t serialNumber;
+extern uint8_t serialNumber[16];
 
 #endif /* GLOBALS_H_ */

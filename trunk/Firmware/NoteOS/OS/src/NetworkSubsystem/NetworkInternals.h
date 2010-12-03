@@ -9,6 +9,9 @@
 #define NETWORKINTERNALS_H_
 
 #include "Network.h"
+#include "BedProtocol.h"
+#include "RddProtocol.h"
+#include "RoutingLogic.h"
 
 //  Constants
 #define GATEWAY_ADDRESS																							0
@@ -43,8 +46,12 @@ typedef enum
 	// transport packets
 	TYPE_TRANSPORT_RDD_ACK,
 	// application packets
+	//   BED based
 	TYPE_APPLICATION_JOIN_REQUEST,
 	TYPE_APPLICATION_JOIN_RESPONSE,
+	TYPE_APPLICATION_RAW_BED,
+	//   RDD based
+	TYPE_APPLICATION_RAW_RDD,
 	TYPE_APPLICATION_SENSOR_DATA,
 	TYPE_APPLICATION_SET_PROPERTY_REQUEST,
 	TYPE_APPLICATION_SET_PROPERTY_RESPONSE,

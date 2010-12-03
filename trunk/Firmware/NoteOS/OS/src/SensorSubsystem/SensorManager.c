@@ -32,8 +32,7 @@ void SensorManager_SetProperty(void* data, uint8_t length)
 
 	if (sensor >= numberOfSensorsInstalled)
 	{
-		Network_CreateGetResponsePacket(0, PROPERTY_STATUS_INVALID_SENSOR, 0);
-		Network_QueueRddPacket();
+		ApplicationProtocols_SendSetResponse(packet->network.sender, PROPERTY_STATUS_INVALID_SENSOR);
 	}
 	else
 	{
@@ -49,8 +48,7 @@ void SensorManager_GetProperty(void* data, uint8_t length)
 
 	if (sensor >= numberOfSensorsInstalled)
 	{
-		Network_CreateGetResponsePacket(0, PROPERTY_STATUS_INVALID_SENSOR, 0);
-		Network_QueueRddPacket();
+		ApplicationProtocols_SendGetResponse(packet->network.sender, PROPERTY_STATUS_INVALID_SENSOR, NULL, 0);
 	}
 	else
 	{

@@ -16,11 +16,11 @@ void NetworkTimer_Initialize()
 {
 	ASSR = (1 << AS2);
 
-	TCCR2A = (1 << WGM21);
+	TCCR2A = 0;
 	TCCR2B = (1 << CS20); // prescaler 1:1
 
-	TIFR2 |= (1 << TOV2);
-	TIMSK2 |= (1 << TOIE2);
+	TIFR2 = (1 << TOV2);
+	TIMSK2 = (1 << TOIE2);
 }
 
 void NetworkTimer_SetTimerPeriod(uint16_t value)
@@ -31,7 +31,7 @@ void NetworkTimer_SetTimerPeriod(uint16_t value)
 
 void NetworkTimer_SetTimerValue(uint16_t value)
 {
-//	GTCCR |= (1 << PSRASY); // reset prescaler
+	//	GTCCR |= (1 << PSRASY); // reset prescaler
 	TCNT2 = value;
 }
 

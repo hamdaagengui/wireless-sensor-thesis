@@ -47,6 +47,11 @@ void SystemTimer_SetPeriod(uint16_t period)
 	TIFR5 |= 1 << OCF5A;
 }
 
+uint16_t SystemTimer_GetCurrent()
+{
+	return TCNT5;
+}
+
 uint16_t SystemTimer_Reset()
 {
 	uint16_t timer = TCNT5;
