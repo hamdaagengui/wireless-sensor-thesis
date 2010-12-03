@@ -12,6 +12,6 @@
 
 extern void* BedProtocol_CreatePacket(uint8_t receiver, uint8_t type, uint8_t size);
 extern bool BedProtocol_QueuePacket();
-extern bool BedProtocol_ProcessPacket(void** data, uint8_t length, block_handler packetHandler);
+extern void BedProtocol_ProcessPacket(void** data, uint8_t length, block_handler packetHandler);
 
 #endif /* BEDPROTOCOL_H_ */

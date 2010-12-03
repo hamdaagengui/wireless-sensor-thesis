@@ -7,6 +7,7 @@
 
 #include "Diagnostics.h"
 #include "../HardwareAbstractionLayer/DiagnosticsLink.h"
+#include "../EventSubsystem/Timer.h"
 
 #ifdef DIAGNOSTICS
 
@@ -29,7 +30,7 @@ void Diagnostics_Initialize()
 
 void Diagnostics_SendRaw(uint8_t value)
 {
-//	DiagnosticsLink_Send(&value, 1);
+	//	DiagnosticsLink_Send(&value, 1);
 }
 
 void Diagnostics_SendEvent(uint8_t event)
@@ -39,10 +40,16 @@ void Diagnostics_SendEvent(uint8_t event)
 		return;
 	}
 
+//	uint32_t time = Timer_GetLocalTime();
+
 	uint8_t buffer[10];
 	uint8_t position = 0; // SOF never need stuffing so skip it
 
 	buffer[position++] = SOF_EVENT;
+//	position += AddData(time & 0xff, buffer, position);
+//	position += AddData((time >> 8) & 0xff, buffer, position);
+//	position += AddData((time >> 16) & 0xff, buffer, position);
+//	position += AddData((time >> 24) & 0xff, buffer, position);
 	position += AddData(event, buffer, position);
 	buffer[position++] = EOF;
 

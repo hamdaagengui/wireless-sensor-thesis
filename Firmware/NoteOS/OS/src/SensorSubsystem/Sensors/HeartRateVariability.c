@@ -6,6 +6,7 @@
  */
 
 #include "HeartRateVariability.h"
+#include "NetworkSubsystem/Network.h"
 
 enum
 {
@@ -39,8 +40,7 @@ static void Set(application_set_request_packet* packet)
 			break;
 
 		default:
-			Network_CreateSetResponsePacket(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY);
-			Network_QueueRddPacket();
+			ApplicationProtocols_SendSetResponse(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY);
 			break;
 	}
 }
@@ -59,8 +59,7 @@ static void Get(application_get_request_packet* packet)
 			break;
 
 		default:
-			Network_CreateGetResponsePacket(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY, 0);
-			Network_QueueRddPacket();
+			ApplicationProtocols_SendGetResponse(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY, NULL, 0);
 			break;
 	}
 }

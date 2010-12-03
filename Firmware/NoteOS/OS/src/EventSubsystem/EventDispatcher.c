@@ -64,6 +64,8 @@ void EventDispatcher_Dispatch()
 		switch (qe->type)
 		{
 			case TYPE_PUBLICATION:
+				Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_PUBLISH_EXECUTED);
+
 				for (uint8_t i = 0; i < numberOfSubscribers; i++)
 				{
 					if (subscribers[i].e == qe->publication.e)
@@ -76,22 +78,20 @@ void EventDispatcher_Dispatch()
 				{
 					MemoryManager_Release(qe->publication.data);
 				}
-
-				Diagnostics_SendEvent(DIAGNOSTICS_PUBLISH_EXECUTED);
 				break;
 
 			case TYPE_COMPLETION:
-				qe->notification.handler();
+				Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_COMPLETION_EXECUTED);
 
-				Diagnostics_SendEvent(DIAGNOSTICS_COMPLETION_EXECUTED);
+				qe->notification.handler();
 				break;
 
 			case TYPE_PROCESSING:
+				Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_PROCESS_EXECUTED);
+
 				qe->processing.handler(qe->processing.data, qe->processing.length);
 
 				MemoryManager_Release(qe->processing.data);
-
-				Diagnostics_SendEvent(DIAGNOSTICS_PROCESS_EXECUTED);
 				break;
 		}
 
@@ -103,7 +103,7 @@ void EventDispatcher_Subscribe(event e, event_handler handler)
 {
 	if (numberOfSubscribers >= EVENTDISPATCHER_MAXIMUM_NUMBER_OF_SUBSCRIBERS)
 	{
-		Diagnostics_SendEvent(DIAGNOSTICS_TOO_MANY_EVENT_SUBSCRIBERS);
+		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_TOO_MANY_EVENT_SUBSCRIBERS);
 		return;
 	}
 
@@ -116,7 +116,7 @@ bool EventDispatcher_Publish(event e, void* data)
 {
 	if (Queue_IsFull(eventQueue))
 	{
-		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
+		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_QUEUE_OVERFLOW);
 		return false;
 	}
 
@@ -128,7 +128,7 @@ bool EventDispatcher_Publish(event e, void* data)
 
 	Queue_AdvanceHead(eventQueue);
 
-	Diagnostics_SendEvent(DIAGNOSTICS_PUBLISH_QUEUED);
+	Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_PUBLISH_QUEUED);
 
 	return true;
 }
@@ -142,7 +142,7 @@ bool EventDispatcher_Complete(completion_handler handler)
 
 	if (Queue_IsFull(eventQueue))
 	{
-		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
+		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_QUEUE_OVERFLOW);
 		return false;
 	}
 
@@ -153,7 +153,7 @@ bool EventDispatcher_Complete(completion_handler handler)
 
 	Queue_AdvanceHead(eventQueue);
 
-	Diagnostics_SendEvent(DIAGNOSTICS_COMPLETION_QUEUED);
+	Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_COMPLETION_QUEUED);
 
 	return true;
 }
@@ -167,7 +167,7 @@ bool EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 
 	if (Queue_IsFull(eventQueue))
 	{
-		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_QUEUE_OVERFLOW);
+		Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_QUEUE_OVERFLOW);
 		return false;
 	}
 
@@ -180,7 +180,7 @@ bool EventDispatcher_Process(block_handler handler, void* data, uint8_t length)
 
 	Queue_AdvanceHead(eventQueue);
 
-	Diagnostics_SendEvent(DIAGNOSTICS_PROCESS_QUEUED);
+	Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_PROCESS_QUEUED);
 
 	return true;
 }

@@ -22,7 +22,6 @@ typedef struct
 
 extern uint8_t routingTable[15];
 
-extern uint8_t RoutingLogic_PickCheapestNode(node nodes[]);
 extern bool RoutingLogic_FindRouteToNode(uint8_t target);
 
 #endif /* ROUTINGLOGIC_H_ */

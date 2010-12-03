@@ -13,7 +13,7 @@
 
 static uint8_t transportRddNextSequenceNumber = 0;
 static uint8_t transportRddQueue[Queue_CalculateSize(sizeof(queue_element), NETWORK_TRANSPORT_RDD_QUEUE_SIZE)];
-static link_network_rdd_transport_header* transportRddCurrentPacket;
+static link_network_rdd_header* transportRddCurrentPacket;
 static uint8_t transportRddCurrentPacketLength;
 static uint8_t transportRddTimer;
 
@@ -40,7 +40,7 @@ void* RddProtocol_CreatePacket(uint8_t receiver, uint8_t type, uint8_t size)
 		return NULL;
 	}
 
-	link_network_rdd_transport_header* p = qe->object;
+	link_network_rdd_header* p = qe->object;
 	p->link.type = type;
 	p->network.receiver = receiver;
 	p->network.sender = address;
@@ -51,41 +51,12 @@ void* RddProtocol_CreatePacket(uint8_t receiver, uint8_t type, uint8_t size)
 	return qe->object;
 }
 
-void* RddProtocol_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t dataSize)
-{
-	application_sensor_data_packet* p = RddProtocol_CreatePacket(receiver, TYPE_APPLICATION_SENSOR_DATA, sizeof(application_sensor_data_packet) + dataSize);
-	if (p == NULL)
-	{
-		return NULL;
-	}
-
-	p->sensor = sensor;
-
-	return p->data;
-}
-
-void RddProtocol_CreateSetResponsePacket(uint8_t receiver, property_status status)
-{
-	application_set_response_packet* p = RddProtocol_CreatePacket(receiver, TYPE_APPLICATION_SET_PROPERTY_RESPONSE, sizeof(application_get_response_packet));
-
-	p->status = status;
-}
-
-void* RddProtocol_CreateGetResponsePacket(uint8_t receiver, property_status status, uint8_t dataSize)
-{
-	application_get_response_packet* p = RddProtocol_CreatePacket(receiver, TYPE_APPLICATION_GET_PROPERTY_RESPONSE, sizeof(application_get_response_packet) + dataSize);
-
-	p->status = status;
-
-	return p->data;
-}
-
 void RddProtocol_QueuePacket()
 {
 	Queue_AdvanceHead(transportRddQueue);
 }
 
-void RddProtocol_AcknowledgePacket(link_network_rdd_transport_header* packet)
+void RddProtocol_AcknowledgePacket(link_network_rdd_header* packet)
 {
 
 }

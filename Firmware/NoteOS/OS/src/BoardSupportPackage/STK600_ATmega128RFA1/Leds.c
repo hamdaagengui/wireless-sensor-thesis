@@ -18,47 +18,47 @@ void Leds_Initialize()
 
 void Leds_GreenOn()
 {
-	GPIO_ClearPin(GPIOE2);
+	//GPIO_ClearPin(GPIOE2);
 }
 
 void Leds_GreenOff()
 {
-	GPIO_SetPin(GPIOE2);
+//	GPIO_SetPin(GPIOE2);
 }
 
 void Leds_GreenToggle()
 {
-	GPIO_TogglePin(GPIOE2);
+//	GPIO_TogglePin(GPIOE2);
 }
 
 void Leds_YellowOn()
 {
-	GPIO_ClearPin(GPIOE3);
+//	GPIO_ClearPin(GPIOE3);
 }
 
 void Leds_YellowOff()
 {
-	GPIO_SetPin(GPIOE3);
+//	GPIO_SetPin(GPIOE3);
 }
 
 void Leds_YellowToggle()
 {
-	GPIO_TogglePin(GPIOE3);
+//	GPIO_TogglePin(GPIOE3);
 }
 
 void Leds_RedOn()
 {
-	GPIO_ClearPin(GPIOE4);
+//	GPIO_ClearPin(GPIOE4);
 }
 
 void Leds_RedOff()
 {
-	GPIO_SetPin(GPIOE4);
+//	GPIO_SetPin(GPIOE4);
 }
 
 void Leds_RedToggle()
 {
-	GPIO_TogglePin(GPIOE4);
+//	GPIO_TogglePin(GPIOE4);
 }
 
 #endif

@@ -42,46 +42,36 @@ static bool Initialize(uint8_t id)
 
 static void Set(application_set_request_packet* packet)
 {
-	uint8_t sender = packet->network.sender;
-
 	switch (packet->property)
 	{
 		case PROPERTY_CURRENT_VALUE:
-			Network_CreateSetResponsePacket(sender, PROPERTY_STATUS_READ_ONLY);
-			Network_QueueRddPacket();
+			ApplicationProtocols_SendSetResponse(packet->network.sender, PROPERTY_STATUS_READ_ONLY);
 			break;
 
 		case PROPERTY_SAMPLE_INTERVAL:
-			*(uint32_t*) Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_SUCCESS, sizeof(uint32_t)) = interval;
-			Network_QueueRddPacket();
+			ApplicationProtocols_SendSetResponse(packet->network.sender, PROPERTY_STATUS_SUCCESS);
 			break;
 
 		default:
-			Network_CreateSetResponsePacket(sender, PROPERTY_STATUS_INVALID_PROPERTY);
-			Network_QueueRddPacket();
+			ApplicationProtocols_SendSetResponse(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY);
 			break;
 	}
 }
 
 static void Get(application_get_request_packet* packet)
 {
-	uint8_t sender = packet->network.sender;
-
 	switch (packet->property)
 	{
 		case PROPERTY_CURRENT_VALUE:
-			*(uint16_t*) Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_SUCCESS, sizeof(uint16_t)) = temperature;
-			Network_QueueRddPacket();
+			ApplicationProtocols_SendGetResponse(packet->network.sender, PROPERTY_STATUS_SUCCESS, &temperature, sizeof(uint16_t));
 			break;
 
 		case PROPERTY_SAMPLE_INTERVAL:
-			*(uint32_t*) Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_SUCCESS, sizeof(uint32_t)) = interval;
-			Network_QueueRddPacket();
+			ApplicationProtocols_SendGetResponse(packet->network.sender, PROPERTY_STATUS_SUCCESS, &interval, sizeof(uint32_t));
 			break;
 
 		default:
-			Network_CreateGetResponsePacket(sender, PROPERTY_STATUS_INVALID_PROPERTY, 0);
-			Network_QueueRddPacket();
+			ApplicationProtocols_SendGetResponse(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY, NULL, 0);
 			break;
 	}
 }

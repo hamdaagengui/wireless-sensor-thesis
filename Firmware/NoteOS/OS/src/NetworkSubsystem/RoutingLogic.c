@@ -12,6 +12,8 @@
 #define NETWORK_UNREACHABLE																					0xffff
 #define LINK_DEAD																										0
 
+static uint8_t PickCheapestNode(node nodes[]);
+
 uint8_t routingTable[15] = { NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE };
 
 typedef struct
@@ -24,25 +26,6 @@ typedef struct
 {
 	route_hop hops[15];
 } route;
-
-uint8_t RoutingLogic_PickCheapestNode(node nodes[])
-{
-	uint16_t lowestCost = COST_INFINITY;
-	uint8_t index = NO_ROUTE;
-
-	for (uint8_t i = 0; i < 15; i++)
-	{
-		if (nodes[i].marked == false)
-		{
-			if (nodes[i].cost < lowestCost)
-			{
-				index = i;
-			}
-		}
-	}
-
-	return index;
-}
 
 bool RoutingLogic_FindRouteToNode(uint8_t target)
 {
@@ -94,4 +77,25 @@ bool RoutingLogic_FindRouteToNode(uint8_t target)
 
 		current->marked = true;
 	}
+
+	return true;
+}
+
+static uint8_t PickCheapestNode(node nodes[])
+{
+	uint16_t lowestCost = COST_INFINITY;
+	uint8_t index = NO_ROUTE;
+
+	for (uint8_t i = 0; i < 15; i++)
+	{
+		if (nodes[i].marked == false)
+		{
+			if (nodes[i].cost < lowestCost)
+			{
+				index = i;
+			}
+		}
+	}
+
+	return index;
 }

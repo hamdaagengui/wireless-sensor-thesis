@@ -18,18 +18,11 @@
 #include "../SensorSubsystem/SensorManager.h"
 #include "../BoardSupportPackage/BoardSupportPackage.h"
 #include "../FixedMath.h"
-#include "RddProtocol.h"
-#include "BedProtocol.h"
-#include "RoutingLogic.h"
 #include "NetworkInternals.h"
 
-static void TransportRddTimeoutHandler();
 static void* FrameReceived(void* data, uint8_t length);
-static bool ProcessBedPacket(void** data, uint8_t length, block_handler packetHandler);
-static bool ProcessRddPacket(void** data, uint8_t length, block_handler packetHandler);
 static void UpdateCca();
 static bool IsChannelClear();
-static void InitiateSynchronization();
 
 // misc
 //static unsigned long randomContext;
@@ -39,25 +32,24 @@ static void InitiateSynchronization();
 
 volatile uint8_t linkState = LINK_STATE_IDLE;
 uint8_t address = GATEWAY_ADDRESS;
-static link_rts_packet rtsPacketTemplate =
-{	.link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_RTS};
-static link_cts_packet ctsPacketTemplate =
-{	.link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_CTS};
-static link_acknowledge_packet ackPacketTemplate =
-{	.link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_ACK};
+static link_rts_packet rtsPacketTemplate = { .link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_RTS };
+static link_cts_packet ctsPacketTemplate = { .link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_CTS };
+static link_acknowledge_packet ackPacketTemplate = { .link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_ACK };
 
 #else
 
 volatile uint8_t linkState = LINK_STATE_UNSYNCHRONIZED;
 uint8_t address = BROADCAST_ADDRESS;
 connection_state connectionState = CONNECTION_STATE_UNCONNECTED;
-static link_rts_packet rtsPacketTemplate = { .link.type=TYPE_LINK_RTS };
-static link_cts_packet ctsPacketTemplate = { .link.type=TYPE_LINK_CTS };
-static link_acknowledge_packet ackPacketTemplate = { .link.type=TYPE_LINK_ACK };
+static link_rts_packet rtsPacketTemplate =
+{	.link.type=TYPE_LINK_RTS};
+static link_cts_packet ctsPacketTemplate =
+{	.link.type=TYPE_LINK_CTS};
+static link_acknowledge_packet ackPacketTemplate =
+{	.link.type=TYPE_LINK_ACK};
 
 #endif
 
-static uint8_t linkCurrentSource;
 static link_network_header* linkCurrentPacket;
 static uint8_t linkCurrentPacketLength;
 static uint8_t linkQueue[Queue_CalculateSize(sizeof(queue_element), NETWORK_LINK_QUEUE_SIZE)];
@@ -75,7 +67,6 @@ void Network_Start()
 
 	srand(RadioDriver_GetRandomNumber());
 
-	NetworkTimer_SetTimerPeriod(NETWORK_LINK_TIMER_FREQUENCY / NETWORK_LINK_COMMUNICATION_SLOT_FREQUENCY);
 	NetworkTimer_SetTimerValue(0);
 }
 
@@ -121,14 +112,6 @@ bool QueueLinkPacket(void* packet, uint8_t length)
 
 // Internal
 
-static void InitiateSynchronization()
-{
-	while (linkState != LINK_STATE_IDLE)
-		;
-
-	linkState = LINK_STATE_UNSYNCHRONIZED;
-}
-
 void SignalLinkLayerTransmissionAttemptFailed()
 {
 	if (++linkTransmissionAttemptCounter >= NETWORK_LINK_MAXIMUM_TRANSMISSION_ATTEMPTS)
@@ -139,6 +122,7 @@ void SignalLinkLayerTransmissionAttemptFailed()
 			queue_element* qe = Queue_Tail(linkQueue);
 			MemoryManager_Release(qe->object);
 			Queue_AdvanceTail(linkQueue);
+			Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_LINK_TX_PACKET_DROPPED);
 		}
 	}
 }
@@ -263,25 +247,31 @@ void Network_TimerEvent()
 	ClearBit(PORTF, 0);
 }
 
-#if MASTER_NODE == 0
-static void SynchronizationHandler()
+void RawHandler(void* data, uint8_t length)
 {
-	if (connectionState == CONNECTION_STATE_UNCONNECTED)
+	Leds_RedToggle();
+}
+
+#if MASTER_NODE == 0
+static void ConnectionHandler()
+{
+	if (connectionState == CONNECTION_STATE_CONNECTING)
 	{
 		application_join_request_packet* p = BedProtocol_CreatePacket(GATEWAY_ADDRESS, TYPE_APPLICATION_JOIN_REQUEST, sizeof(application_join_request_packet));
+		if (p == NULL)
+		{
+			return;
+		}
 
+		//NonVolatileStorage_Read(0, p->serialNumber, sizeof(p->serialNumber));
 
-		//NonVolatileStorage_Read(0, p->serialNumber, lengthof(p->serialNumber));
+		memcpy(p->serialNumber, serialNumber, sizeof(serialNumber));
 
-		p->serialNumber[0] = serialNumber;
-
-		memset(p->serialNumber + 1, 0, 15);
-		Network_QueueBedPacket();
-
-		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_CREATED_JOIN_REQUEST);
+		if (BedProtocol_QueuePacket())
+		{
+			Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_CREATED_JOIN_REQUEST);
+		}
 	}
-
-	EventDispatcher_Publish(EVENT_SYNCHRONIZED, NULL);
 }
 #endif
 
@@ -292,32 +282,41 @@ static void JoinRequestHandler(void* data, uint8_t length)
 
 	application_join_request_packet* p = data;
 
-	application_join_response_packet* response = Network_CreateBedPacket(BROADCAST_ADDRESS, TYPE_APPLICATION_JOIN_RESPONSE, sizeof(application_join_response_packet));
-	response->assignedAddress = nextAddress++;
+	application_join_response_packet* response = BedProtocol_CreatePacket(BROADCAST_ADDRESS, TYPE_APPLICATION_JOIN_RESPONSE, sizeof(application_join_response_packet));
+	if (response == NULL)
+	{
+		return;
+	}
+
+	response->assignedAddress = nextAddress;
 	memcpy(response->serialNumber, p->serialNumber, lengthof(p->serialNumber));
-	Network_QueueBedPacket();
+	if (BedProtocol_QueuePacket())
+	{
+		nextAddress++;
 
-	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_GOT_JOIN_REQUEST);
+		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_CREATED_JOIN_RESPONSE);
 
-	Leds_GreenOn();
+		Leds_GreenOn();
+	}
 }
 #endif
 
 #if MASTER_NODE == 0
 static void JoinResponseHandler(void* data, uint8_t length)
 {
-	application_join_response_packet* p = data;
-
-
-	//NonVolatileStorage_Read(0, p->serialNumber, lengthof(p->serialNumber));
-
-	Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_GOT_JOIN_RESPONSE);
-
-	if (p->serialNumber[0] == serialNumber)
+	if (connectionState == CONNECTION_STATE_CONNECTING)
 	{
-		AssignAddress(p->assignedAddress);
-		EventDispatcher_Publish(EVENT_CONNECTED, NULL);
-		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_JOINED);
+		application_join_response_packet* p = data;
+
+		//NonVolatileStorage_Read(0, p->serialNumber, sizeof(p->serialNumber));
+
+		if (memcmp(serialNumber, p->serialNumber, sizeof(serialNumber)) == 0)
+		{
+			AssignAddress(p->assignedAddress);
+			connectionState = CONNECTION_STATE_CONNECTED;
+			EventDispatcher_Publish(EVENT_CONNECTED, NULL);
+			Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_JOINED);
+		}
 	}
 }
 #endif
@@ -336,7 +335,22 @@ static void* FrameReceived(void* data, uint8_t length)
 			{
 				link_rts_packet* p = data;
 
-				NetworkTimer_SetTimerValue(20 + 0 * p->slot);
+				NetworkTimer_SetTimerValue(17 + 0 * p->slot);
+
+				if (linkState == LINK_STATE_UNSYNCHRONIZED)
+				{
+					linkState = LINK_STATE_EXPECTING_RTS;
+				}
+
+#if MASTER_NODE == 0
+				if (connectionState == CONNECTION_STATE_UNCONNECTED)
+				{
+					if (EventDispatcher_Complete(ConnectionHandler))
+					{
+						connectionState = CONNECTION_STATE_CONNECTING;
+					}
+				}
+#endif
 
 				if (linkState != LINK_STATE_EXPECTING_RTS)
 				{
@@ -350,25 +364,15 @@ static void* FrameReceived(void* data, uint8_t length)
 					break;
 				}
 
-				linkCurrentSource = lh->source;
-
-
 				// TODO: Extract destination and link loss for destination and calculate needed TX power level and set it. If NO_ROUTE use maximum power.
 				RadioDriver_SetTxPower(RADIODRIVER_TX_POWER_MAXIMUM); // use maximum for now
 
-				ctsPacketTemplate.link.destination = linkCurrentSource;
+				ctsPacketTemplate.link.destination = lh->source;
 				RadioDriver_Send(&ctsPacketTemplate, sizeof(ctsPacketTemplate));
 
 				linkState = LINK_STATE_EXPECTING_DATA;
 
-				Diagnostics_SendEvent(DIAGNOSTICS_RX_RTS);
-				Diagnostics_SendEvent(DIAGNOSTICS_TX_CTS);
-
-
-				//				if (connectionState == CONNECTION_STATE_UNCONNECTED)
-				//				{
-				//					EventDispatcher_Complete(SynchronizationHandler);
-				//				}
+				Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_LINK_RTS_REPLIED);
 			}
 			break;
 
@@ -393,7 +397,6 @@ static void* FrameReceived(void* data, uint8_t length)
 
 				linkState = LINK_STATE_EXPECTING_ACK;
 
-				Diagnostics_SendEvent(DIAGNOSTICS_RX_CTS);
 				Diagnostics_SendEvent(DIAGNOSTICS_TX_DATA);
 			}
 			break;
@@ -441,6 +444,10 @@ static void* FrameReceived(void* data, uint8_t length)
 
 			// transport layer packets
 
+		case TYPE_APPLICATION_RAW_BED:
+			BedProtocol_ProcessPacket(&data, length, RawHandler);
+			break;
+
 		case TYPE_TRANSPORT_RDD_ACK:
 			{
 				//				if (VerifyNetworkLayerHeader(&data, length))
@@ -460,42 +467,37 @@ static void* FrameReceived(void* data, uint8_t length)
 
 
 			// application layer packets
+
 #if MASTER_NODE == 1
-			case TYPE_APPLICATION_JOIN_REQUEST:
-			if (ProcessBedPacket(&data, length, JoinRequestHandler))
-			{
-				//Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
-			}
+		case TYPE_APPLICATION_JOIN_REQUEST:
+			BedProtocol_ProcessPacket(&data, length, JoinRequestHandler);
 			break;
 #endif
 
 
 #if MASTER_NODE == 0
-		case TYPE_APPLICATION_JOIN_RESPONSE:
-			if (ProcessBedPacket(&data, length, JoinResponseHandler))
-			{
-				//Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
-			}
+			case TYPE_APPLICATION_JOIN_RESPONSE:
+			BedProtocol_ProcessPacket(&data, length, JoinResponseHandler);
 			break;
 #endif
 
 
 			//		case TYPE_APPLICATION_SENSOR_DATA:
-			//			if (ProcessNetworkPacket(&data, length, sensorDataProcessor))
+			//			if (RddProtocol_ProcessPacket(&data, length, sensorDataProcessor))
 			//			{
 			//				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
 			//			}
 			//			break;
 
 		case TYPE_APPLICATION_SET_PROPERTY_REQUEST:
-			if (ProcessRddPacket(&data, length, SensorManager_SetProperty))
+			if (RddProtocol_ProcessPacket(&data, length, SensorManager_SetProperty))
 			{
 				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
 			}
 			break;
 
 		case TYPE_APPLICATION_GET_PROPERTY_REQUEST:
-			if (ProcessRddPacket(&data, length, SensorManager_GetProperty))
+			if (RddProtocol_ProcessPacket(&data, length, SensorManager_GetProperty))
 			{
 				Diagnostics_SendEvent(DIAGNOSTICS_RX_SENSOR_DATA);
 			}
@@ -518,33 +520,38 @@ bool VerifyNetworkLayerHeader(void** data, uint8_t length)
 
 	// link layer functionality
 
-	// verify that a packet is expected and that the source is the node that sent the RTS
-	if (linkState != LINK_STATE_EXPECTING_DATA || linkCurrentSource != lh->source)
+	// verify that a packet is expected
+	if (linkState != LINK_STATE_EXPECTING_DATA)
 	{
 		linkState = LINK_STATE_IDLE;
 		return false;
 	}
+
 	linkState = LINK_STATE_IDLE;
 
 
-	// send link layer acknowledge
-	ackPacketTemplate.link.destination = linkCurrentSource;
-	RadioDriver_Send(&ackPacketTemplate, sizeof(ackPacketTemplate));
+	// check address
+	if (lh->destination != address && lh->destination != BROADCAST_ADDRESS)
+	{
+		return false;
+	}
 
+	if (lh->destination == address) // only ack unicasts
+	{
+		// send link layer acknowledge
+		ackPacketTemplate.link.destination = lh->source;
+		RadioDriver_Send(&ackPacketTemplate, sizeof(ackPacketTemplate));
+	}
 
 	// network layer functionality
 
 	// forward if packet was not for this node
-	if (lnh->network.receiver != address)
+	if (lnh->network.receiver != address && lnh->network.receiver != BROADCAST_ADDRESS)
 	{
+		Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_FORWARDING);
 		if (QueueLinkPacket(*data, length))
 		{
 			*data = NULL; // keep the allocated block
-			Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_FORWARDING);
-		}
-		else
-		{
-			Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_FORWARDING_DROPPED);
 		}
 
 		return false;

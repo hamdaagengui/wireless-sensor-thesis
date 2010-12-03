@@ -33,13 +33,11 @@ static void Set(application_set_request_packet* packet)
 	switch (packet->property)
 	{
 		case PROPERTY_ZERO:
-			Network_CreateSetResponsePacket(packet->network.sender, PROPERTY_STATUS_READ_ONLY);
-			Network_QueueRddPacket();
+			ApplicationProtocols_SendSetResponse(packet->network.sender, PROPERTY_STATUS_READ_ONLY);
 			break;
 
 		default:
-			Network_CreateSetResponsePacket(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY);
-			Network_QueueRddPacket();
+			ApplicationProtocols_SendSetResponse(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY);
 			break;
 	}
 }
@@ -50,15 +48,13 @@ static void Get(application_get_request_packet* packet)
 	{
 		case PROPERTY_ZERO:
 			{
-				uint8_t* value = Network_CreateGetResponsePacket(packet->network.sender, PROPERTY_STATUS_SUCCESS, sizeof(uint8_t));
-				*value = 0;
-				Network_QueueRddPacket();
+				uint8_t zero = 0;
+				ApplicationProtocols_SendGetResponse(packet->network.sender, PROPERTY_STATUS_SUCCESS, &zero, sizeof(uint8_t));
 			}
 			break;
 
 		default:
-			Network_CreateGetResponsePacket(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY, 0);
-			Network_QueueRddPacket();
+			ApplicationProtocols_SendGetResponse(packet->network.sender, PROPERTY_STATUS_INVALID_PROPERTY, NULL, 0);
 			break;
 	}
 }

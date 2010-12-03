@@ -22,6 +22,7 @@ extern void SystemTimer_Initialize();
 extern void SystemTimer_Enable();
 extern void SystemTimer_Disable();
 extern void SystemTimer_SetPeriod(uint16_t period);
+extern uint16_t SystemTimer_GetCurrent();
 extern uint16_t SystemTimer_Reset();
 
 #endif
