@@ -9,7 +9,7 @@
 #define CONFIGURATION_H_
 
 // General
-#define MASTER_NODE																									1
+#define MASTER_NODE																									0
 
 // Board Support Package selection
 #define BOARDSUPPORTPACKAGE_STK600_ATMEGA128RFA1										1
@@ -17,9 +17,15 @@
 // Network subsystem
 #define NETWORK_LINK_TIMER_FREQUENCY																32768 // In Hz
 #define NETWORK_LINK_COMMUNICATION_SLOT_FREQUENCY										128 // Number of transfers per second (i.e. RTS + CTS + DATA + ACK)
-#define NETWORK_LINK_NUMBER_OF_RTS_SLOTS														6
-#define NETWORK_LINK_RTS_SLOT_DURATION															100 // Duration of an RTS slot in micro seconds)
-#define NETWORK_LINK_MAXIMUM_TRANSMISSION_ATTEMPTS									2
+#define NETWORK_LINK_NUMBER_OF_RTS_GUARD_SLOTS											4
+#define NETWORK_LINK_RTS_GUARD_SLOT_DURATION												256 // Duration of an RTS guard slot in micro seconds)
+#define NETWORK_LINK_CCA_SAMPLE_COUNT																8
+#define NETWORK_LINK_CCA_ALPHA																			0.06
+#define NETWORK_LINK_CCA_OUTLIER_COUNT															5
+#define NETWORK_LINK_CCA_THRESHOLD_SAFE_BAND												5
+#define NETWORK_LINK_CCA_CHECK_INTERVAL															2
+#define NETWORK_LINK_CCA_CHECK_DURATION															(NETWORK_LINK_CCA_OUTLIER_COUNT * NETWORK_LINK_CCA_CHECK_INTERVAL)
+#define NETWORK_LINK_MAXIMUM_TRANSMISSION_ATTEMPTS									5
 #define NETWORK_LINK_MAXIMUM_PACKET_SIZE														64
 #define NETWORK_LINK_QUEUE_SIZE																			10
 #define NETWORK_NETWORK_CAN_ROUTE																		1

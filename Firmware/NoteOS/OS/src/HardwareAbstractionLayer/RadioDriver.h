@@ -36,9 +36,14 @@ extern void RadioDriver_SetTxPower(uint8_t power);
 extern void RadioDriver_SetChannel(uint8_t channel);
 
 /**
- * Same as GetRawRssi but here the value is converted to dBm.
+ * Get the current RSSI in dBm.
  */
 extern int8_t RadioDriver_GetRssi();
+
+/**
+ * Get the RSSI (in dBm) as it was when the frame header was received.
+ */
+extern int8_t RadioDriver_GetRssiAtFrameStart();
 
 /**
  * Send a frame.
@@ -47,6 +52,23 @@ extern int8_t RadioDriver_GetRssi();
  * This leaves a maximum of either 127 or 125 bytes for user data.
  */
 extern void RadioDriver_Send(void* data, uint8_t length);
+
+/**
+ * Switch to receive mode.
+ * Only relevant in non auto rx mode! See configuration define RADIODRIVER_AUTO_RX.
+ * It's safe to call this function even if the transceiver is already in receive mode.
+ * When a frame has been received the transmitter switches back to non rx mode and
+ * EnableReceiveMode must be called again to receive a new frame.
+ */
+extern void RadioDriver_EnableReceiveMode();
+
+/**
+ * Switch to idle mode.
+ * Only relevant in non auto rx mode! See configuration define RADIODRIVER_AUTO_RX.
+ * It's safe to call this function even if the transceiver is already in idle mode.
+ * When a frame is received an action equivalent to calling this function is performed.
+ */
+extern void RadioDriver_DisableReceiveMode();
 
 #endif
 

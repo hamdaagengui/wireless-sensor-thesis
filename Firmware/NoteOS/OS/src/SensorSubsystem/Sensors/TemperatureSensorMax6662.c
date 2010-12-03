@@ -93,7 +93,8 @@ static void TakeSample()
 
 static void SampleTaken()
 {
-	int16_t* value = MemoryManager_Allocate(sizeof(int16_t));
-	*value = temperature;
-	EventDispatcher_Publish(SENSOR_TEMPERATURE_EAR_LEFT, value);
+	sensor_event* se = MemoryManager_Allocate(sizeof(sensor_event) + sizeof(int16_t));
+	se->sensor = SENSOR_TEMPERATURE_EAR_LEFT;
+	*(int16_t*) &se->data = temperature;
+	EventDispatcher_Publish(EVENT_SENSOR_DATA, se);
 }

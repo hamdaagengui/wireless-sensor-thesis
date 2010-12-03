@@ -3,7 +3,7 @@
 #include "../RadioDriver.h"
 #include "../../MemorySubsystem/MemoryManager.h"
 
-#define RADIODRIVER_AUTO_RX																					0
+#define RADIODRIVER_AUTO_RX																					1
 #define RADIODRIVER_USE_CRC																					1
 
 // Transceiver state status
@@ -55,7 +55,7 @@ enum
 #define WaitWhileStatus(s)											while ((TRX_STATUS & TRX_STATUS_MASK) == s);
 #define ReadStatus()														(TRX_STATUS & TRX_STATUS_MASK)
 
-static bidirectional_block_handler frameHandler;
+static bidirectional_block_handler frameHandler = NULL;
 static volatile bool transmitting;
 static volatile uint8_t rssi;
 static uint8_t* frameBufferObject;
@@ -77,6 +77,8 @@ void RadioDriver_Initialize()
 #else
 	ChangeState(STATE_TRX_OFF);
 #endif
+
+	RadioDriver_SetTxPower(RADIODRIVER_TX_POWER_MAXIMUM);
 
 	frameBufferObject = MemoryManager_Allocate(NETWORK_LINK_MAXIMUM_PACKET_SIZE);
 }
@@ -112,6 +114,19 @@ uint8_t RadioDriver_GetRandomNumber()
 }
 
 int8_t RadioDriver_GetRssi()
+{
+	int8_t r = PHY_RSSI & PHY_RSSI_MASK;
+	if (r == 0)
+	{
+		return 0;
+	}
+	else
+	{
+		return -90 + 3 * (r - 1);
+	}
+}
+
+int8_t RadioDriver_GetRssiAtFrameStart()
 {
 	int8_t r = rssi & PHY_RSSI_MASK;
 	if (r == 0)
@@ -201,6 +216,7 @@ void RadioDriver_EnableReceiveMode()
 	if (ReadStatus() != STATUS_RX_ON)
 	{
 		ChangeState(STATE_RX_ON);
+		WaitUntilStatus(STATE_RX_ON);
 	}
 }
 
@@ -209,6 +225,7 @@ void RadioDriver_DisableReceiveMode()
 	if (ReadStatus() == STATUS_BUSY_RX || ReadStatus() == STATUS_RX_ON)
 	{
 		ChangeState(STATE_TRX_OFF);
+		WaitUntilStatus(STATE_TRX_OFF);
 	}
 }
 

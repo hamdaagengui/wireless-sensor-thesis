@@ -78,7 +78,8 @@ typedef struct
 typedef struct
 {
 	link_header link;
-	uint8_t slot;
+	uint8_t slot :2;
+	uint8_t :6;
 	int8_t transmissionPowerLevel;
 } link_rts_packet;
 
@@ -204,13 +205,17 @@ typedef struct
 extern void Network_Initialize();
 extern void Network_Start();
 
-extern void* Network_CreateBedPacket(uint8_t receiver, uint8_t type, uint8_t size);
-extern bool Network_QueueBedPacket();
+#include "BedProtocol.h"
 
-extern void* Network_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t dataSize);
-extern void Network_CreateSetResponsePacket(uint8_t receiver, property_status status);
-extern void* Network_CreateGetResponsePacket(uint8_t receiver, property_status status, uint8_t dataSize);
-extern void Network_QueueRddPacket();
+//extern void* Network_CreateBedPacket(uint8_t receiver, uint8_t type, uint8_t size);
+//extern bool Network_QueueBedPacket();
+
+#include "RddProtocol.h"
+
+//extern void* Network_CreateSensorDataPacket(uint8_t receiver, uint8_t sensor, uint8_t dataSize);
+//extern void Network_CreateSetResponsePacket(uint8_t receiver, property_status status);
+//extern void* Network_CreateGetResponsePacket(uint8_t receiver, property_status status, uint8_t dataSize);
+//extern void Network_QueueRddPacket();
 
 extern bool Network_SetProperty(uint8_t node, uint8_t sensor, uint8_t property, void* data, uint8_t length, result_handler resultHandler);
 extern bool Network_GetProperty(uint8_t node, uint8_t sensor, uint8_t property, void* data, uint8_t length, result_handler resultHandler);

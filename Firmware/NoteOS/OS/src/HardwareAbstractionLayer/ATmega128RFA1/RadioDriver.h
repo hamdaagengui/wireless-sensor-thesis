@@ -169,20 +169,3 @@ extern void RadioDriver_Calibrate();
  * Waits for a previously initiated send operation to complete.
  */
 extern void RadioDriver_WaitForSendToComplete();
-
-/**
- * Switch to receive mode.
- * Only relevant in non auto rx mode! See configuration define RADIODRIVER_AUTO_RX.
- * It's safe to call this function even if the transceiver is already in receive mode.
- * When a frame has been received the transmitter switches back to non rx mode and
- * EnableReceiveMode must be called again to receive a new frame.
- */
-extern void RadioDriver_EnableReceiveMode();
-
-/**
- * Switch to idle mode.
- * Only relevant in non auto rx mode! See configuration define RADIODRIVER_AUTO_RX.
- * It's safe to call this function even if the transceiver is already in idle mode.
- * When a frame is received an action equivalent to calling this function is performed.
- */
-extern void RadioDriver_DisableReceiveMode();

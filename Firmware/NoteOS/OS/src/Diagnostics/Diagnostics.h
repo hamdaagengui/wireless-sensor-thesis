@@ -97,10 +97,18 @@ typedef enum
 	DIAGNOSTICS_NETWORK_SENT_RDD_PACKET,
 
 	DIAGNOSTICS_NETWORK_JOINED,
-	DIAGNOSTICS_NETWORK_CREATED_JOIN_REQUEST
+	DIAGNOSTICS_NETWORK_CREATED_JOIN_REQUEST,
+	DIAGNOSTICS_NETWORK_CREATED_JOIN_RESPONSE,
+	DIAGNOSTICS_NETWORK_GOT_JOIN_REQUEST,
+	DIAGNOSTICS_NETWORK_GOT_JOIN_RESPONSE,
+	DIAGNOSTICS_NETWORK_STAR_TOPOLOGY_FALL_BACK,
+
+	DIAGNOSTICS_MASTER_NODE_RUNNING,
+	DIAGNOSTICS_SLAVE_NODE_RUNNING
 } diagnostics_event;
 
 extern void Diagnostics_Initialize();
+extern void Diagnostics_SendRaw(uint8_t value);
 extern void Diagnostics_SendEvent(uint8_t event);
 extern void Diagnostics_SendMessage(uint8_t messageId, void* message, uint8_t messageLength);
 extern void Diagnostics_SendState(uint8_t stateMachineId, uint8_t newState);
