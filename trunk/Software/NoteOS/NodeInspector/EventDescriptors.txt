@@ -7,12 +7,12 @@
 0;0;Kernel;Kernel;System is now running		
 
 // Event dispatcher
-1;0;Event;EventDispatcher;Notification queued;notification_q ++
-2;0;Event;EventDispatcher;Notification executed;notification_x ++
+1;0;Event;EventDispatcher;Completion queued;completion_q ++
+2;0;Event;EventDispatcher;Completion executing;completion_x ++
 3;0;Event;EventDispatcher;Processing queued;processing_q ++
-4;0;Event;EventDispatcher;Processing executed;processing_x ++
+4;0;Event;EventDispatcher;Processing executing;processing_x ++
 5;0;Event;EventDispatcher;Publication queued;publication_q ++
-6;0;Event;EventDispatcher;Publication executed;publication_x ++
+6;0;Event;EventDispatcher;Publication executing;publication_x ++
 7;2;Event;EventDispatcher;Event queue overflowed
 8;2;Event;EventDispatcher;Too many subscribers of event
 
@@ -42,25 +42,57 @@
 29;2;Memory;MemoryManager;Release failed
 
 // Network
-30;0;Network;Network;Received RTS;rx_rts ++
-31;0;Network;Network;Received CTS;rx_cts ++
-32;0;Network;Network;Received Data;rx_data ++
-33;0;Network;Network;Received Acknowledge;rx_ack ++
-34;0;Network;Network;Sent RTS;tx_rts ++
-35;0;Network;Network;Sent CTS;tx_cts ++
-36;0;Network;Network;Sent Data;tx_data ++
-37;0;Network;Network;Sent Acknowledge;tx_ack ++
-38;0;Network;Network;Data queued
-39;2;Network;Network;Could not queue data
-40;0;Network;Network;Network tick
-41;0;Network;Network;Forwarding packet
+30;0;Network;Link;RTS =>;out_rts ++
+31;0;Network;Link;RTS <=;in_rts ++
+32;0;Network;Link;CTS =>;out_cts ++
+33;0;Network;Link;CTS <=;in_cts ++
+34;0;Network;Link;DATA =>;out_data ++
+35;0;Network;Link;DATA <=;in_data ++
+36;0;Network;Link;ACK =>;out_ack ++
+37;0;Network;Link;ACK <=;in_ack ++
+38;0;Network;Link;BROADCAST =>;out_broadcast ++
+39;0;Network;Link;BROADCAST <=;in_broadcast ++
+40;0;Network;Network;Data queued
+41;2;Network;Network;Could not queue data
+42;1;Network;Network;Network tick
+43;0;Network;Network;Forwarding packet
+
+44;0;Network;Link;Packet expected
 
 
 // NEW
-42;0;Kernel;Timer;Timer tick
+62;0;Kernel;Timer;Timer tick
 // NEW ADC
-43;0;HAL;ADC;Configuration created
-44;0;HAL;ADC;Conversion queued
-45;2;HAL;ADC;Failed to queue conversion
-46;0;HAL;ADC;Conversion started
-47;0;HAL;ADC;Conversion completed
+63;0;HAL;ADC;Configuration created
+64;0;HAL;ADC;Conversion queued
+65;2;HAL;ADC;Failed to queue conversion
+66;0;HAL;ADC;Conversion started
+67;0;HAL;ADC;Conversion completed
+
+68;2;Network;Network;Forwarded packet dropped
+69;2;PowerManager;PowerManager;Resource request overflow
+70;2;PowerManager;PowerManager;Resource release overflow
+
+71;0;Network;Network;Link packet queued
+72;2;Network;Network;Link queue overrun
+73;2;Network;Network;Unable to create BED packet
+74;2;Network;Network;Unable to create RDD packet
+75;0;Network;Network;Created BED packet
+76;0;Network;Network;Created RDD packet
+77;0;Network;Network;Sent BED packet
+78;0;Network;Network;Sent RDD packet
+79;0;Network;Network;Joined network
+80;0;Network;Network;Join Request created
+81;0;Network;Network;Join Response created
+82;0;Network;Network;Replied to Join Request
+83;0;Network;Network;Join Response received
+84;0;Kernel;StartUp;Master node is now running
+85;0;Kernel;StartUp;Slave node is now running
+
+86;0;Network;BED;Raw data received
+
+87;2;Network;Link;Packet dropped after too many retransmissions	
+
+88;0;Network;Link;Link packet queued - sending directly
+89;0;Network;Link;Link packet queued - using mesh topology
+90;0;Network;Link;Link packet queued - using star topology

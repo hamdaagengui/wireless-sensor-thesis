@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeInspector", "NodeInspector\NodeInspector.csproj", "{477A0983-6FFD-4DF6-937C-E3A7F70077A2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RouteSimulator", "RouteSimulator\RouteSimulator.csproj", "{AF217CB2-EEEC-455C-8C85-AB006A88C665}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RssiScanner", "RssiScanner\RssiScanner.csproj", "{E539CBB1-F8C6-4DCA-A998-19626747D0EC}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -17,6 +21,14 @@ Global
 		{477A0983-6FFD-4DF6-937C-E3A7F70077A2}.Debug|x86.Build.0 = Debug|x86
 		{477A0983-6FFD-4DF6-937C-E3A7F70077A2}.Release|x86.ActiveCfg = Release|x86
 		{477A0983-6FFD-4DF6-937C-E3A7F70077A2}.Release|x86.Build.0 = Release|x86
+		{AF217CB2-EEEC-455C-8C85-AB006A88C665}.Debug|x86.ActiveCfg = Debug|x86
+		{AF217CB2-EEEC-455C-8C85-AB006A88C665}.Debug|x86.Build.0 = Debug|x86
+		{AF217CB2-EEEC-455C-8C85-AB006A88C665}.Release|x86.ActiveCfg = Release|x86
+		{AF217CB2-EEEC-455C-8C85-AB006A88C665}.Release|x86.Build.0 = Release|x86
+		{E539CBB1-F8C6-4DCA-A998-19626747D0EC}.Debug|x86.ActiveCfg = Debug|x86
+		{E539CBB1-F8C6-4DCA-A998-19626747D0EC}.Debug|x86.Build.0 = Debug|x86
+		{E539CBB1-F8C6-4DCA-A998-19626747D0EC}.Release|x86.ActiveCfg = Release|x86
+		{E539CBB1-F8C6-4DCA-A998-19626747D0EC}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
