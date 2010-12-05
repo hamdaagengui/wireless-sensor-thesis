@@ -28,11 +28,6 @@ void Diagnostics_Initialize()
 	DiagnosticsLink_Initialize(FrameHandler);
 }
 
-void Diagnostics_SendRaw(uint8_t value)
-{
-	//	DiagnosticsLink_Send(&value, 1);
-}
-
 void Diagnostics_SendEvent(uint8_t event)
 {
 	if (ReadBit(PIND, 6) != 0)

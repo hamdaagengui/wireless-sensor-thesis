@@ -38,8 +38,12 @@ volatile uint8_t linkState = LINK_STATE_IDLE;
 uint8_t address = GATEWAY_ADDRESS;
 static link_rts_packet rtsPacketTemplate =
 {	.link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_RTS};
+static link_rts_rsi_packet rtsRsiPacketTemplate =
+{	.link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_RTS_RSI};
 static link_cts_packet ctsPacketTemplate =
 {	.link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_CTS};
+static link_cts_rsi_packet ctsRsiPacketTemplate =
+{	.link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_CTS_RSI};
 static link_acknowledge_packet ackPacketTemplate =
 {	.link.source = GATEWAY_ADDRESS, .link.type = TYPE_LINK_ACK};
 
@@ -49,7 +53,9 @@ volatile uint8_t linkState = LINK_STATE_UNSYNCHRONIZED;
 uint8_t address = BROADCAST_ADDRESS;
 connection_state connectionState = CONNECTION_STATE_UNCONNECTED;
 static link_rts_packet rtsPacketTemplate = { .link.source = BROADCAST_ADDRESS, .link.type = TYPE_LINK_RTS };
+static link_rts_rsi_packet rtsRsiPacketTemplate = { .link.source = BROADCAST_ADDRESS, .link.type = TYPE_LINK_RTS_RSI };
 static link_cts_packet ctsPacketTemplate = { .link.source = BROADCAST_ADDRESS, .link.type = TYPE_LINK_CTS };
+static link_cts_rsi_packet ctsRsiPacketTemplate = { .link.source = BROADCAST_ADDRESS, .link.type = TYPE_LINK_CTS_RSI };
 static link_acknowledge_packet ackPacketTemplate = { .link.source = BROADCAST_ADDRESS, .link.type = TYPE_LINK_ACK };
 
 static timer_configuration connectionTimer;
@@ -94,7 +100,9 @@ static void AssignAddress(uint8_t adr)
 {
 	address = adr;
 	rtsPacketTemplate.link.source = address;
+	rtsRsiPacketTemplate.link.source = address;
 	ctsPacketTemplate.link.source = address;
+	ctsRsiPacketTemplate.link.source = address;
 	ackPacketTemplate.link.source = address;
 }
 #endif
@@ -221,11 +229,6 @@ void Network_TimerEvent()
 			linkCurrentPacket = qe->object;
 			linkCurrentPacketLength = qe->size;
 
-
-			//			char buf[100];
-			//			sprintf(buf, "%d => %d", linkCurrentPacket->link.source, linkCurrentPacket->link.destination);
-			//			Diagnostics_SendMessage(buf);
-
 			if (linkCurrentPacket->link.destination == BROADCAST_ADDRESS)
 			{
 				RadioDriver_SetTxPower(RADIODRIVER_TX_POWER_MAXIMUM); // broadcasts are always sent at maximum power.
@@ -239,17 +242,36 @@ void Network_TimerEvent()
 			}
 			else
 			{
-				// TODO: Extract destination and link loss for destination and calculate needed TX power level and set it. If NO_ROUTE use maximum power.
-				RadioDriver_SetTxPower(RADIODRIVER_TX_POWER_MAXIMUM); // use maximum for now
+				uint8_t destination = linkCurrentPacket->link.destination;
 
-				rtsPacketTemplate.link.destination = linkCurrentPacket->link.destination;
-				rtsPacketTemplate.slot = slot;
-				rtsPacketTemplate.transmissionPowerLevel = 0; // TODO Implement this
-				RadioDriver_Send(&rtsPacketTemplate, sizeof(rtsPacketTemplate));
+				int8_t txPower = RADIODRIVER_TX_POWER_MAXIMUM;
+				if (rsi[destination].timeRemaining > 0)
+				{
+					txPower = NETWORK_LINK_RADIO_SENSITIVITY + rsi[destination].linkLoss + NETWORK_LINK_RADIO_POWER_MARGIN;
+				}
+				RadioDriver_SetTxPower(txPower);
 
-				linkState = LINK_STATE_EXPECTING_CTS;
+				if (rsi[destination].timeRemaining < RSI_TIME_REMAINING_THRESHOLD_TIME) // should a RSI update be requested from that node?
+				{
+					rtsRsiPacketTemplate.link.destination = destination;
+					rtsRsiPacketTemplate.slot = slot;
+					rtsRsiPacketTemplate.rsi.transmissionPower = txPower;
+					RadioDriver_Send(&rtsRsiPacketTemplate, sizeof(rtsRsiPacketTemplate));
 
-				Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_LINK_RTS_SENT);
+					linkState = LINK_STATE_EXPECTING_CTS;
+
+					Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_LINK_RTS_SENT);
+				}
+				else
+				{
+					rtsPacketTemplate.link.destination = destination;
+					rtsPacketTemplate.slot = slot;
+					RadioDriver_Send(&rtsPacketTemplate, sizeof(rtsPacketTemplate));
+
+					linkState = LINK_STATE_EXPECTING_CTS;
+
+					Diagnostics_SendEvent(DIAGNOSTICS_NETWORK_LINK_RTS_SENT);
+				}
 			}
 		}
 	}
@@ -645,7 +667,6 @@ static void UpdateCca()
 	if (++currentIndex >= NETWORK_LINK_CCA_SAMPLE_COUNT)
 	{
 		currentIndex = 0;
-		Diagnostics_SendRaw(rssi);
 	}
 
 	static fixed15_16 oldMedian = 0;

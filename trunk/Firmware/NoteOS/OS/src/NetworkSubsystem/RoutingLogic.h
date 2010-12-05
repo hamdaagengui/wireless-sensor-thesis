@@ -20,9 +20,15 @@ typedef struct
 	uint8_t previousNode;
 } node;
 
+#define RSI_TIME_REMAINING_START_TIME																255
+#define RSI_TIME_REMAINING_THRESHOLD_TIME														100
+
 typedef struct
 {
+	uint8_t timeRemaining;
+	int8_t transmissionPower;
 	int8_t rssi;
+	int8_t linkLoss;
 } route_significant_information;
 
 extern uint8_t routingTable[16];

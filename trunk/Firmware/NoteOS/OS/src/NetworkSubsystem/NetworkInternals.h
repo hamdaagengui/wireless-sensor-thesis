@@ -39,7 +39,9 @@ typedef enum
 {
 	// link packets
 	TYPE_LINK_RTS,
+	TYPE_LINK_RTS_RSI,
 	TYPE_LINK_CTS,
+	TYPE_LINK_CTS_RSI,
 	TYPE_LINK_ACK,
 	// network packets
 	TYPE_NETWORK_ROUTES,
