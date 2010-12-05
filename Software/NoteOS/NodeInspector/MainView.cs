@@ -10,6 +10,7 @@ using NodeInspector.Properties;
 using System.ComponentModel;
 using System.Threading;
 using System.Diagnostics;
+using System.Text;
 
 namespace NodeInspector
 {
@@ -18,6 +19,8 @@ namespace NodeInspector
 		SerialPort port;
 
 		ConcurrentQueue<EventFrame> eventFrameQueue = new ConcurrentQueue<EventFrame>();
+		ConcurrentQueue<MessageFrame> msgFrameQueue = new ConcurrentQueue<MessageFrame>();
+		ConcurrentQueue<GraphFrame> graphFrameQueue = new ConcurrentQueue<GraphFrame>();
 
 		long bytesReceived = 0;
 		long framesReceived = 0;
@@ -164,7 +167,25 @@ namespace NodeInspector
 
 		private void timer1_Tick(object sender, EventArgs e)
 		{
-			bool changes = false;
+			UpdateEventStuff(false);
+
+			UpdateMessageStuff();
+
+			//UpdateGraphStuff();
+
+			if (checkBoxRun.Checked)
+			{
+				Text = "*  Node Inspector " + bytesReceived / 1024 + " kB / " + framesReceived + " frames";
+			}
+			else
+			{
+				Text = "Node Inspector " + bytesReceived / 1024 + " kB / " + framesReceived + " frames";
+			}
+		}
+
+		void UpdateEventStuff(bool force)
+		{
+			bool changes = force;
 
 			bool[] levels = new bool[3];
 			levels[0] = checkBoxShowMessages.Checked;
@@ -222,9 +243,43 @@ namespace NodeInspector
 				{
 					listViewLogs.EnsureVisible(listViewLogs.Items.Count - 1);
 				}
-
-				Text = "Node Inspector " + bytesReceived + "/" + framesReceived;
 			}
+		}
+
+		void UpdateMessageStuff()
+		{
+			int frameCounter = 100;
+			MessageFrame mf;
+			while (msgFrameQueue.TryDequeue(out mf) && (frameCounter-- > 0))
+			{
+				richTextBoxTerminal.AppendText(mf.Text + "\n");
+			}
+		}
+
+
+		int min = 127, max = -128;
+		int[] avrBuf = new int[100];
+		int avrIndex = 0;
+		int sum = 0;
+
+		void UpdateGraphStuff()
+		{
+			int frameCounter = 100;
+			GraphFrame gf;
+			while (graphFrameQueue.TryDequeue(out gf) && (frameCounter-- > 0))
+			{
+				min = gf.Value < min ? gf.Value : min;
+				max = gf.Value < max ? gf.Value : max;
+				sum -= avrBuf[avrIndex];
+				avrBuf[avrIndex] = gf.Value;
+				sum += avrBuf[avrIndex];
+				if (++avrIndex >= avrBuf.Length)
+				{
+					avrIndex = 0;
+				}
+			}
+
+			textBox1.Text = string.Format("{0}  /  {1}   ({2})", min, max, (sum / avrBuf.Length).ToString());
 		}
 
 		void UpdatePortList()
@@ -305,61 +360,74 @@ namespace NodeInspector
 
 			while (port.BytesToRead > 0)
 			{
-				Interlocked.Increment(ref bytesReceived);
-				byte v = (byte)port.ReadByte();
-
-				switch (v)
+				int length = port.BytesToRead;
+				if (length > 50)
 				{
-					case SOF_EVENT:
-						frameTimeStamp = new DateTime(DateTime.Now.Ticks - startTime.Ticks);
-						frameType = FrameType.Event;
-						break;
-
-					case SOF_MESSAGE:
-						frameTimeStamp = DateTime.Now;
-						frameType = FrameType.Message;
-						break;
-
-					case SOF_STATE:
-						frameTimeStamp = DateTime.Now;
-						frameType = FrameType.State;
-						break;
-
-					case ESC:
-						escReceived = true;
-						break;
-
-					case EOF:
-						try
-						{
-							switch (frameType)
-							{
-								case FrameType.Event:
-									eventFrameQueue.Enqueue(new EventFrame(frameTimeStamp, frameData.ToArray()));
-									Interlocked.Increment(ref framesReceived);
-									break;
-								case FrameType.Message:
-									break;
-								case FrameType.State:
-									break;
-							}
-						}
-						catch
-						{
-							Console.WriteLine("!");
-						}
-						frameData.Clear();
-						break;
-
-					default:
-						if (escReceived)
-						{
-							escReceived = false;
-							v |= 0x80;
-						}
-						frameData.Add(v);
-						break;
+					length = 50;
 				}
+				byte[] bytes = new byte[length];
+				length = port.Read(bytes, 0, length);
+
+				foreach (var b in bytes)
+				{
+					var v = b;
+					switch (v)
+					{
+						case SOF_EVENT:
+							frameTimeStamp = new DateTime(DateTime.Now.Ticks - startTime.Ticks);
+							frameType = FrameType.Event;
+							break;
+
+						case SOF_MESSAGE:
+							frameTimeStamp = new DateTime(DateTime.Now.Ticks - startTime.Ticks);
+							frameType = FrameType.Message;
+							break;
+
+						case SOF_STATE:
+							frameTimeStamp = DateTime.Now;
+							frameType = FrameType.State;
+							break;
+
+						case ESC:
+							escReceived = true;
+							break;
+
+						case EOF:
+							try
+							{
+								switch (frameType)
+								{
+									case FrameType.Event:
+										eventFrameQueue.Enqueue(new EventFrame(frameTimeStamp, frameData.ToArray()));
+										Interlocked.Increment(ref framesReceived);
+										break;
+									case FrameType.Message:
+										msgFrameQueue.Enqueue(new MessageFrame(frameTimeStamp, frameData.ToArray()));
+										Interlocked.Increment(ref framesReceived);
+										break;
+									case FrameType.State:
+										break;
+								}
+							}
+							catch
+							{
+								Console.WriteLine("!");
+							}
+							frameData.Clear();
+							break;
+
+						default:
+							if (escReceived)
+							{
+								escReceived = false;
+								v |= 0x80;
+							}
+							frameData.Add(v);
+							break;
+					}
+				}
+
+				Interlocked.Add(ref bytesReceived, length);
 			}
 		}
 
@@ -372,15 +440,27 @@ namespace NodeInspector
 
 		void Reset()
 		{
+			if (port == null || port.IsOpen == false)
+			{
+				return;
+			}
+
 			portActive = false;
 
 			port.DtrEnable = true;
 
-			Thread.Sleep(500);
+			Thread.Sleep(200);
 
 			port.DiscardInBuffer();
-			EventFrame ef;
-			while (eventFrameQueue.TryDequeue(out ef)) ;
+			
+			//EventFrame ef;
+			//while (eventFrameQueue.TryDequeue(out ef)) ;
+			//MessageFrame mf;
+			//while (msgFrameQueue.TryDequeue(out mf)) ;
+
+			eventFrameQueue = new ConcurrentQueue<EventFrame>();
+			msgFrameQueue = new ConcurrentQueue<MessageFrame>();
+
 			logs.Clear();
 			LogEntry.ResetNumbering();
 			foreach (var v in variables.Values)
@@ -393,21 +473,21 @@ namespace NodeInspector
 
 			timeSet = false;
 
+			bytesReceived = 0;
+			framesReceived = 0;
+
+			UpdateEventStuff(true);
+
 			portActive = true;
 
-			Thread.Sleep(200);
+			richTextBoxTerminal.Clear();
 
-			numericUpDownActiveNode_ValueChanged(null, null);
+			Thread.Sleep(200);
 		}
 
-		private void numericUpDownActiveNode_ValueChanged(object sender, EventArgs e)
+		private void buttonClearTerminal_Click(object sender, EventArgs e)
 		{
-			//if (port != null && port.IsOpen)
-			//{
-			//  byte[] b = new byte[1];
-			//  b[0] = Convert.ToByte(numericUpDownActiveNode.Value);
-			//  port.Write(b, 0, 1);
-			//}
+			richTextBoxTerminal.Clear();
 		}
 	}
 }
