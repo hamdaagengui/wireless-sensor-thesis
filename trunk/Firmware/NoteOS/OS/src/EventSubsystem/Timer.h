@@ -19,11 +19,10 @@
 
 typedef enum
 {
-	TIMER_MODE_PRECISION_ONE_SHOT, //!< TIMER_MODE_PRECISION_ONE_SHOT
-	TIMER_MODE_PRECISION_CONTINUES,//!< TIMER_MODE_PRECISION_CONTINUES
-	TIMER_MODE_RELAXED_ONE_SHOT, //!< TIMER_MODE_RELAXED_ONE_SHOT
+	TIMER_MODE_PRECISION_ONE_SHOT,
+	TIMER_MODE_PRECISION_CONTINUES,
+	TIMER_MODE_RELAXED_ONE_SHOT,
 	TIMER_MODE_RELAXED_CONTINUES
-//!< TIMER_MODE_RELAXED_CONTINUES
 } timer_mode;
 
 typedef struct
@@ -60,7 +59,5 @@ extern void Timer_Restart(timer_configuration* configuration);
  * @param configuration
  */
 extern void Timer_Stop(timer_configuration* configuration);
-
-extern uint32_t Timer_GetLocalTime();
 
 #endif /* TIMER_H_ */

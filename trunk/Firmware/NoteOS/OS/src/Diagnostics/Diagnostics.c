@@ -9,13 +9,13 @@
 #include "../HardwareAbstractionLayer/DiagnosticsLink.h"
 #include "../EventSubsystem/Timer.h"
 
-#ifdef DIAGNOSTICS
+#if DIAGNOSTICS == 1
 
 enum
 {
 	ESC = 251,
-	EOF,
-	SOF_STATE,
+	_EOF,
+	SOF_GRAPH,
 	SOF_MESSAGE,
 	SOF_EVENT
 };
@@ -40,31 +40,64 @@ void Diagnostics_SendEvent(uint8_t event)
 		return;
 	}
 
-//	uint32_t time = Timer_GetLocalTime();
+	//	uint32_t time = Timer_GetLocalTime();
 
 	uint8_t buffer[10];
-	uint8_t position = 0; // SOF never need stuffing so skip it
+	uint8_t position = 0;
 
 	buffer[position++] = SOF_EVENT;
-//	position += AddData(time & 0xff, buffer, position);
-//	position += AddData((time >> 8) & 0xff, buffer, position);
-//	position += AddData((time >> 16) & 0xff, buffer, position);
-//	position += AddData((time >> 24) & 0xff, buffer, position);
+	//	position += AddData(time & 0xff, buffer, position);
+	//	position += AddData((time >> 8) & 0xff, buffer, position);
+	//	position += AddData((time >> 16) & 0xff, buffer, position);
+	//	position += AddData((time >> 24) & 0xff, buffer, position);
 	position += AddData(event, buffer, position);
-	buffer[position++] = EOF;
+	buffer[position++] = _EOF;
 
 	DiagnosticsLink_Send(buffer, position);
 }
 
-void Diagnostics_SendMessage(uint8_t messageId, void* message, uint8_t messageLength)
+void Diagnostics_SendMessage(char* text)
 {
+	if (ReadBit(PIND, 6) != 0)
+	{
+		return;
+	}
 
+	uint8_t buffer[200];
+	uint8_t position = 0;
+
+	buffer[position++] = SOF_MESSAGE;
+	while (*text != 0)
+	{
+		position += AddData(*text, buffer, position);
+		text++;
+	}
+	buffer[position++] = _EOF;
+
+	DiagnosticsLink_Send(buffer, position);
 }
 
-void Diagnostics_SendState(uint8_t stateMachineId, uint8_t newState)
+extern void Diagnostics_SendGraph(int8_t value)
 {
+	if (ReadBit(PIND, 6) != 0)
+	{
+		return;
+	}
 
+	uint8_t buffer[4];
+	uint8_t position = 0;
+
+	buffer[position++] = SOF_GRAPH;
+	position += AddData(value, buffer, position);
+	buffer[position++] = _EOF;
+
+	DiagnosticsLink_Send(buffer, position);
 }
+
+//void Diagnostics_SendState(uint8_t stateMachineId, uint8_t newState)
+//{
+//
+//}
 
 static uint8_t AddData(uint8_t value, uint8_t* buffer, uint8_t position)
 {
@@ -96,7 +129,7 @@ void Diagnostics_SendEvent(uint8_t eventId)
 {
 }
 
-void Diagnostics_SendMessage(uint8_t messageId, void* message, uint8_t messageLength)
+void Diagnostics_SendMessage(char* text)
 {
 }
 

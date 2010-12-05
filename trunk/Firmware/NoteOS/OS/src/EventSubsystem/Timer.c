@@ -6,14 +6,11 @@
  */
 
 #include "Timer.h"
-#include "../HardwareAbstractionLayer/SystemTimer.h"
 #include "../Diagnostics/Diagnostics.h"
 
 static void TickAllTimers();
 static void FindAndSetShortestInterval();
 static void RemoveTimer(uint8_t index);
-
-static uint32_t localTime = 0;
 
 static timer_configuration* timers[TIMER_MAXIMUM_NUMBER_OF_TIMERS];
 static uint8_t timerCount = 0;
@@ -36,7 +33,7 @@ void Timer_Start(timer_configuration* configuration)
 	{
 		if (timerCount == TIMER_MAXIMUM_NUMBER_OF_TIMERS)
 		{
-			Diagnostics_SendEvent(DIAGNOSTICS_TIMER_FAILED_TO_START);
+			Diagnostics_SendEvent(DIAGNOSTICS_TIMER_NO_FREE_TIMER_OBJECTS);
 			return;
 		}
 
@@ -103,11 +100,6 @@ void Timer_Stop(timer_configuration* configuration)
 	}
 }
 
-uint32_t Timer_GetLocalTime()
-{
-	return (SystemTimer_GetCurrent() + localTime) * TIMER_RESOLUTION;
-}
-
 void Timer_Tick()
 {
 //	Diagnostics_SendEvent(DIAGNOSTICS_TIMER_TICK);
@@ -148,8 +140,6 @@ static void TickAllTimers()
 			}
 		}
 	}
-
-	localTime += interval;
 }
 
 static void FindAndSetShortestInterval()

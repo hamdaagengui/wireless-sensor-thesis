@@ -10,34 +10,35 @@
 #include "../EventSubsystem/EventDispatcher.h"
 #include "../MemorySubsystem/MemoryManager.h"
 
-static link_network_bed_header* transportBedCurrentPacket = NULL;
-static uint8_t transportBedCurrentPacketLength = 0;
+static link_network_bed_header* currentPacket = NULL;
+static uint8_t currentPacketLength = 0;
 
 void* BedProtocol_CreatePacket(uint8_t receiver, uint8_t type, uint8_t size)
 {
-	transportBedCurrentPacket = MemoryManager_Allocate(size);
+	currentPacket = MemoryManager_Allocate(size);
 
-	if (transportBedCurrentPacket == NULL)
+	if (currentPacket == NULL)
 	{
 		return NULL;
 	}
 
-	transportBedCurrentPacket->link.type = type;
-	transportBedCurrentPacket->network.receiver = receiver;
-	transportBedCurrentPacket->network.sender = address;
-	transportBedCurrentPacketLength = size;
+	currentPacket->link.type = type;
+	currentPacket->network.receiver = receiver;
+	currentPacket->network.sender = address;
 
-	return transportBedCurrentPacket;
+	currentPacketLength = size;
+
+	return currentPacket;
 }
 
 bool BedProtocol_QueuePacket()
 {
-	if (transportBedCurrentPacket == NULL)
+	if (currentPacket == NULL)
 	{
 		return false;
 	}
 
-	return QueueLinkPacket(transportBedCurrentPacket, transportBedCurrentPacketLength);
+	return QueueLinkPacket(currentPacket, currentPacketLength);
 }
 
 void BedProtocol_ProcessPacket(void** data, uint8_t length, block_handler packetHandler)

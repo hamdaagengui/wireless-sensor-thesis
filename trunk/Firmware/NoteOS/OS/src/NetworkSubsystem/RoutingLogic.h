@@ -10,18 +10,26 @@
 
 #include "NetworkInternals.h"
 
-#define NO_ROUTE																										0xff
+#define ROUTE_INVALID																								255
 
 typedef struct
 {
 	uint16_t costToNeighbors[15];
 	bool marked;
-	uint16_t cost;
+	uint16_t costFromStart;
 	uint8_t previousNode;
 } node;
 
-extern uint8_t routingTable[15];
+typedef struct
+{
+	int8_t rssi;
+} route_significant_information;
 
-extern bool RoutingLogic_FindRouteToNode(uint8_t target);
+extern uint8_t routingTable[16];
+extern route_significant_information rsi[15];
+extern node nodes[15];
+
+extern void RoutingLogic_CalculateCosts();
+extern void RoutingLogic_FindRouteToNode(uint8_t target);
 
 #endif /* ROUTINGLOGIC_H_ */

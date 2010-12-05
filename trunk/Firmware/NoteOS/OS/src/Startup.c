@@ -30,25 +30,27 @@ int main()
 	serialNumber[0] += ReadBit(PIND, 4) ? 0 : 4;
 	//	sn += ReadBit(PIND, 6) ? 0 : 8;
 
-	MemoryManager_Initialize();
-
-	HardwareAbstractionLayer_Initialize();
-
 	Diagnostics_Initialize();
+
+	MemoryManager_Initialize();
 
 	EventDispatcher_Initialize();
 
+	HardwareAbstractionLayer_Initialize();
+
 	Network_Initialize();
 	Network_Start();
+
+	_delay_ms(serialNumber[0] * 50);
+
+	sei();
+
+	SensorManager_InstallSensor(&internalInterface);
 
 
 #ifdef BOARDSUPPORTPACKAGE_H_
 	BoardSupportPackage_Initialize();
 #endif
-
-	SensorManager_InstallSensor(&internalInterface);
-
-	sei();
 
 
 	// Start user application (only if a configuration file exist (used as an indicator of a real application as opposed to building documentation))

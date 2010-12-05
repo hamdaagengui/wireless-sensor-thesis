@@ -7,44 +7,71 @@
 
 #include "NoteOS.h"
 
-void ThermoUpdate(sensor_id sensor, void* data)
+#if MASTER_NODE == 1
+
+char pingMsg[] =
+{	"Hello World!"};
+void SynchronizationInviter()
 {
-	ApplicationProtocols_SendSensorData(0, 1, data, 2);
+	ApplicationProtocols_SendRawBedData(14, pingMsg, sizeof(pingMsg));
+
+	Leds_GreenToggle();
 }
 
-void Ping()
+void BedData(void* data, uint8_t length)
 {
-	char pingMsg[] = { "Ping" };
-	ApplicationProtocols_SendRawBedData(BROADCAST_ADDRESS, pingMsg, sizeof(pingMsg));
+	Leds_YellowToggle();
+}
+
+timer_configuration synchronizationInvitationTimer;
+void Start()
+{
+	Timer_CreateConfiguration(&synchronizationInvitationTimer, 1000000, TIMER_MODE_RELAXED_CONTINUES, SynchronizationInviter);
+	Timer_Start(&synchronizationInvitationTimer);
+
+	Network_SetRawBedDataHandler(BedData);
+}
+
+#else
+
+timer_configuration connectionTimer;
+timer_configuration pingerTimer;
+char pingMsg[] = { "Hello World!" };
+
+void Pinger()
+{
+	ApplicationProtocols_SendRawBedData(GATEWAY_ADDRESS, pingMsg, sizeof(pingMsg));
 
 	Leds_RedToggle();
 }
 
-timer_configuration tim;
-
-void Synced(event e, void* data)
+void BedData(void* data, uint8_t length)
 {
-	Leds_YellowOn();
+	Leds_YellowToggle();
+}
+
+void ConnectionBlinker()
+{
+	Leds_GreenToggle();
 }
 
 void Connected(event e, void* data)
 {
+	Timer_Stop(&connectionTimer);
 	Leds_GreenOn();
+
+	Timer_CreateConfiguration(&pingerTimer, 2000000, TIMER_MODE_RELAXED_CONTINUES, Pinger);
+	Timer_Start(&pingerTimer);
 }
 
 void Start()
 {
-	//	SensorManager_InstallSensor(&temperatureSensorMax6662Interface);
-	//	SensorManager_InstallSensor(&heartRateVariabilityInterface);
-	//
-	//	EventDispatcher_Subscribe(SENSOR_TEMPERATURE_EAR_LEFT, ThermoUpdate);
-
-	EventDispatcher_Subscribe(EVENT_SYNCHRONIZED, Synced);
 	EventDispatcher_Subscribe(EVENT_CONNECTED, Connected);
 
+	Network_SetRawBedDataHandler(BedData);
 
-#if MASTER_NODE == 1
-	Timer_CreateConfiguration(&tim, 1000000, TIMER_MODE_RELAXED_CONTINUES, Ping);
-	Timer_Start(&tim);
-#endif
+	Timer_CreateConfiguration(&connectionTimer, 80000, TIMER_MODE_RELAXED_CONTINUES, ConnectionBlinker);
+	Timer_Start(&connectionTimer);
 }
+
+#endif
