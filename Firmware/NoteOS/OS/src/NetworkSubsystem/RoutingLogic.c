@@ -14,38 +14,38 @@
 
 static uint8_t PickCheapestNode(node nodes[]);
 
-uint8_t routingTable[15] = { NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE, NO_ROUTE };
+uint8_t routingTable[16] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, BROADCAST_ADDRESS };
+route_significant_information rsi[15];
+node nodes[15];
 
-typedef struct
+void RoutingLogic_CalculateCosts()
 {
-	int8_t loss;
-	uint8_t node;
-} route_hop;
-
-typedef struct
-{
-	route_hop hops[15];
-} route;
-
-bool RoutingLogic_FindRouteToNode(uint8_t target)
-{
-	node nodes[15];
 	for (uint8_t i = 0; i < 15; i++)
 	{
-		node* n = &nodes[i];
-		n->marked = false;
-		n->cost = COST_INFINITY;
-		n->previousNode = NO_ROUTE;
+		if (i != address)
+		{
+			nodes[address].costToNeighbors[i] = rsi[i].rssi;
+		}
 	}
-	nodes[address].cost = 0;
+}
+
+void RoutingLogic_FindRouteToNode(uint8_t target)
+{
+	for (uint8_t i = 0; i < 15; i++)
+	{
+		nodes[i].marked = false;
+		nodes[i].costFromStart = COST_INFINITY;
+		nodes[i].previousNode = ROUTE_INVALID;
+	}
+	nodes[address].costFromStart = 0;
 
 	for (uint8_t i = 0; i < 15; i++)
 	{
 		uint8_t currentIndex = PickCheapestNode(nodes);
-		if (currentIndex == NO_ROUTE)
+		if (currentIndex == ROUTE_INVALID)
 		{
-			routingTable[target] = NO_ROUTE;
-			return false;
+			routingTable[target] = ROUTE_INVALID;
+			return;
 		}
 		if (currentIndex == target)
 		{
@@ -57,7 +57,7 @@ bool RoutingLogic_FindRouteToNode(uint8_t target)
 				previous = nodes[next].previousNode;
 			}
 			routingTable[target] = next;
-			return true;
+			return;
 		}
 
 		node* current = &nodes[currentIndex];
@@ -66,10 +66,10 @@ bool RoutingLogic_FindRouteToNode(uint8_t target)
 			if (current->costToNeighbors[neighborIndex] != 0)
 			{
 				node* neighbor = &nodes[neighborIndex];
-				uint16_t newCost = current->cost + current->costToNeighbors[neighborIndex];
-				if (newCost < neighbor->cost)
+				uint16_t newCost = current->costFromStart + current->costToNeighbors[neighborIndex];
+				if (newCost < neighbor->costFromStart)
 				{
-					neighbor->cost = newCost;
+					neighbor->costFromStart = newCost;
 					neighbor->previousNode = currentIndex;
 				}
 			}
@@ -77,20 +77,18 @@ bool RoutingLogic_FindRouteToNode(uint8_t target)
 
 		current->marked = true;
 	}
-
-	return true;
 }
 
 static uint8_t PickCheapestNode(node nodes[])
 {
 	uint16_t lowestCost = COST_INFINITY;
-	uint8_t index = NO_ROUTE;
+	uint8_t index = ROUTE_INVALID;
 
 	for (uint8_t i = 0; i < 15; i++)
 	{
 		if (nodes[i].marked == false)
 		{
-			if (nodes[i].cost < lowestCost)
+			if (nodes[i].costFromStart < lowestCost)
 			{
 				index = i;
 			}

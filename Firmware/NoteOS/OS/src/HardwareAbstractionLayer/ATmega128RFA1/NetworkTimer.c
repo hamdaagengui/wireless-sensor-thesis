@@ -21,6 +21,8 @@ void NetworkTimer_Initialize()
 
 	TIFR2 = (1 << TOV2);
 	TIMSK2 = (1 << TOIE2);
+
+	TCNT2 = 0;
 }
 
 void NetworkTimer_SetTimerPeriod(uint16_t value)

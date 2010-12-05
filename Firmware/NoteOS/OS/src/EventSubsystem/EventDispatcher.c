@@ -64,7 +64,7 @@ void EventDispatcher_Dispatch()
 		switch (qe->type)
 		{
 			case TYPE_PUBLICATION:
-				Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_PUBLISH_EXECUTED);
+				Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_PUBLISH_EXECUTING);
 
 				for (uint8_t i = 0; i < numberOfSubscribers; i++)
 				{
@@ -81,13 +81,13 @@ void EventDispatcher_Dispatch()
 				break;
 
 			case TYPE_COMPLETION:
-				Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_COMPLETION_EXECUTED);
+				Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_COMPLETION_EXECUTING);
 
 				qe->notification.handler();
 				break;
 
 			case TYPE_PROCESSING:
-				Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_PROCESS_EXECUTED);
+				Diagnostics_SendEvent(DIAGNOSTICS_EVENT_DISPATCHER_PROCESS_EXECUTING);
 
 				qe->processing.handler(qe->processing.data, qe->processing.length);
 

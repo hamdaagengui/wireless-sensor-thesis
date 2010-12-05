@@ -61,7 +61,6 @@ typedef struct
 	link_header link;
 	network_header network;
 	bed_header transport;
-	//uint8_t payload[];
 } link_network_bed_header;
 
 typedef struct
@@ -69,7 +68,6 @@ typedef struct
 	link_header link;
 	network_header network;
 	rdd_header transport;
-	//uint8_t payload[];
 } link_network_rdd_header;
 
 //
@@ -78,8 +76,7 @@ typedef struct
 typedef struct
 {
 	link_header link;
-	uint8_t slot :2;
-	uint8_t :6;
+	uint8_t slot;
 	int8_t transmissionPowerLevel;
 } link_rts_packet;
 
@@ -102,14 +99,18 @@ typedef struct
 } network_routes_packet;
 
 // Transport layer packets
+
+
+// Application layer packets
+
 typedef struct
 {
 	link_header link;
 	network_header network;
-	rdd_header transport;
-} transport_rdd_acknowledge_packet;
+	bed_header transport;
+	uint8_t data[];
+} application_raw_bed_packet;
 
-// Application layer packets
 typedef struct
 {
 	link_header link;
@@ -131,9 +132,8 @@ typedef struct
 {
 	link_header link;
 	network_header network;
-	bed_header transport;
-	uint8_t data[];
-} application_raw_bed_packet;
+	rdd_header transport;
+} transport_rdd_acknowledge_packet;
 
 typedef struct
 {
@@ -212,6 +212,8 @@ typedef struct
 
 extern void Network_Initialize();
 extern void Network_Start();
+
+extern void Network_SetRawBedDataHandler(block_handler handler);
 
 #include "BedProtocol.h"
 

@@ -8,7 +8,7 @@
 #include "TemperatureSensorMax6662.h"
 #include "../../Devices/MAX6662.h"
 #include "../../EventSubsystem/Timer.h"
-#include "../../BoardSupportPackage/BoardSupportPackage.h"
+#include "../../BoardSupportPackages/BoardSupportPackage.h"
 #include "../../MemorySubsystem/MemoryManager.h"
 
 enum
