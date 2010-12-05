@@ -20,6 +20,7 @@ int main()
 	PORTF = 0x00;
 	DDRF = 0xff;
 
+	// TODO: Replace this with EEPROM serial number
 	PORTD = 0b01010101; // SN configuration
 	DDRD = 0b10101010;
 	DDRD = 0b10101010;
@@ -41,7 +42,7 @@ int main()
 	Network_Initialize();
 	Network_Start();
 
-	_delay_ms(serialNumber[0] * 50);
+	_delay_ms(serialNumber[0] * 50); // TODO: This is not needed when CCA is working
 
 	sei();
 

@@ -70,20 +70,38 @@ typedef struct
 	rdd_header transport;
 } link_network_rdd_header;
 
+typedef struct
+{
+	int8_t transmissionPower;
+} rsi_block;
 //
 //
 // Link layer packets
 typedef struct
 {
 	link_header link;
-	uint8_t slot;
-	int8_t transmissionPowerLevel;
+	uint8_t slot :2;
+	uint8_t :6;
 } link_rts_packet;
 
 typedef struct
 {
 	link_header link;
+	uint8_t slot :2;
+	uint8_t :6;
+	rsi_block rsi;
+} link_rts_rsi_packet;
+
+typedef struct
+{
+	link_header link;
 } link_cts_packet;
+
+typedef struct
+{
+	link_header link;
+	rsi_block rsi;
+} link_cts_rsi_packet;
 
 typedef struct
 {

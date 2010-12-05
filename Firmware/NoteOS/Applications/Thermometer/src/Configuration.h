@@ -28,6 +28,10 @@
 #define NETWORK_LINK_MAXIMUM_TRANSMISSION_ATTEMPTS									1
 #define NETWORK_LINK_MAXIMUM_PACKET_SIZE														64
 #define NETWORK_LINK_QUEUE_SIZE																			10
+//
+#define NETWORK_LINK_RADIO_SENSITIVITY															-90 // Should follow the radio driver
+#define NETWORK_LINK_RADIO_POWER_MARGIN															5 // The amount of dBm to added to the minimum needed transmission power level when sending packets
+//
 #define NETWORK_NETWORK_CAN_ROUTE																		1
 #define NETWORK_TRANSPORT_RDD_QUEUE_SIZE														8
 #define NETWORK_TRANSPORT_RDD_TIMEOUT																64 // in units of: 1 / (NETWORK_TIMER_FREQUENCY / NETWORK_COMMUNICATION_SLOT_FREQUENCY) (default = 500 ms)

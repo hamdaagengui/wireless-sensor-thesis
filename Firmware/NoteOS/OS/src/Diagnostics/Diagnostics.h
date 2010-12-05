@@ -126,7 +126,6 @@ typedef enum
 #endif
 
 extern void Diagnostics_Initialize();
-extern void Diagnostics_SendRaw(uint8_t value);
 extern void Diagnostics_SendEvent(uint8_t event);
 extern void Diagnostics_SendMessage(char* text);
 extern void Diagnostics_SendGraph(int8_t value);
