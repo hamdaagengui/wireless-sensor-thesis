@@ -302,7 +302,7 @@ void Network_TimerEvent()
 }
 
 #if MASTER_NODE == 0
-static void ConnectionHandler()
+static void ConnectionEstablishmentHandler()
 {
 	application_join_request_packet* p = BedProtocol_CreatePacket(BROADCAST_ADDRESS, TYPE_APPLICATION_JOIN_REQUEST, sizeof(application_join_request_packet));
 	if (p == NULL)
@@ -379,7 +379,7 @@ static void JoinResponseHandler(void* data, uint8_t length)
 #if MASTER_NODE == 0
 static void ConnectionEstablishmentTimeout()
 {
-	ConnectionHandler();
+	ConnectionEstablishmentHandler();
 	Timer_Restart(&connectionTimer);
 }
 #endif
@@ -410,7 +410,7 @@ static void* FrameReceived(void* data, uint8_t length)
 #if MASTER_NODE == 0
 				if (connectionState == CONNECTION_STATE_UNCONNECTED)
 				{
-					if (EventDispatcher_Complete(ConnectionHandler))
+					if (EventDispatcher_Complete(ConnectionEstablishmentHandler))
 					{
 						connectionState = CONNECTION_STATE_CONNECTING;
 						Timer_Start(&connectionTimer);
