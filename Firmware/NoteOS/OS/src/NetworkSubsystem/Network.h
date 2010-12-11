@@ -177,6 +177,8 @@ typedef struct
 	link_header link;
 	network_header network;
 	rdd_header transport;
+	uint8_t sensor;
+	uint8_t property;
 	uint8_t status;
 } application_set_response_packet;
 
@@ -194,6 +196,8 @@ typedef struct
 	link_header link;
 	network_header network;
 	rdd_header transport;
+	uint8_t sensor;
+	uint8_t property;
 	uint8_t status;
 	uint8_t data[];
 } application_get_response_packet;
