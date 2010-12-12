@@ -100,9 +100,7 @@ static void AssignAddress(uint8_t adr)
 {
 	address = adr;
 	rtsPacketTemplate.link.source = address;
-	rtsRsiPacketTemplate.link.source = address;
 	ctsPacketTemplate.link.source = address;
-	ctsRsiPacketTemplate.link.source = address;
 	ackPacketTemplate.link.source = address;
 }
 #endif
