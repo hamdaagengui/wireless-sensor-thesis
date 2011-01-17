@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFormPlusPlus", "WinFormP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfSuitGraphCreator", "RfSuitGraphCreator\RfSuitGraphCreator.csproj", "{E61F208B-DED5-4C5C-8A6B-662502BF45A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfSuitLive", "RfSuitLive\RfSuitLive.csproj", "{C8DD63BC-8D87-42FE-98F6-264B83255568}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -111,6 +113,16 @@ Global
 		{E61F208B-DED5-4C5C-8A6B-662502BF45A0}.Release|Mixed Platforms.Build.0 = Release|x86
 		{E61F208B-DED5-4C5C-8A6B-662502BF45A0}.Release|x86.ActiveCfg = Release|x86
 		{E61F208B-DED5-4C5C-8A6B-662502BF45A0}.Release|x86.Build.0 = Release|x86
+		{C8DD63BC-8D87-42FE-98F6-264B83255568}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{C8DD63BC-8D87-42FE-98F6-264B83255568}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{C8DD63BC-8D87-42FE-98F6-264B83255568}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{C8DD63BC-8D87-42FE-98F6-264B83255568}.Debug|x86.ActiveCfg = Debug|x86
+		{C8DD63BC-8D87-42FE-98F6-264B83255568}.Debug|x86.Build.0 = Debug|x86
+		{C8DD63BC-8D87-42FE-98F6-264B83255568}.Release|Any CPU.ActiveCfg = Release|x86
+		{C8DD63BC-8D87-42FE-98F6-264B83255568}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{C8DD63BC-8D87-42FE-98F6-264B83255568}.Release|Mixed Platforms.Build.0 = Release|x86
+		{C8DD63BC-8D87-42FE-98F6-264B83255568}.Release|x86.ActiveCfg = Release|x86
+		{C8DD63BC-8D87-42FE-98F6-264B83255568}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
