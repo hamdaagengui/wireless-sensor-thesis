@@ -13,5 +13,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/usr/share/java/dbus.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/WBANLibrary"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
